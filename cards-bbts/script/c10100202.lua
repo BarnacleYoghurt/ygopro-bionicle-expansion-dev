@@ -1,0 +1,101 @@
+--Bohrok Gahlok
+function c10100202.initial_effect(c)
+	--flip
+	local e1=Effect.CreateEffect(c)
+	e1:SetCategory(CATEGORY_SPECIAL_SUMMON)
+	e1:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_FLIP+EFFECT_TYPE_TRIGGER_F)
+	e1:SetProperty(EFFECT_FLAG_DELAY)
+	e1:SetTarget(c10100202.target1)
+	e1:SetOperation(c10100202.operation1)
+	c:RegisterEffect(e1)
+	--be unpredictable
+	local e2=Effect.CreateEffect(c)
+	e2:SetType(EFFECT_TYPE_IGNITION)
+	e2:SetRange(LOCATION_MZONE)
+	e2:SetTarget(c10100202.target2)
+	e2:SetOperation(c10100202.operation2)
+	e2:SetCountLimit(1)
+	c:RegisterEffect(e2)
+end
+function c10100202.filter1(c,e,tp)
+	return c:IsSetCard(0x15c) and c:GetLevel()==4 and not c:IsCode(10100202) and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
+end
+function c10100202.target1(e,tp,eg,ep,ev,re,r,rp,chk)
+	if chk==0 then return Duel.GetLocationCount(tp,LOCATION_MZONE)>0
+		and Duel.IsExistingMatchingCard(c10100202.filter1,tp,LOCATION_DECK,0,1,nil,e,tp) end
+	local g=Duel.GetMatchingGroup(c10100202.filter1,tp,LOCATION_DECK,0,nil,e,tp)
+	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,g,1,0,0)
+end
+function c10100202.operation1(e,tp,eg,ep,ev,re,r,rp)
+	local c=e:GetHandler()
+	local g=Duel.SelectMatchingCard(tp,c10100202.filter1,tp,LOCATION_DECK,0,1,1,nil,e,tp)
+	if g:GetCount() > 0 then
+		Duel.SpecialSummon(g,0,tp,tp,false,false,POS_FACEDOWN_DEFENSE)
+		Duel.ConfirmCards(1-tp,g)
+	end
+end
+function c10100202.filter2(c)
+	return c:IsFaceup() and c:IsType(TYPE_EFFECT) and not c:IsDisabled()
+end
+function c10100202.target2(e,tp,eg,ep,ev,re,r,rp,chk)
+	local g=Duel.GetFieldGroup(tp,0,LOCATION_GRAVE)
+	if g:GetCount()==0 then return false end
+	local top=g:GetFirst()
+	local tc=g:GetNext()
+	while tc do
+		if tc:GetSequence()>top:GetSequence() then top=tc end
+		tc=g:GetNext()
+	end
+	if chk==0 then 
+		if bit.band(top:GetType(),0x1)==0x1 then
+			return Duel.IsExistingTarget(Card.IsDestructable,tp,0,LOCATION_ONFIELD,1,nil)
+		elseif bit.band(top:GetType(),0x2)==0x2 then
+			return Duel.IsExistingMatchingCard(c10100202.filter2,tp,0,LOCATION_MZONE,1,nil)
+		elseif bit.band(top:GetType(),0x4) == 0x4 then
+			return Duel.IsExistingMatchingCard(Card.IsAbleToRemove,tp,0,LOCATION_HAND,1,nil)
+		else 
+			return false
+		end
+	end
+	if bit.band(top:GetType(),0x1) == 0x1 then
+		local tg=Duel.SelectTarget(tp,Card.IsDestructable,tp,0,LOCATION_ONFIELD,1,1,nil)
+		Duel.SetOperationInfo(0,CATEGORY_DESTROY,tg,1,0,0)
+	elseif bit.band(top:GetType(),0x2) == 0x2 then
+		local tg=Duel.GetMatchingGroup(c10100202.filter2,tp,0,LOCATION_MZONE,nil)
+		Duel.SetOperationInfo(0,CATEGORY_DISABLE,tg,1,0,0)
+	elseif bit.band(top:GetType(),0x4) then
+		local tg=Duel.GetMatchingGroup(Card.IsAbleToRemove,tp,0,LOCATION_HAND,nil)
+		Duel.SetOperationInfo(0,CATEGORY_REMOVE,tg,1,0,0)
+	end
+	e:SetLabel(top:GetType())
+end
+function c10100202.operation2(e,tp,eg,ep,ev,re,r,rp)
+	local c=e:GetHandler()
+	if bit.band(e:GetLabel(),0x1) == 0x1 then
+		local tc=Duel.GetFirstTarget()
+		if c:IsRelateToEffect(e) and tc:IsRelateToEffect(e) then 
+			Duel.Destroy(tc,REASON_EFFECT)
+		end
+	elseif bit.band(e:GetLabel(),0x2) == 0x2 then
+		local g=Duel.SelectMatchingCard(tp,c10100202.filter2,tp,0,LOCATION_MZONE,1,1,nil)
+		if c:IsRelateToEffect(e) and g:GetCount()>0 then
+			local tc=g:GetFirst()
+			local e1=Effect.CreateEffect(c)
+			e1:SetType(EFFECT_TYPE_SINGLE)
+			e1:SetCode(EFFECT_DISABLE)
+			e1:SetReset(RESET_EVENT+0x1fe0000+RESET_PHASE+PHASE_END)
+			tc:RegisterEffect(e1)
+			local e2=Effect.CreateEffect(c)
+			e2:SetType(EFFECT_TYPE_SINGLE)
+			e2:SetCode(EFFECT_DISABLE_EFFECT)
+			e2:SetReset(RESET_EVENT+0x1fe0000+RESET_PHASE+PHASE_END)
+			tc:RegisterEffect(e2)
+		end
+	elseif bit.band(e:GetLabel(),0x4) == 0x4 then
+		local g=Duel.GetMatchingGroup(Card.IsAbleToRemove,tp,0,LOCATION_HAND,nil)
+		if g:GetCount()>0 then
+			local sg=g:RandomSelect(tp,1)
+			Duel.Remove(sg,POS_FACEUP,REASON_EFFECT)
+		end
+	end
+end

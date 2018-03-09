@@ -1,0 +1,13 @@
+# Whitelist mode (ignore everything)
+*
+# Whitelist self
+!.gitignore
+# Look into directories
+!*/
+# BCOT
+!cards-bcot/**/*.lua
+# BCOR
+!cards-bcor/**/*.lua
+# BBTS
+!cards-bbts/**/*.lua
+!util-bbts.lua
