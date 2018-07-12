@@ -1,3 +1,4 @@
+--Bohrok Va
 BohrokVa={}
 bv=BohrokVa
 
@@ -55,6 +56,48 @@ function BohrokVa.krana(baseC)
 	local e=Effect.CreateEffect(baseC)
 	e:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_CONTINUOUS)
 	e:SetCode(EVENT_TO_GRAVE)
+	e:SetOperation(operation)
+	return e
+end
+--Bohrok Kaita
+BohrokKaita={}
+bk=BohrokKaita
+
+function BohrokKaita.krana(baseC)
+	function filter(c)
+		return c:IsType(TYPE_MONSTER) and c:IsSetCard(0x15d) and c:IsAbleToGrave()
+	end
+	function condition(e,tp,eg,ep,ev,re,r,rp)
+		return bit.band(e:GetHandler():GetSummonType(),SUMMON_TYPE_FUSION)==SUMMON_TYPE_FUSION
+	end
+	function target(e,tp,eg,ep,ev,re,r,rp,chk)
+		if chk==0 then 
+			return Duel.IsExistingMatchingCard(filter,tp,LOCATION_DECK,0,1,nil) 
+			and Duel.GetLocationCount(tp,LOCATION_SZONE)>0 
+		end
+		local g=Duel.SelectMatchingCard(tp,filter,tp,LOCATION_DECK,0,1,3,nil)
+		g:KeepAlive()
+		e:SetLabelObject(g)
+		e:SetLabel(g:Select(1-tp,1,1,nil):GetFirst():GetCode())
+	end
+	function operation(e,tp,eg,ep,ev,re,r,rp)
+		local g=e:GetLabelObject()
+		if g and g:FilterCount(Card.IsCode,nil,e:GetLabel())>0 then
+			local c=e:GetHandler()
+			local ec=g:Filter(Card.IsCode,nil,e:GetLabel()):GetFirst()
+			Duel.Equip(tp,ec,c,true)
+			g:RemoveCard(ec)
+			if g:GetCount()>0 then
+				Duel.SendtoGrave(g,REASON_EFFECT)
+			end
+		end
+	end
+	
+	local e=Effect.CreateEffect(baseC)
+	e:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_F)
+	e:SetCode(EVENT_SPSUMMON_SUCCESS)
+	e:SetCondition(condition)
+	e:SetTarget(target)
 	e:SetOperation(operation)
 	return e
 end
