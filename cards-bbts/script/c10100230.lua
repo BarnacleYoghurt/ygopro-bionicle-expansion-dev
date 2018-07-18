@@ -1,0 +1,39 @@
+if not bbts_bvk then
+	dofile "expansions/util-bbts.lua"
+end
+--Bohrok Va Kaita Ja
+function c10100230.initial_effect(c)
+	--Fusion Material
+	aux.AddFusionProcCode3(c,10100217,10100220,10100221,true,true)
+	c:EnableReviveLimit()
+	--Synchro Limit
+	local e1=bbts_bvk.synchrolimit(c)
+	c:RegisterEffect(e1)
+	--Switch
+	local e2=bbts_bvk.switch(c)
+	c:RegisterEffect(e2)
+	--Search
+	local e3=Effect.CreateEffect(c)
+	e3:SetCategory(CATEGORY_TOHAND+CATEGORY_SEARCH)
+	e3:SetType(EFFECT_TYPE_IGNITION)
+	e3:SetRange(LOCATION_MZONE)
+	e3:SetTarget(c10100230.target3)
+	e3:SetOperation(c10100230.operation3)
+	e3:SetCountLimit(1)
+	c:RegisterEffect(e3)
+end
+function c10100230.filter3(c)
+	return (c:IsSetCard(0x15c) or c:IsSetCard(0x15d)) and c:IsAbleToHand()
+end
+function c10100230.target3(e,tp,eg,ep,ev,re,r,rp,chk)
+	if chk==0 then return Duel.IsExistingMatchingCard(c10100230.filter3,tp,LOCATION_DECK,0,1,nil) end
+	Duel.SetOperationInfo(0,CATEGORY_TOHAND,nil,1,tp,LOCATION_DECK)
+end
+function c10100230.operation3(e,tp,eg,ep,ev,re,r,rp)
+	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_ATOHAND)
+	local g=Duel.SelectMatchingCard(tp,c10100230.filter3,tp,LOCATION_DECK,0,1,1,nil)
+	if g:GetCount()>0 then
+		Duel.SendtoHand(g,nil,REASON_EFFECT)
+		Duel.ConfirmCards(1-tp,g)
+	end
+end

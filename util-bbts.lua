@@ -271,3 +271,68 @@ function BBTS_BohrokKaita.ss(baseC)
 	e:SetOperation(operation)
 	return e
 end
+--Bohrok Va Kaita
+BBTS_BohrokVaKaita={}
+bbts_bvk=BBTS_BohrokVaKaita
+
+function BBTS_BohrokVaKaita.synchrolimit(baseC)	
+	function filter(c,syncard,tuner,f)
+		return c:IsFaceup() and c:IsNotTuner() and c:IsCanBeSynchroMaterial(syncard,tuner) and c:IsSetCard(0x15c) and (f==nil or f(c))
+	end
+	function target(e,syncard,f,minc,maxc)
+		local c=e:GetHandler()
+		local lv=syncard:GetLevel()-c:GetLevel()
+		if lv<=0 then return false end
+		local g=Duel.GetMatchingGroup(filter,syncard:GetControler(),LOCATION_MZONE,LOCATION_MZONE,c,syncard,c,f)
+		return g:CheckWithSumEqual(Card.GetSynchroLevel,lv,minc,maxc,syncard)
+	end
+	function operation(e,tp,eg,ep,ev,re,r,rp,syncard,f,minc,maxc)
+		local c=e:GetHandler()
+		local lv=syncard:GetLevel()-c:GetLevel()
+		local g=Duel.GetMatchingGroup(filter,syncard:GetControler(),LOCATION_MZONE,LOCATION_MZONE,c,syncard,c,f)
+		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SMATERIAL)
+		local sg=g:SelectWithSumEqual(tp,Card.GetSynchroLevel,lv,minc,maxc,syncard)
+		Duel.SetSynchroMaterial(sg)
+	end
+	local e=Effect.CreateEffect(baseC)
+	e:SetType(EFFECT_TYPE_SINGLE)
+	e:SetCode(EFFECT_SYNCHRO_MATERIAL_CUSTOM)
+	e:SetProperty(EFFECT_FLAG_CANNOT_DISABLE+EFFECT_FLAG_UNCOPYABLE)
+	e:SetTarget(target)
+	e:SetValue(1)
+	e:SetOperation(operation)
+	return e
+end
+function BBTS_BohrokVaKaita.switch(baseC)	
+	local function filter(c,e,tp)
+		return c:IsSetCard(0x15c) and c:IsType(TYPE_FUSION) and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
+	end
+	local function condition(e,tp,eg,ep,ev,re,r,rp)
+		return bit.band(e:GetHandler():GetSummonType(),SUMMON_TYPE_FUSION)==SUMMON_TYPE_FUSION
+	end
+	local function cost(e,tp,eg,ep,ev,re,r,rp,chk)
+		if chk==0 then return e:GetHandler():IsReleasable() end
+		Duel.Release(e:GetHandler(),REASON_COST)
+	end
+	local function target(e,tp,eg,ep,ev,re,r,rp,chk)
+		if chk==0 then return Duel.IsExistingMatchingCard(filter,tp,LOCATION_EXTRA,0,1,nil,e,tp) end
+		local g=Duel.GetMatchingGroup(filter,tp,LOCATION_EXTRA,0,nil,e,tp)
+		Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,g,1,0,0)
+	end
+	local function operation(e,tp,eg,ep,ev,re,r,rp)
+		local c=e:GetHandler()
+		local g=Duel.SelectMatchingCard(tp,filter,tp,LOCATION_EXTRA,0,1,1,nil,e,tp)
+		if g:GetCount() > 0 then
+			Duel.SpecialSummon(g,0,tp,tp,false,false,POS_FACEUP)
+		end
+	end
+	local e=Effect.CreateEffect(baseC)
+	e:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O)
+	e:SetCode(EVENT_PHASE+PHASE_STANDBY)
+	e:SetRange(LOCATION_MZONE)
+	e:SetCondition(condition)
+	e:SetCost(cost)
+	e:SetTarget(target)
+	e:SetOperation(operation)
+	return e
+end
