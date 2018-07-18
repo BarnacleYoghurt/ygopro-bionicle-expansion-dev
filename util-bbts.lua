@@ -245,7 +245,7 @@ function BBTS_BohrokKaita.krana(baseC)
 end
 function BBTS_BohrokKaita.ss(baseC)
 	local function filter(c,e,tp)
-		return c:IsSetCard(0x15c) and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
+		return c:IsSetCard(0x15c) and c:GetLevel()==4 and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
 	end
 	local function target(e,tp,eg,ep,ev,re,r,rp,chk)
 		if chk==0 then 

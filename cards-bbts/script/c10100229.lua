@@ -23,7 +23,7 @@ function c10100229.initial_effect(c)
 	c:RegisterEffect(e3)
 end
 function c10100229.filter2(c,e,tp)
-	return c:IsSetCard(0x15c) and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
+	return c:IsSetCard(0x15c) and c:IsLevelBelow(4) and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
 end
 function c10100229.target2(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then 
