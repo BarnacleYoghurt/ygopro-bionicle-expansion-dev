@@ -1,4 +1,4 @@
-if not bbts_bk then
+if not bbts then
 	dofile "expansions/util-bbts.lua"
 end
 --Bohrok Kaita Za
@@ -7,7 +7,7 @@ function c10100228.initial_effect(c)
 	aux.AddFusionProcCode3(c,10100201,10100203,10100204,true,true)
 	c:EnableReviveLimit()
 	--Equip Krana
-	local e1=bbts_bk.krana(c)
+	local e1=bbts.bohrokkaita_krana(c)
 	c:RegisterEffect(e1)
 	--Gain ATK
 	local e2=Effect.CreateEffect(c)
@@ -16,30 +16,33 @@ function c10100228.initial_effect(c)
 	e2:SetRange(LOCATION_MZONE)
 	e2:SetProperty(EFFECT_FLAG_CARD_TARGET)
 	e2:SetCountLimit(1)
-	e2:SetTarget(c10100228.target2)
+	e2:SetCost(c10100228.cost2)
 	e2:SetOperation(c10100228.operation2)
 	c:RegisterEffect(e2)
 	--Special Summon
-	local e3=bbts_bk.ss(c)
+	local e3=bbts.bohrokkaita_ss(c)
 	c:RegisterEffect(e3)
 end
 function c10100228.filter2(c)
-	return c:IsSetCard(0x15c) and c:IsFaceup()
+	return c:IsSetCard(0x15c) and c:IsType(TYPE_MONSTER) and c:IsAbleToRemoveAsCost()
 end
-function c10100228.target2(e,tp,eg,ep,ev,re,r,rp,chk)
+function c10100228.cost2(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then 
-		return Duel.IsExistingMatchingCard(c10100228.filter2,tp,LOCATION_MZONE,0,1,e:GetHandler())
+		return Duel.IsExistingMatchingCard(c10100228.filter2,tp,LOCATION_GRAVE,0,1,nil)
 	end
-	Duel.SelectTarget(tp,c10100228.filter2,tp,LOCATION_MZONE,0,1,1,e:GetHandler())
+	local g=Duel.SelectMatchingCard(tp,c10100228.filter2,tp,LOCATION_GRAVE,0,1,3,nil)
+	e:SetLabel(g:GetCount())
+	Duel.Remove(g,POS_FACEUP,REASON_COST)
 end
 function c10100228.operation2(e,tp,eg,ep,ev,re,r,rp)
-	local tc = Duel.GetFirstTarget()
-	if tc:IsRelateToEffect(e) and Duel.ChangePosition(tc,POS_FACEDOWN_DEFENSE) then
-		local e1=Effect.CreateEffect(e:GetHandler())
+	local c=e:GetHandler()
+	if c:IsFaceup() and c:IsRelateToEffect(e) then
+		local e1=Effect.CreateEffect(c)
 		e1:SetType(EFFECT_TYPE_SINGLE)
+		e1:SetProperty(EFFECT_FLAG_COPY_INHERIT)
 		e1:SetCode(EFFECT_UPDATE_ATTACK)
-		e1:SetValue(1000)
+		e1:SetValue(e:GetLabel()*1000)
 		e1:SetReset(RESET_EVENT+0x1ff0000+RESET_PHASE+PHASE_END)
-		e:GetHandler():RegisterEffect(e1)
+		c:RegisterEffect(e1)
 	end
 end

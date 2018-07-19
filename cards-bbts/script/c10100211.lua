@@ -1,10 +1,10 @@
-if not bbts_k then
+if not bbts then
 	dofile "expansions/util-bbts.lua"
 end
 --Krana Za, Squad Leader
 function c10100211.initial_effect(c)
 	--Equip
-	local e1=bbts_k.equip(c)
+	local e1=bbts.krana_equip(c)
 	c:RegisterEffect(e1)
 	--Sacrifice
 	local e2=Effect.CreateEffect(c)
@@ -12,13 +12,13 @@ function c10100211.initial_effect(c)
 	e2:SetType(EFFECT_TYPE_CONTINUOUS+EFFECT_TYPE_EQUIP)
 	e2:SetCode(EFFECT_DESTROY_REPLACE)
 	e2:SetRange(LOCATION_SZONE)
-	e2:SetCondition(bbts_k.condition_equipped)
+	e2:SetCondition(bbts.krana_condition_equipped)
 	e2:SetTarget(c10100211.target2)
 	e2:SetValue(1)
 	e2:SetOperation(c10100211.operation2)
 	c:RegisterEffect(e2)
 	--Revive
-	local e3=bbts_k.revive(c)
+	local e3=bbts.krana_revive(c)
 	c:RegisterEffect(e3)
 	--Return
 	local e4=Effect.CreateEffect(c)
@@ -29,7 +29,7 @@ function c10100211.initial_effect(c)
 	e4:SetOperation(c10100211.operation4)
 	c:RegisterEffect(e4)
 	--Summon
-	local e5=bbts_k.summon(c)
+	local e5=bbts.krana_summon(c)
 	c:RegisterEffect(e5)
 end
 function c10100211.filter2(c,tp)

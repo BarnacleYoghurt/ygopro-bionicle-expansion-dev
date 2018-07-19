@@ -1,10 +1,10 @@
-if not bv then
+if not bbts then
 	dofile "expansions/util-bbts.lua"
 end
 --Bohrok Kohrak Va
 function c10100220.initial_effect(c)
 	--special summon
-	local e1 = bv.selfss(c,10100205)
+	local e1 = bbts.bohrokva_selfss(c,10100205)
 	c:RegisterEffect(e1)
 	--Negate attack
 	local e2 = Effect.CreateEffect(c)
@@ -16,7 +16,7 @@ function c10100220.initial_effect(c)
 	e2:SetOperation(c10100220.operation2)
 	c:RegisterEffect(e2)
 	--Return
-	local e3 = bv.krana(c)
+	local e3 = bbts.bohrokva_krana(c)
 	c:RegisterEffect(e3)
 end
 function c10100220.condition2(e,tp,eg,ep,ev,re,r,rp)
