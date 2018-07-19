@@ -1,10 +1,10 @@
-if not bbts_k then
+if not bbts then
 	dofile "expansions/util-bbts.lua"
 end
 --Krana Vu, Surveyor
 function c10100208.initial_effect(c)
 	--Equip
-	local e1=bbts_k.equip(c)
+	local e1=bbts.krana_equip(c)
 	c:RegisterEffect(e1)
 	--Negate
 	local e2=Effect.CreateEffect(c)
@@ -19,14 +19,14 @@ function c10100208.initial_effect(c)
 	e2:SetOperation(c10100208.operation2)
 	c:RegisterEffect(e2)
 	--Revive
-	local e3=bbts_k.revive(c)
+	local e3=bbts.krana_revive(c)
 	c:RegisterEffect(e3)
 	--Summon
-	local e4=bbts_k.summon(c)
+	local e4=bbts.krana_summon(c)
 	c:RegisterEffect(e4)
 end
 function c10100208.condition2(e,tp,eg,ep,ev,re,r,rp)
-	if not bbts_k.condition_equipped(e,tp,eg,ep,ev,re,r,rp) then return false end
+	if not bbts.krana_condition_equipped(e,tp,eg,ep,ev,re,r,rp) then return false end
 	if not re:IsHasProperty(EFFECT_FLAG_CARD_TARGET) then return false end
 	local g=Duel.GetChainInfo(ev,CHAININFO_TARGET_CARDS)
 	local ec = e:GetHandler():GetEquipTarget()

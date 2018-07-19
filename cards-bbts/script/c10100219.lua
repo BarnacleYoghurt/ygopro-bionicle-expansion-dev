@@ -1,10 +1,10 @@
-if not bv then
+if not bbts then
 	dofile "expansions/util-bbts.lua"
 end
 --Bohrok Pahrak Va
 function c10100219.initial_effect(c)
 	--special summon
-	local e1 = bv.selfss(c,10100204)
+	local e1 = bbts.bohrokva_selfss(c,10100204)
 	c:RegisterEffect(e1)
 	--Return to deck
 	local e2 = Effect.CreateEffect(c)
@@ -15,7 +15,7 @@ function c10100219.initial_effect(c)
 	e2:SetCountLimit(1)
 	c:RegisterEffect(e2)
 	--Return
-	local e3 = bv.krana(c)
+	local e3 = bbts.bohrokva_krana(c)
 	c:RegisterEffect(e3)
 end
 function c10100219.filter2(c)

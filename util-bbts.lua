@@ -1,8 +1,7 @@
+BBTS={}
+bbts=BBTS
 --Krana
-BBTS_Krana={}
-bbts_k=BBTS_Krana
-
-function BBTS_Krana.equip(baseC)
+function BBTS.krana_equip(baseC)
 	local function filter(c)
 		return c:IsFaceup() and c:IsSetCard(0x15c) and c:IsLevelAbove(4)
 	end
@@ -45,7 +44,7 @@ function BBTS_Krana.equip(baseC)
 	e:SetCountLimit(1)
 	return e
 end
-function BBTS_Krana.revive(baseC)
+function BBTS.krana_revive(baseC)
 	local function condition(e,tp,eg,ep,ev,re,r,rp)
 		local c=e:GetHandler()
 		local rc=eg:GetFirst()
@@ -81,7 +80,7 @@ function BBTS_Krana.revive(baseC)
 	e:SetOperation(operation)
 	return e
 end
-function BBTS_Krana.summon(baseC)
+function BBTS.krana_summon(baseC)
 	local function filter(c,e,tp)
 		return c:IsSetCard(0x15c) and c:GetLevel()==4 and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
 	end
@@ -124,15 +123,12 @@ function BBTS_Krana.summon(baseC)
 	e:SetOperation(operation)
 	return e
 end
-function BBTS_Krana.condition_equipped(e,tp,eg,ep,ev,re,r,rp)
+function BBTS.krana_condition_equipped(e,tp,eg,ep,ev,re,r,rp)
 	local tc=e:GetHandler():GetEquipTarget()
 	return tc and tc:IsSetCard(0x15c)
 end
 --Bohrok Va
-BohrokVa={}
-bv=BohrokVa
-
-function BohrokVa.selfss(baseC,reqCode)
+function BBTS.bohrokva_selfss(baseC,reqCode)
 	local function filter(c)
 		return c:IsFaceup() and c:IsCode(reqCode)
 	end
@@ -152,7 +148,7 @@ function BohrokVa.selfss(baseC,reqCode)
 	return e
 end
 
-function BohrokVa.krana(baseC)
+function BBTS.bohrokva_krana(baseC)
 	local function filter_1(c)
 		return c:IsSetCard(0x15d) and c:IsFaceup() and c:IsAbleToHand()
 	end
@@ -191,10 +187,7 @@ function BohrokVa.krana(baseC)
 	return e
 end
 --Bohrok Kaita
-BBTS_BohrokKaita={}
-bbts_bk=BBTS_BohrokKaita
-
-function BBTS_BohrokKaita.krana(baseC)
+function BBTS.bohrokkaita_krana(baseC)
 	local function filter(c)
 		return c:IsType(TYPE_MONSTER) and c:IsSetCard(0x15d) and c:IsAbleToGrave()
 	end
@@ -243,7 +236,7 @@ function BBTS_BohrokKaita.krana(baseC)
 	e:SetOperation(operation)
 	return e
 end
-function BBTS_BohrokKaita.ss(baseC)
+function BBTS.bohrokkaita_ss(baseC)
 	local function filter(c,e,tp)
 		return c:IsSetCard(0x15c) and c:GetLevel()==4 and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
 	end
@@ -272,10 +265,7 @@ function BBTS_BohrokKaita.ss(baseC)
 	return e
 end
 --Bohrok Va Kaita
-BBTS_BohrokVaKaita={}
-bbts_bvk=BBTS_BohrokVaKaita
-
-function BBTS_BohrokVaKaita.synchrolimit(baseC)	
+function BBTS.bohrokvakaita_synchrolimit(baseC)	
 	function filter(c,syncard,tuner,f)
 		return c:IsFaceup() and c:IsNotTuner() and c:IsCanBeSynchroMaterial(syncard,tuner) and c:IsSetCard(0x15c) and (f==nil or f(c))
 	end
@@ -303,7 +293,7 @@ function BBTS_BohrokVaKaita.synchrolimit(baseC)
 	e:SetOperation(operation)
 	return e
 end
-function BBTS_BohrokVaKaita.switch(baseC)	
+function BBTS.bohrokvakaita_switch(baseC)	
 	local function filter(c,e,tp)
 		return c:IsSetCard(0x15c) and c:IsType(TYPE_FUSION) and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
 	end
@@ -332,6 +322,29 @@ function BBTS_BohrokVaKaita.switch(baseC)
 	e:SetRange(LOCATION_MZONE)
 	e:SetCondition(condition)
 	e:SetCost(cost)
+	e:SetTarget(target)
+	e:SetOperation(operation)
+	return e
+end
+function bbts.bahrag_pendset(baseC)
+	function condition(e,tp,eg,ep,ev,re,r,rp)
+		return e:GetHandler():IsFaceup() and tp==Duel.GetTurnPlayer()
+	end
+	function target(e,tp,eg,ep,ev,re,r,rp,chk)
+		if chk==0 then return Duel.CheckLocation(tp,LOCATION_SZONE,6) or Duel.CheckLocation(tp,LOCATION_SZONE,7) end
+	end
+	function operation(e,tp,eg,ep,ev,re,r,rp)
+		if not Duel.CheckLocation(tp,LOCATION_SZONE,6) and not Duel.CheckLocation(tp,LOCATION_SZONE,7) then return false end
+		local c=e:GetHandler()
+		if c:IsRelateToEffect(e) then
+			Duel.MoveToField(c,tp,tp,LOCATION_SZONE,POS_FACEUP,true)
+		end
+	end
+	local e=Effect.CreateEffect(baseC)
+	e:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O)
+	e:SetCode(EVENT_PHASE+PHASE_STANDBY)
+	e:SetRange(LOCATION_EXTRA)
+	e:SetCondition(condition)
 	e:SetTarget(target)
 	e:SetOperation(operation)
 	return e

@@ -1,4 +1,4 @@
-if not bbts_bvk then
+if not bbts then
 	dofile "expansions/util-bbts.lua"
 end
 --Bohrok Va Kaita Za
@@ -7,10 +7,10 @@ function c10100231.initial_effect(c)
 	aux.AddFusionProcCode3(c,10100216,10100218,10100219,true,true)
 	c:EnableReviveLimit()
 	--Synchro Limit
-	local e1=bbts_bvk.synchrolimit(c)
+	local e1=bbts.bohrokvakaita_synchrolimit(c)
 	c:RegisterEffect(e1)
 	--Switch
-	local e2=bbts_bvk.switch(c)
+	local e2=bbts.bohrokvakaita_switch(c)
 	c:RegisterEffect(e2)
 	--Special Summon
 	local e3=Effect.CreateEffect(c)
