@@ -3,6 +3,7 @@ if not bbts then
 end
 --Bahrag Gahdok, Queen of the Bohrok
 function c10100232.initial_effect(c)
+	aux.EnablePendulumAttribute(c)
 	--synchro summon
 	aux.AddSynchroProcedure(c,aux.FilterBoolFunction(Card.IsSetCard,0x15c),aux.NonTuner(Card.IsSetCard,0x15c),1)
 	c:EnableReviveLimit()
@@ -39,7 +40,7 @@ function c10100232.initial_effect(c)
 	c:RegisterEffect(e4)
 end
 function c10100232.filter1(c)
-	return c:IsSetCard(0x15c) and c:IsControler(tp) and c:IsType(TYPE_MONSTER)
+	return c:IsSetCard(0x15c) and c:IsControler(tp) and c:IsType(TYPE_MONSTER) and c:IsPreviousLocation(LOCATION_ONFIELD)
 end
 function c10100232.condition1(e,tp,eg,ep,ev,re,r,rp)
 	return eg:IsExists(c10100232.filter1,1,nil,tp)
@@ -65,7 +66,7 @@ function c10100232.filter2(c,e,tp)
 	return c:IsSetCard(0x15c) and c:GetLevel()==4 and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
 end
 function c10100232.condition2(e,tp,eg,ep,ev,re,r,rp)
-	return Duel.GetFieldGroupCount(tp,LOCATION_MZONE,0)==1
+	return not Duel.IsExistingMatchingCard(Card.IsFaceup,tp,LOCATION_MZONE,0,1,e:GetHandler())
 end
 function c10100232.target2(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingMatchingCard(c10100232.filter2,tp,LOCATION_GRAVE,0,1,nil,e,tp) and Duel.GetLocationCount(tp,LOCATION_MZONE)>0 end
@@ -77,7 +78,29 @@ function c10100232.operation2(e,tp,eg,ep,ev,re,r,rp)
 	local g=Duel.SelectMatchingCard(tp,c10100232.filter2,tp,LOCATION_GRAVE,0,1,1,nil,e,tp)
 	if g:GetCount() > 0 then
 		Duel.SpecialSummon(g,0,tp,tp,false,false,POS_FACEUP)
+		local tc=g:GetFirst()
+		local fid=e:GetHandler():GetFieldID()
+		tc:RegisterFlagEffect(10100232,RESET_EVENT+0x1fe0000+RESET_PHASE+PHASE_END,0,1,fid)
+		local e1=Effect.CreateEffect(c)
+		e1:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
+		e1:SetCode(EVENT_PHASE+PHASE_END)
+		e1:SetProperty(EFFECT_FLAG_IGNORE_IMMUNE)
+		e1:SetCountLimit(1)
+		e1:SetLabel(fid)
+		e1:SetLabelObject(tc)
+		e1:SetCondition(c10100232.condition2_1)
+		e1:SetOperation(c10100232.operation2_1)
+		e1:SetReset(RESET_PHASE+PHASE_END)
+		Duel.RegisterEffect(e1,tp)
 	end
+end
+function c10100232.condition2_1(e,tp,eg,ep,ev,re,r,rp)
+	local tc=e:GetLabelObject()
+	return tc:GetFlagEffectLabel(10100232)==e:GetLabel()
+end
+function c10100232.operation2_1(e,tp,eg,ep,ev,re,r,rp)
+	local tc=e:GetLabelObject()
+	Duel.Remove(tc,POS_FACEUP,REASON_EFFECT)
 end
 function c10100232.filter3(c)
 	return c:IsFaceup() and c:IsCode(10100233)
