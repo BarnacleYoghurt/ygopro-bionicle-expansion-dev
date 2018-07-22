@@ -37,6 +37,7 @@ function c10100233.initial_effect(c)
 	c:RegisterEffect(e3a)
 	local e3b=e3a:Clone()
 	e3b:SetCode(EFFECT_CANNOT_BE_EFFECT_TARGET)
+	e3b:SetValue(aux.tgoval)
 	e3b:SetProperty(EFFECT_FLAG_IGNORE_IMMUNE)
 	c:RegisterEffect(e3b)
 	--Pendulum
@@ -99,8 +100,6 @@ end
 function c10100233.filter3(c)
 	return c:IsFaceup() and c:IsCode(10100232)
 end
-function c10100233.condition3(e,tp,eg,ep,ev,re,r,rp)
-	Debug.Message('check protect')
-	Debug.Message(Duel.IsExistingMatchingCard(c10100233.filter3,tp,LOCATION_ONFIELD,0,1,nil))
-	return Duel.IsExistingMatchingCard(c10100233.filter3,tp,LOCATION_ONFIELD,0,1,nil)
+function c10100233.condition3(e)
+	return Duel.IsExistingMatchingCard(c10100233.filter3,e:GetHandlerPlayer(),LOCATION_ONFIELD,0,1,nil)
 end

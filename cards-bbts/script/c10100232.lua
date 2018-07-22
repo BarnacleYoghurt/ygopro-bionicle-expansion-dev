@@ -105,6 +105,6 @@ end
 function c10100232.filter3(c)
 	return c:IsFaceup() and c:IsCode(10100233)
 end
-function c10100232.condition3(e,tp,eg,ep,ev,re,r,rp)
-	return Duel.IsExistingMatchingCard(c10100232.filter3,tp,LOCATION_ONFIELD,0,1,nil)
+function c10100232.condition3(e)
+	return Duel.IsExistingMatchingCard(c10100232.filter3,e:GetHandlerPlayer(),LOCATION_ONFIELD,0,1,nil)
 end
