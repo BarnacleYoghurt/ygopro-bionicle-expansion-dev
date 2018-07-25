@@ -33,7 +33,7 @@ function c10100233.initial_effect(c)
 	e3a:SetTargetRange(LOCATION_MZONE,0)
 	e3a:SetCondition(c10100233.condition3)
 	e3a:SetTarget(aux.TargetBoolFunction(Card.IsSetCard,0x15e))
-	e3a:SetValue(1)
+	e3a:SetValue(c10100233.value3a)
 	c:RegisterEffect(e3a)
 	local e3b=e3a:Clone()
 	e3b:SetCode(EFFECT_CANNOT_BE_EFFECT_TARGET)
@@ -53,8 +53,46 @@ function c10100233.target1(e,tp,eg,ep,ev,re,r,rp,chk)
 end
 function c10100233.operation1(e,tp,eg,ep,ev,re,r,rp)
 	local tc=Duel.GetFirstTarget()
-	if tc:IsRelateToEffect(e) then
-		Duel.ChangePosition(tc,POS_FACEDOWN_DEFENSE)
+	if tc:IsRelateToEffect(e) and Duel.ChangePosition(tc,POS_FACEDOWN_DEFENSE) then
+		--Doesn't work properly - card remains indestructable after being flipped face-up
+		local e1=Effect.CreateEffect(e:GetHandler())
+		e1:SetType(EFFECT_TYPE_SINGLE)
+		e1:SetCode(EFFECT_INDESTRUCTABLE_BATTLE)
+		e1:SetCondition(c10100233.condition1_1)
+		e1:SetValue(1)
+		e1:SetReset(RESET_EVENT+0x1fc0000+RESET_PHASE+PHASE_END)
+		tc:RegisterEffect(e1)
+		local e2=Effect.CreateEffect(e:GetHandler())
+		e2:SetType(EFFECT_TYPE_SINGLE)
+		e2:SetCode(EFFECT_INDESTRUCTABLE_EFFECT)
+		e2:SetCondition(c10100233.condition1_2)
+		e2:SetValue(1)
+		e2:SetReset(RESET_EVENT+0x1fc0000+RESET_PHASE+PHASE_END)
+		tc:RegisterEffect(e2)
+		--Check if face-down at start of Damage Step
+		local e3=Effect.CreateEffect(e:GetHandler())
+		e3:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_CONTINUOUS)
+		e3:SetCode(EVENT_BATTLE_START)
+		e3:SetCondition(c10100233.condition1_3)
+		e3:SetOperation(c10100233.operation1_3)
+		e3:SetReset(RESET_EVENT+0x1fc0000+RESET_PHASE+PHASE_END)
+		tc:RegisterEffect(e3)
+	end
+end
+function c10100233.condition1_1(e)
+	return e:GetHandler():GetFlagEffect(10100233)~=0
+end
+function c10100233.condition1_2(e)
+	return e:GetHandler():IsFacedown()
+end
+function c10100233.condition1_3(e,tp,eg,ep,ev,re,r,rp)
+	local c=e:GetHandler()
+	return c:IsFacedown() and c:IsLocation(LOCATION_MZONE)
+end
+function c10100233.operation1_3(e,tp,eg,ep,ev,re,r,rp)
+	local c=e:GetHandler()
+	if c:GetFlagEffect(10100233)==0 then
+		c:RegisterFlagEffect(10100233,RESET_PHASE+PHASE_DAMAGE,0,1)
 	end
 end
 function c10100233.filter2(c,e,tp)
@@ -102,4 +140,7 @@ function c10100233.filter3(c)
 end
 function c10100233.condition3(e)
 	return Duel.IsExistingMatchingCard(c10100233.filter3,e:GetHandlerPlayer(),LOCATION_ONFIELD,0,1,nil)
+end
+function c10100233.value3a(e,re,rp)
+	return rp~=e:GetHandlerPlayer()
 end
