@@ -199,28 +199,30 @@ function BBTS.bohrokkaita_krana(baseC)
 			return Duel.IsExistingMatchingCard(filter,tp,LOCATION_DECK,0,1,nil) 
 			and Duel.GetLocationCount(tp,LOCATION_SZONE)>0 
 		end
-		local g=Duel.SelectMatchingCard(tp,filter,tp,LOCATION_DECK,0,1,3,nil)
-		g:KeepAlive()
-		e:SetLabelObject(g)
-		e:SetLabel(g:Select(1-tp,1,1,nil):GetFirst():GetCode())
 	end
 	local function operation(e,tp,eg,ep,ev,re,r,rp)
-		local g=e:GetLabelObject()
-		if g and g:FilterCount(Card.IsCode,nil,e:GetLabel())>0 then
-			local c=e:GetHandler()
-			local ec=g:Filter(Card.IsCode,nil,e:GetLabel()):GetFirst()
-			if Duel.Equip(tp,ec,c,true) then
-				local function value_1(e,c)
-					return c==e:GetLabelObject()
+		local c=e:GetHandler()
+		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_EQUIP)
+		local g=Duel.SelectMatchingCard(tp,filter,tp,LOCATION_DECK,0,1,3,nil)
+		if g:GetCount()>0 then
+			Duel.ConfirmCards(1-tp,g)
+			Duel.Hint(HINT_SELECTMSG,1-tp,HINTMSG_EQUIP)
+			local eg=g:Select(1-tp,1,1,nil)
+			if eg:GetCount()>0 then
+				local ec=eg:GetFirst()
+				if Duel.Equip(tp,ec,c,true) then
+					local function value_1(e,c)
+						return c==e:GetLabelObject()
+					end
+					local e1=Effect.CreateEffect(ec)
+					e1:SetType(EFFECT_TYPE_SINGLE)
+					e1:SetCode(EFFECT_EQUIP_LIMIT)
+					e1:SetValue(value_1)
+					e1:SetLabelObject(c)
+					e1:SetReset(RESET_EVENT+0x1fe0000)
+					ec:RegisterEffect(e1)
+					g:RemoveCard(ec)
 				end
-				local e1=Effect.CreateEffect(ec)
-				e1:SetType(EFFECT_TYPE_SINGLE)
-				e1:SetCode(EFFECT_EQUIP_LIMIT)
-				e1:SetValue(value_1)
-				e1:SetLabelObject(c)
-				e1:SetReset(RESET_EVENT+0x1fe0000)
-				ec:RegisterEffect(e1)
-				g:RemoveCard(ec)
 			end
 			if g:GetCount()>0 then
 				Duel.SendtoGrave(g,REASON_EFFECT)
@@ -257,7 +259,6 @@ function BBTS.bohrokkaita_ss(baseC)
 	end
 	
 	local e=Effect.CreateEffect(baseC)
-	e:SetProperty(EFFECT_FLAG_DELAY)
 	e:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
 	e:SetCode(EVENT_LEAVE_FIELD)
 	e:SetTarget(target)

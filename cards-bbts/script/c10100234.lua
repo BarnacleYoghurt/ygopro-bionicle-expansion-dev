@@ -32,6 +32,7 @@ function c10100234.operation1(e,tp,eg,ep,ev,re,r,rp)
 	local g=Duel.GetChainInfo(0,CHAININFO_TARGET_CARDS)
 	local ct=Duel.Destroy(g,REASON_EFFECT)
 	if ct>0 then
+		Duel.BreakEffect()
 		Duel.Draw(tp,ct,REASON_EFFECT)
 	end
 end
