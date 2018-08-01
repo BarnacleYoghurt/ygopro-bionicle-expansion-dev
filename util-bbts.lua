@@ -261,6 +261,7 @@ function BBTS.bohrokkaita_ss(baseC)
 	local e=Effect.CreateEffect(baseC)
 	e:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
 	e:SetCode(EVENT_LEAVE_FIELD)
+	e:SetProperty(EFFECT_FLAG_DAMAGE_STEP)
 	e:SetTarget(target)
 	e:SetOperation(operation)
 	return e
