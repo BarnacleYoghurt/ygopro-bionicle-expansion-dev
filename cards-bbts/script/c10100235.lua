@@ -39,13 +39,14 @@ end
 function c10100235.operation1(e,tp,eg,ep,ev,re,r,rp)
 	local tc=Duel.GetFirstTarget()
 	if tc and tc:IsRelateToEffect(e) then
-		local e1_1 = Effect.CreateEffect(e:GetHandler())
-		e1_1:SetCategory(CATEGORY_DESTROY)
-		e1_1:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_CONTINUOUS)
-		e1_1:SetCode(EVENT_BATTLE_START)
-		e1_1:SetTarget(c10100235.target1_1)
-		e1_1:SetOperation(c10100235.operation1_1)
-		tc:RegisterEffect(e1_1)
+		local e1 = Effect.CreateEffect(e:GetHandler())
+		e1:SetCategory(CATEGORY_DESTROY)
+		e1:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_CONTINUOUS)
+		e1:SetCode(EVENT_BATTLE_START)
+		e1:SetTarget(c10100235.target1_1)
+		e1:SetOperation(c10100235.operation1_1)
+		e1:SetReset(RESET_EVENT+0x1fe0000+RESET_PHASE+PHASE_END)
+		tc:RegisterEffect(e1)
 	end
 end
 function c10100235.filter1_1(c)
