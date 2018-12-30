@@ -11,10 +11,10 @@ function c10100238.initial_effect(c)
 	e1:SetTarget(c10100238.target1)
 	e1:SetOperation(c10100238.operation1)
 	c:RegisterEffect(e1)
-	--SS from Deck
+	--To hand
 	local e2=Effect.CreateEffect(c)
 	e2:SetDescription(aux.Stringid(10100238,1))
-	e2:SetCategory(CATEGORY_SPECIAL_SUMMON)
+	e2:SetCategory(CATEGORY_TOHAND+CATEGORY_SEARCH)
 	e2:SetType(EFFECT_TYPE_IGNITION)
 	e2:SetRange(LOCATION_PZONE)
 	e2:SetTarget(c10100238.target2)
@@ -42,38 +42,19 @@ function c10100238.operation1(e,tp,eg,ep,ev,re,r,rp)
 		Duel.SpecialSummon(e:GetHandler(),0,tp,tp,false,false,POS_FACEUP)
 	end
 end
-function c10100238.filter2(c,e,tp)
-	return c:IsSetCard(0x15a) and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
+function c10100238.filter2(c)
+	return c:IsSetCard(0x15a) and not c:IsCode(10100238) and c:IsAbleToHand()
 end
 function c10100238.target2(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and Duel.IsExistingMatchingCard(c10100238.filter2,tp,LOCATION_DECK,0,1,nil,e,tp) end
-	local g=Duel.GetMatchingGroup(c10100238.filter2,tp,LOCATION_DECK,0,nil,e,tp)
-	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,e:GetHandler(),1,tp,LOCATION_DECK)
+	if chk==0 then return Duel.IsExistingMatchingCard(c10100238.filter2,tp,LOCATION_DECK+LOCATION_GRAVE,0,1,nil) end
+	local g=Duel.GetMatchingGroup(c10100238.filter2,tp,LOCATION_DECK+LOCATION_GRAVE,0,nil)
+	Duel.SetOperationInfo(0,CATEGORY_TOHAND,g,1,tp,LOCATION_DECK+LOCATION_GRAVE)
 end
 function c10100238.operation2(e,tp,eg,ep,ev,re,r,rp)
-	local g=Duel.SelectMatchingCard(tp,c10100238.filter2,tp,LOCATION_DECK,0,1,1,nil,e,tp)
-	if g:GetCount()>0 and Duel.GetLocationCount(tp,LOCATION_MZONE)>0 then
-		if Duel.SpecialSummon(g,0,tp,tp,false,false,POS_FACEUP) then
-			local sc=g:GetFirst()
-			local e1=Effect.CreateEffect(e:GetHandler())
-			e1:SetType(EFFECT_TYPE_SINGLE)
-			e1:SetCode(EFFECT_SET_ATTACK_FINAL)
-			e1:SetValue(0)
-			e1:SetReset(RESET_EVENT+0x1fe0000)
-			sc:RegisterEffect(e1)
-			local e2=Effect.CreateEffect(e:GetHandler())
-			e2:SetType(EFFECT_TYPE_SINGLE)
-			e2:SetCode(EFFECT_DISABLE)
-			e2:SetReset(RESET_EVENT+0x1fe0000)
-			sc:RegisterEffect(e2)
-			local e3=Effect.CreateEffect(e:GetHandler())
-			e3:SetType(EFFECT_TYPE_SINGLE)
-			e3:SetCode(EFFECT_DISABLE_EFFECT)
-			e3:SetValue(RESET_TURN_SET)
-			e3:SetReset(RESET_EVENT+0x1fe0000)
-			sc:RegisterEffect(e3)
-			Duel.Damage(tp,g:GetFirst():GetBaseAttack(),REASON_EFFECT)
-		end
+	local g=Duel.SelectMatchingCard(tp,c10100238.filter2,tp,LOCATION_DECK+LOCATION_GRAVE,0,1,1,nil,e,tp)
+	if g:GetCount()>0 and Duel.SendtoHand(g,nil,REASON_EFFECT) then
+		Duel.ConfirmCards(1-tp,g)
+		Duel.Damage(tp,g:GetFirst():GetBaseAttack(),REASON_EFFECT)
 	end
 end
 function c10100238.condition3(e,tp,eg,ep,ev,re,r,rp)
