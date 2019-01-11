@@ -2,6 +2,7 @@
 function c10100240.initial_effect(c)
 	--Banish
 	local e1=Effect.CreateEffect(c)
+	e1:SetDescription(aux.Stringid(10100240,0))
 	e1:SetCategory(CATEGORY_REMOVE)
 	e1:SetType(EFFECT_TYPE_QUICK_O)
 	e1:SetProperty(EFFECT_FLAG_CARD_TARGET)
