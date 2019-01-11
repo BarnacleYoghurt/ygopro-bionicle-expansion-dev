@@ -2,6 +2,7 @@
 function c10100236.initial_effect(c)
 	--Reduce ATK
 	local e1=Effect.CreateEffect(c)
+	e1:SetDescription(aux.Stringid(10100236,0))
 	e1:SetCategory(CATEGORY_ATKCHANGE)
 	e1:SetType(EFFECT_TYPE_QUICK_O)
 	e1:SetCode(EVENT_FREE_CHAIN)	
@@ -28,7 +29,7 @@ function c10100236.target1(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingMatchingCard(Card.IsFaceup,tp,0,LOCATION_MZONE,1,nil) end
 end
 function c10100236.operation1(e,tp,eg,ep,ev,re,r,rp)
-	local val=Duel.GetMatchingGroupCount(c10100236.filter1b,tp,LOCATION_MZONE,0,nil)*600
+	local val=Duel.GetMatchingGroupCount(c10100236.filter1b,tp,LOCATION_REMOVED,0,nil)*500
 	local e1=Effect.CreateEffect(e:GetHandler())
 	e1:SetType(EFFECT_TYPE_SINGLE)
 	e1:SetCode(EFFECT_UPDATE_ATTACK)
