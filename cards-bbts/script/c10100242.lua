@@ -1,6 +1,7 @@
 --Bohrok Servant
 function c10100242.initial_effect(c)
-	--fusion material
+	c:SetSPSummonOnce(10100242)
+  --fusion material
 	c:EnableReviveLimit()
   aux.AddFusionProcFun2(c, c10100242.genFilter0a(c), c10100242.genFilter0b(c), true)
 	--spsummon condition
