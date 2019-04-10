@@ -34,13 +34,13 @@ end
 function c10100242.genFilter0a(sc)
   return function(c)
     local tp=sc:GetControler()
-    return c:IsSetCard(0x15d) and c:GetOwner()==tp 
+    return c:IsType(TYPE_MONSTER) and c:IsSetCard(0x15d) and c:GetOwner()==tp 
   end
 end
 function c10100242.genFilter0b(sc)
 	return function(c) 
     local tp=sc:GetControler()
-    return c:GetOwner()==1-tp 
+    return c:IsType(TYPE_MONSTER) and c:GetOwner()==1-tp 
   end
 end
 function c10100242.value1(e,se,sp,st)
