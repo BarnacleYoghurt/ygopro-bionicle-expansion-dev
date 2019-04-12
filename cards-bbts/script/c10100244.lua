@@ -10,6 +10,7 @@ function c10100244.initial_effect(c)
 	e1:SetCost(c10100244.cost1)
 	e1:SetTarget(c10100244.target1)
 	e1:SetOperation(c10100244.operation1)
+  e1:SetCountLimit(1)
 	c:RegisterEffect(e1)
   --take control
   local e2=Effect.CreateEffect(c)
