@@ -19,8 +19,7 @@ function c10100242.initial_effect(c)
 	e2:SetRange(LOCATION_EXTRA)
 	e2:SetCondition(c10100242.condition2)
 	e2:SetOperation(c10100242.operation2)
-  --Treat as Fusion Summon
-  e2:SetValue(SUMMON_TYPE_FUSION - SUMMON_TYPE_SPECIAL)
+  e2:SetValue(242)
 	c:RegisterEffect(e2)
   --atk/def
 	local e3=Effect.CreateEffect(c)
@@ -62,7 +61,7 @@ function c10100242.operation2(e,tp,eg,ep,ev,re,r,rp,c)
 	Duel.Remove(g,POS_FACEUP,REASON_COST+REASON_FUSION+REASON_MATERIAL)
 end
 function c10100242.condition3(e,tp,eg,ep,ev,re,r,rp)
-	return bit.band(e:GetHandler():GetSummonType(),SUMMON_TYPE_FUSION)==SUMMON_TYPE_FUSION
+	return bit.band(e:GetHandler():GetSummonType(),SUMMON_TYPE_FUSION)==SUMMON_TYPE_FUSION or e:GetHandler():GetSummonType()==SUMMON_TYPE_SPECIAL+242
 end
 function c10100242.filter3(c,tp)
   return c:GetOwner()==1-tp
