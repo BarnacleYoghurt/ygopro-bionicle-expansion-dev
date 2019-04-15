@@ -42,14 +42,16 @@ end
 function c10100244.operation1(e,tp,eg,ep,ev,re,r,rp)
   local c=e:GetHandler()
   local tc=Duel.GetFirstTarget()
-  if c:IsRelateToEffect(e) and tc:IsRelateToEffect(e) and Duel.Remove(tc,POS_FACEUP,REASON_EFFECT) then
-    Duel.BreakEffect()
-    Duel.SpecialSummon(c,0,tp,1-tp,false,false,POS_FACEUP)
-    Duel.BreakEffect()
-    local g=Duel.GetMatchingGroup(Card.IsSynchroSummonable,1-tp,LOCATION_EXTRA,0,nil,c)
-    if g:GetCount()>0 then
-      local sg=g:Select(1-tp,1,1,nil)
-      Duel.SynchroSummon(1-tp,sg:GetFirst(),c)
+  if tc:IsRelateToEffect(e) then 
+    if Duel.Remove(tc,POS_FACEUP,REASON_EFFECT) and c:IsRelateToEffect(e) then
+      Duel.BreakEffect()
+      Duel.SpecialSummon(c,0,tp,1-tp,false,false,POS_FACEUP)
+      Duel.BreakEffect()
+      local g=Duel.GetMatchingGroup(Card.IsSynchroSummonable,1-tp,LOCATION_EXTRA,0,nil,c)
+      if g:GetCount()>0 then
+        local sg=g:Select(1-tp,1,1,nil)
+        Duel.SynchroSummon(1-tp,sg:GetFirst(),c)
+      end
     end
   end
 end
