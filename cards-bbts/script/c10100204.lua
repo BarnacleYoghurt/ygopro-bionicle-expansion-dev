@@ -1,13 +1,11 @@
+if not bbts then
+	dofile "expansions/util-bbts.lua"
+end
 --Bohrok Pahrak
 function c10100204.initial_effect(c)
 	--flip
-	local e1=Effect.CreateEffect(c)
-	e1:SetCategory(CATEGORY_SPECIAL_SUMMON)
-	e1:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_FLIP+EFFECT_TYPE_TRIGGER_F)
-	e1:SetProperty(EFFECT_FLAG_DELAY)
-	e1:SetTarget(c10100204.target1)
-	e1:SetOperation(c10100204.operation1)
-	c:RegisterEffect(e1)
+  local e1=bbts.bohrok_flip(c)
+  c:RegisterEffect(e1)
 	--Block effects during battle
 	local e2=Effect.CreateEffect(c)
 	e2:SetType(EFFECT_TYPE_FIELD)

@@ -1,13 +1,11 @@
+if not bbts then
+	dofile "expansions/util-bbts.lua"
+end
 --Bohrok Gahlok
 function c10100202.initial_effect(c)
 	--flip
-	local e1=Effect.CreateEffect(c)
-	e1:SetCategory(CATEGORY_SPECIAL_SUMMON)
-	e1:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_FLIP+EFFECT_TYPE_TRIGGER_F)
-	e1:SetProperty(EFFECT_FLAG_DELAY)
-	e1:SetTarget(c10100202.target1)
-	e1:SetOperation(c10100202.operation1)
-	c:RegisterEffect(e1)
+  local e1=bbts.bohrok_flip(c)
+  c:RegisterEffect(e1)
 	--be unpredictable
 	local e2=Effect.CreateEffect(c)
 	e2:SetType(EFFECT_TYPE_IGNITION)

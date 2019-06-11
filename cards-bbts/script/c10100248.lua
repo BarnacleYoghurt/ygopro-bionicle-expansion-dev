@@ -25,7 +25,7 @@ function c10100248.filter1(c)
   return c:IsLevelBelow(4) and c:IsAttribute(ATTRIBUTE_EARTH) and c:IsAbleToHand()
 end
 function c10100248.condition1(e,tp,eg,ep,ev,re,r,rp)
-  return e:GetHandlerPlayer() == tp
+  return Duel.GetTurnPlayer()==tp
 end
 function c10100248.cost1(e,tp,eg,ep,ev,re,r,rp,chk)
   if chk==0 then

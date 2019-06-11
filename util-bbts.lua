@@ -1,5 +1,33 @@
 BBTS={}
 bbts=BBTS
+--Bohrok Flip
+function BBTS.bohrok_flip(baseC)
+  local function filter(c,e,tp)
+    return c:IsSetCard(0x15c) and c:GetLevel()==4 and not c:IsCode(baseC:GetCode()) and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
+  end
+  local function target(e,tp,eg,ep,ev,re,r,rp,chk)
+    if chk==0 then 
+      return Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and Duel.IsExistingMatchingCard(filter,tp,LOCATION_DECK,0,1,nil,e,tp) 
+    end
+    local g=Duel.GetMatchingGroup(filter,tp,LOCATION_DECK,0,nil,e,tp)
+    Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,g,1,0,0)
+  end
+  function operation(e,tp,eg,ep,ev,re,r,rp)
+    local c=e:GetHandler()
+    local g=Duel.SelectMatchingCard(tp,filter,tp,LOCATION_DECK,0,1,1,nil,e,tp)
+    if g:GetCount() > 0 then
+      Duel.SpecialSummon(g,0,tp,tp,false,false,POS_FACEDOWN_DEFENSE)
+      Duel.ConfirmCards(1-tp,g)
+    end
+  end
+  local e=Effect.CreateEffect(baseC)
+	e:SetCategory(CATEGORY_SPECIAL_SUMMON)
+	e:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_FLIP)
+	e:SetProperty(EFFECT_FLAG_DELAY)
+	e:SetTarget(target)
+	e:SetOperation(operation)
+	return e
+end
 --Krana
 function BBTS.krana_equip(baseC)
 	local function filter(c)
