@@ -33,7 +33,7 @@ function c10100247.filter1b(c,e,tp,rc)
     )
 end
 function c10100247.filter1c(c,rc)
-  return not c:IsCode(rc:GetCode()) and c:GetLevel() == rc:GetLevel()
+  return c:GetLevel() == rc:GetLevel()
 end
 function c10100247.cost1(e,tp,eg,ep,ev,re,r,rp,chk)
   if chk==0 then
