@@ -2,10 +2,8 @@
 function c10100248.initial_effect(c)
   --Search
   local e1=Effect.CreateEffect(c)
-  e1:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O)
-  e1:SetCode(EVENT_PHASE+PHASE_END)
+  e1:SetType(EFFECT_TYPE_IGNITION)
   e1:SetRange(LOCATION_HAND)
-  e1:SetCondition(c10100248.condition1)
   e1:SetCost(c10100248.cost1)
   e1:SetTarget(c10100248.target1)
   e1:SetOperation(c10100248.operation1)
@@ -22,10 +20,7 @@ function c10100248.initial_effect(c)
   c:RegisterEffect(e2)
 end
 function c10100248.filter1(c)
-  return c:IsLevelBelow(4) and c:IsAttribute(ATTRIBUTE_EARTH) and c:IsAbleToHand()
-end
-function c10100248.condition1(e,tp,eg,ep,ev,re,r,rp)
-  return Duel.GetTurnPlayer()==tp
+  return c:IsSetCard(0x157) and c:IsAttribute(ATTRIBUTE_EARTH) and c:IsAbleToHand()
 end
 function c10100248.cost1(e,tp,eg,ep,ev,re,r,rp,chk)
   if chk==0 then

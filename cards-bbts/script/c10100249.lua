@@ -33,8 +33,8 @@ function c10100249.initial_effect(c)
   --set ATK
   local e5=Effect.CreateEffect(c)
   e5:SetType(EFFECT_TYPE_EQUIP)
-  e5:SetCode(EFFECT_SET_ATTACK_FINAL)
-  e5:SetValue(2000)
+  e5:SetCode(EFFECT_SET_BASE_ATTACK)
+  e5:SetValue(1750)
   c:RegisterEffect(e5)
   --Block effects
   local e6=Effect.CreateEffect(c)
