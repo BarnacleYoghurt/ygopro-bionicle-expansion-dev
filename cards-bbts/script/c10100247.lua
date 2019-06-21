@@ -7,6 +7,7 @@ function c10100247.initial_effect(c)
   e1:SetCost(c10100247.cost1)
   e1:SetTarget(c10100247.target1)
   e1:SetOperation(c10100247.operation1)
+  e1:SetLabelObject(nil)
   e1:SetCountLimit(1,10100247)
   c:RegisterEffect(e1)
   --While others work
@@ -37,6 +38,8 @@ function c10100247.filter1c(c,rc)
 end
 function c10100247.cost1(e,tp,eg,ep,ev,re,r,rp,chk)
   if chk==0 then
+    Debug.Message("Checking cost for Nuparu ...")
+    Debug.Message(Duel.IsExistingMatchingCard(c10100247.filter1a, tp, LOCATION_GRAVE, LOCATION_GRAVE, 1, nil))
     return Duel.IsExistingMatchingCard(c10100247.filter1a, tp, LOCATION_GRAVE, LOCATION_GRAVE, 1, nil)
   end
   local g=Duel.SelectMatchingCard(tp,c10100247.filter1a, tp, LOCATION_GRAVE, LOCATION_GRAVE, 1, 1, nil)
@@ -45,6 +48,8 @@ function c10100247.cost1(e,tp,eg,ep,ev,re,r,rp,chk)
 end
 function c10100247.target1(e,tp,eg,ep,ev,re,r,rp,chk)
   if chk==0 then
+    Debug.Message("Checking target for Nuparu ...")
+    Debug.Message(Duel.IsExistingMatchingCard(c10100247.filter1b, tp, LOCATION_HAND, 0, 1, nil, e, tp, e:GetLabelObject()))
     return Duel.IsExistingMatchingCard(c10100247.filter1b, tp, LOCATION_HAND, 0, 1, nil, e, tp, e:GetLabelObject())
   end
   local g=Duel.GetMatchingGroup(c10100247.filter1b, tp, LOCATION_HAND, 0, nil, e, tp, e:GetLabelObject())
@@ -55,6 +60,7 @@ function c10100247.operation1(e,tp,eg,ep,ev,re,r,rp)
   if g:GetCount() > 0 then
     Duel.SpecialSummon(g,SUMMON_TYPE_SPECIAL,tp,tp,false,false,POS_FACEUP_DEFENSE)
   end
+  e:SetLabelObject(nil) --Reset before next use
 end
 function c10100247.cost2(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return e:GetHandler():GetAttackAnnouncedCount()==0 end
