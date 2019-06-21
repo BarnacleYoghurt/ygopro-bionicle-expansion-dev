@@ -50,7 +50,7 @@ function c10100249.initial_effect(c)
 end
 function c10100249.filter1(c)
 	local ct1,ct2=c:GetUnionCount()
-	return c:IsFaceup() and c:IsRace(RACE_WARRIOR) and ct2==0
+	return c:IsFaceup() and c:IsRace(RACE_WARRIOR) and c:GetLevel()==2 and ct2==0
 end
 function c10100249.target1(e,tp,eg,ep,ev,re,r,rp,chk)
 	local c=e:GetHandler()
@@ -99,5 +99,5 @@ function c10100249.value5(e,re,tp)
 	return not re:GetHandler():IsImmuneToEffect(e) and re:IsActiveType(TYPE_MONSTER)
 end
 function c10100249.value6(e,c)
-	return (c:IsRace(RACE_WARRIOR)) or e:GetHandler():GetEquipTarget()==c
+	return (c:IsRace(RACE_WARRIOR) and c:GetLevel()==2) or e:GetHandler():GetEquipTarget()==c
 end
