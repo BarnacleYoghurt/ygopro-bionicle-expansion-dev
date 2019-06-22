@@ -35,8 +35,15 @@ function c10100250.initial_effect(c)
   c:RegisterEffect(e4)
   --Negate effects
   local e5=Effect.CreateEffect(c)
+  e5:SetType(EFFECT_TYPE_EQUIP)
+  e5:SetCode(EFFECT_DISABLE)
+  c:RegisterEffect(e5)
   --Override name
   local e6=Effect.CreateEffect(c)
+  e6:SetType(EFFECT_TYPE_EQUIP)
+  e6:SetCode(EFFECT_CHANGE_CODE)
+  e6:SetValue(10100250)
+  c:RegisterEffect(e6)
   --Boost
   local e7=Effect.CreateEffect(c)
 	--eqlimit
