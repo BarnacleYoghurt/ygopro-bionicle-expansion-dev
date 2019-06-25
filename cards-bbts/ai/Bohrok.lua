@@ -106,7 +106,7 @@ end
 
 DECK_BOHROK = NewDeck("Bohrok",C_Beware,BohrokStartup) 
 
-BohrokActivateBlacklist = {C_Beware,C_Nest} --Merge({Cs_Monsters,Cs_Spells,Cs_Traps})
+BohrokActivateBlacklist = {C_Beware,C_Nest,C_WakeAll} --Merge({Cs_Monsters,Cs_Spells,Cs_Traps})
 BohrokSummonBlacklist = Merge({Cs_Bohrok}) -- Merge({Cs_Monsters})
 BohrokSetBlacklist=  Merge({Cs_Bohrok,Cs_BohrokVa}) -- Merge({Cs_Monsters,Cs_Spells,Cs_Traps})
 BohrokRepoBlacklist= Merge({Cs_Bohrok,Cs_BohrokVa}) -- Merge({Cs_Monsters})
@@ -186,6 +186,23 @@ function BohrokInit(cards)
     print("Taking a step as part of the Crystal Wing Combo.")
     return {SynchroCWComm,CurrentIndex}
   end
+  --Counter Boxor
+  if HasID(OppMon(),10100249) or HasID(OppST(),10100249) then
+    local BoxorPrio = {}
+    if HasID(OppST(),10100249) then
+      BoxorPrio = {C_Nuhvok,C_Pahrak,C_Kohrak,C_Lehvak,C_Gahlok,C_Tahnok}
+    else
+      BoxorPrio = {C_Pahrak,C_Kohrak,C_Lehvak,C_Gahlok,C_Tahnok,C_Nuhvok}
+    end
+    for i=1,#BoxorPrio do
+      if HasID(Act,BoxorPrio[i]) then
+        return {COMMAND_ACTIVATE,CurrentIndex}
+      end
+      if HasID(Sum,BoxorPrio[i]) then
+        return {COMMAND_SUMMON,CurrentIndex}
+      end
+    end
+  end
   -- If opponent has negation, Summon Lehvak Va (If Lehvak in hand, should be summoned first)
   -- Flip other Bohrok
   -- Set Bohrok; prioritize by DEF (Careful: Don't crowd field too much)
@@ -207,9 +224,18 @@ function BohrokCard(cards,min,max,id,c)
   if id == C_Beware then
     return Add(cards)
   end
+  if id >= C_Tahnok and id <= C_Lehvak then
+    if HasID(cards,10100249) then -- Take out Boxor first
+      return {CurrentIndex}
+    end
+  end
 end
 
 function CanSynchroCW(Sum,SpSum)
+  if not (HasID(AIExtra(), 50954680) and Duel.IsExistingMatchingCard(IsLevel6Synchro,player_ai,LOCATION_EXTRA+LOCATION_MZONE,0,1,nil)) then --Necessary materials not present
+    return false
+  end
+  
   if HasID(SpSum,50954680) then --Summon CW directly
     print("I can summon Crystal Wing right now!")
     return COMMAND_SPECIAL_SUMMON
@@ -235,6 +261,9 @@ function CanSynchroCW(Sum,SpSum)
     end
   end
   return false
+end
+function IsLevel6Synchro(c)
+  return c:IsType(TYPE_SYNCHRO) and c:GetLevel()==6
 end
 function HasVa(Cards)
   return HasID(Cards,C_LehvakVa) -- Best because negation just in case

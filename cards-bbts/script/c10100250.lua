@@ -58,6 +58,16 @@ function c10100250.initial_effect(c)
 	e8:SetProperty(EFFECT_FLAG_CANNOT_DISABLE)
 	e8:SetValue(c10100250.value8)
 	c:RegisterEffect(e8)
+  --Search
+  local e9=Effect.CreateEffect(c)
+  e9:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_F)
+  e9:SetCode(EVENT_PHASE+PHASE_END)
+  e9:SetRange(LOCATION_GRAVE)
+  e9:SetCondition(c10100250.condition9)
+  e9:SetTarget(c10100250.target9)
+  e9:SetOperation(c10100250.operation9)
+  e9:SetCountLimit(1,10100250)
+  c:RegisterEffect(e9)
 end
 function c10100250.filter1(c)
 	local ct1,ct2=c:GetUnionCount()
@@ -128,4 +138,24 @@ function c10100250.value7(e,c)
 end
 function c10100250.value8(e,c)
 	return (c:IsSetCard(0x155)) or e:GetHandler():GetEquipTarget()==c
+end
+function c10100250.filter9(c)
+  return c:IsCode(10100251) and c:IsAbleToHand()
+end
+function c10100250.condition9(e,tp,eg,ep,ev,re,r,rp)
+	return e:GetHandler():GetTurnID()==Duel.GetTurnCount()
+end
+function c10100250.target9(e,tp,eg,ep,ev,re,r,rp,chk)
+	if chk==0 then
+    return Duel.IsExistingMatchingCard(c10100250.filter9,tp,LOCATION_DECK,0,1,nil)
+  end
+  local tc=Duel.GetFirstMatchingCard(c10100250.filter9,tp,LOCATION_DECK,0,nil)
+  Duel.SetOperationInfo(0,CATEGORY_TOHAND,tc,1,0,0)
+end
+function c10100250.operation9(e,tp,eg,ep,ev,re,r,rp)
+	local tc=Duel.GetFirstMatchingCard(c10100250.filter9,tp,LOCATION_DECK,0,nil)
+  if tc then
+    Duel.SendtoHand(tc,nil,REASON_EFFECT)
+    Duel.ConfirmCards(1-tp,tc)
+  end
 end
