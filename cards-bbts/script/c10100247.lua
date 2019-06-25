@@ -21,7 +21,7 @@ function c10100247.initial_effect(c)
   e2:SetCountLimit(1,10100247)
   c:RegisterEffect(e2)
 end
-function c10100247.filter1a(c)
+function c10100247.filter1a(c,tp)
   return c:IsRace(RACE_MACHINE) and c:IsAbleToRemoveAsCost() and Duel.IsExistingMatchingCard(c10100247.filter1c,tp,LOCATION_HAND,0,1,nil,c)
 end
 function c10100247.filter1b(c,e,tp,rc)
@@ -38,18 +38,14 @@ function c10100247.filter1c(c,rc)
 end
 function c10100247.cost1(e,tp,eg,ep,ev,re,r,rp,chk)
   if chk==0 then
-    Debug.Message("Checking cost for Nuparu ...")
-    Debug.Message(Duel.IsExistingMatchingCard(c10100247.filter1a, tp, LOCATION_GRAVE, LOCATION_GRAVE, 1, nil))
-    return Duel.IsExistingMatchingCard(c10100247.filter1a, tp, LOCATION_GRAVE, LOCATION_GRAVE, 1, nil)
+    return Duel.IsExistingMatchingCard(c10100247.filter1a, tp, LOCATION_GRAVE, LOCATION_GRAVE, 1, nil,tp)
   end
-  local g=Duel.SelectMatchingCard(tp,c10100247.filter1a, tp, LOCATION_GRAVE, LOCATION_GRAVE, 1, 1, nil)
+  local g=Duel.SelectMatchingCard(tp,c10100247.filter1a, tp, LOCATION_GRAVE, LOCATION_GRAVE, 1, 1, nil,tp)
   e:SetLabelObject(g:GetFirst())
   Duel.Remove(g, POS_FACEUP, REASON_COST)
 end
 function c10100247.target1(e,tp,eg,ep,ev,re,r,rp,chk)
   if chk==0 then
-    Debug.Message("Checking target for Nuparu ...")
-    Debug.Message(Duel.IsExistingMatchingCard(c10100247.filter1b, tp, LOCATION_HAND, 0, 1, nil, e, tp, e:GetLabelObject()))
     return Duel.IsExistingMatchingCard(c10100247.filter1b, tp, LOCATION_HAND, 0, 1, nil, e, tp, e:GetLabelObject())
   end
   local g=Duel.GetMatchingGroup(c10100247.filter1b, tp, LOCATION_HAND, 0, nil, e, tp, e:GetLabelObject())
