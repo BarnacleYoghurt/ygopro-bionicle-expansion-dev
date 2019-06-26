@@ -169,13 +169,11 @@ function BohrokInit(cards)
     print("Activating Bohrok Nest.")
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-  -- Remove priority targets using effects of Bohrok already face-up on the field
   -- Kohrak against indestructible
   -- Lehvak/Gahlok(M) against untargetable
   -- Nuhvok against S/T
   -- Pahrak whenever possible
   -- Tahnok only when no other possible
-  -- Normal/Flip Summon Bohrok for removing priority targets, if any; prioritize by which effect is needed and ATK
   if CanFlipBohrok(Rep) then
     print("Flippin' Bohrok.")
     return Repo()
@@ -186,19 +184,14 @@ function BohrokInit(cards)
     print("Taking a step as part of the Crystal Wing Combo.")
     return {SynchroCWComm,CurrentIndex}
   end
-  --Counter Boxor
-  if HasID(OppMon(),10100249) or HasID(OppST(),10100249) then
-    local BoxorPrio = {}
-    if HasID(OppST(),10100249) then
-      BoxorPrio = {C_Nuhvok,C_Pahrak,C_Kohrak,C_Lehvak,C_Gahlok,C_Tahnok}
-    else
-      BoxorPrio = {C_Pahrak,C_Kohrak,C_Lehvak,C_Gahlok,C_Tahnok,C_Nuhvok}
-    end
-    for i=1,#BoxorPrio do
-      if HasID(Act,BoxorPrio[i]) then
+  --Remove priority targets (Boxor etc)
+  UrgentRemoval = UrgentRemovalNeeded()
+  if UrgentRemoval then
+    for i=1,#UrgentRemoval do
+      if HasID(Act,UrgentRemoval[i]) then
         return {COMMAND_ACTIVATE,CurrentIndex}
       end
-      if HasID(Sum,BoxorPrio[i]) then
+      if HasID(Sum,UrgentRemoval[i]) then
         return {COMMAND_SUMMON,CurrentIndex}
       end
     end
@@ -291,4 +284,59 @@ function CanFlipBohrok(Rep)
     or HasID(Rep,C_Nuhvok,FilterPosition,POS_FACEDOWN_DEFENSE)
     or HasID(Rep,C_Lehvak,FilterPosition,POS_FACEDOWN_DEFENSE))
 end
-
+function UrgentRemovalNeeded()
+  DangerIDs = {
+    10100249, -- Boxor
+    56832966 -- Utopia za Lightning
+  }
+  
+  PriorityVals = {
+    [C_Tahnok] = 2,
+    [C_Gahlok] = 3,
+    [C_Nuhvok] = 3,
+    [C_Pahrak] = 5,
+    [C_Kohrak] = 4,
+    [C_Lehvak] = 4
+  }
+  
+  if #OppGrave()==0 or bit32.band(OppGrave()[1].type,TYPE_MONSTER)==0 then -- No destruction effect for Gahlok
+    PriorityVals[C_Gahlok] = 0
+  end
+  
+  --Maybe better approach: First determine priority values, then just build one array based on those
+  for i=1,#DangerIDs do
+    if HasID(OppST(),DangerIDs[i],true,FilterPosition,POS_FACEUP) then
+      PriorityVals[C_Tahnok] = 0
+      PriorityVals[C_Nuhvok] = 6
+      if #OppMon()>0 and CardsMatchingFilter(OppMon(),FilterAttackMax,1900)==0 then -- Pahrak will be able to use effect
+        PriorityVals[C_Pahrak] = 0
+      end
+      return InPriorityOrder(Cs_Bohrok,PriorityVals)
+    end
+    if HasID(OppMon(),DangerIDs[i],true,FilterPosition,POS_FACEUP) then
+      PriorityVals[C_Nuhvok] = 0
+      if #OppMon()>0 and CardsMatchingFilter(OppMon(),FilterAttackMax,1900)==0 then -- Pahrak will be able to use effect
+        PriorityVals[C_Pahrak] = 0
+      end
+      return InPriorityOrder(Cs_Bohrok,PriorityVals)
+    end
+  end
+  return false
+end
+function InPriorityOrder(t,prio)
+  ordered = {}
+  for i=1,#t do
+    if prio[t[i]] > 0 then
+      p=1
+      while ordered[p] ~= nil do
+        if prio[ordered[p]] < prio[t[i]] then
+          table.insert(ordered, p, nil)
+        else
+          p = p + 1
+        end
+      end
+      ordered[p] = t[i]
+    end
+  end
+  return ordered
+end
