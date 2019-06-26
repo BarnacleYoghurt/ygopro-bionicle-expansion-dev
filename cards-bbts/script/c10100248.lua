@@ -17,7 +17,7 @@ function c10100248.initial_effect(c)
   e2:SetRange(LOCATION_GRAVE)
   e2:SetTarget(c10100248.target2)
   e2:SetOperation(c10100248.operation2)
-  e1:SetCountLimit(1,10100248)
+  e2:SetCountLimit(1,10100248)
   c:RegisterEffect(e2)
 end
 function c10100248.filter1(c)

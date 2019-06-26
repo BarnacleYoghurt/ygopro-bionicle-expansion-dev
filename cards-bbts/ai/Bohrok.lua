@@ -106,7 +106,7 @@ end
 
 DECK_BOHROK = NewDeck("Bohrok",C_Beware,BohrokStartup) 
 
-BohrokActivateBlacklist = {C_Beware,C_Nest,C_WakeAll} --Merge({Cs_Monsters,Cs_Spells,Cs_Traps})
+BohrokActivateBlacklist = {C_Beware,C_Nest,C_WakeOne,C_WakeAll} --Merge({Cs_Monsters,Cs_Spells,Cs_Traps})
 BohrokSummonBlacklist = Merge({Cs_Bohrok}) -- Merge({Cs_Monsters})
 BohrokSetBlacklist=  Merge({Cs_Bohrok,Cs_BohrokVa}) -- Merge({Cs_Monsters,Cs_Spells,Cs_Traps})
 BohrokRepoBlacklist= Merge({Cs_Bohrok,Cs_BohrokVa}) -- Merge({Cs_Monsters})
@@ -169,12 +169,11 @@ function BohrokInit(cards)
     print("Activating Bohrok Nest.")
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-  -- Kohrak against indestructible
-  -- Lehvak/Gahlok(M) against untargetable
-  -- Nuhvok against S/T
-  -- Pahrak whenever possible
-  -- Tahnok only when no other possible
   if CanFlipBohrok(Rep) then
+    if HasID(Act,C_WakeOne,FilterPosition,POS_FACEDOWN) then
+      print("Before flipping Bohrok, You Wake One...")
+      return {COMMAND_ACTIVATE, CurrentIndex}
+    end
     print("Flippin' Bohrok.")
     return Repo()
   end
@@ -203,12 +202,22 @@ function BohrokInit(cards)
     print("Settin' Bohrok.")
     return {COMMAND_SET_MONSTER,CurrentIndex}
   end
-  -- MP2: If Bohrok set, set If You Wake One..., and, if present, ...You Wake Them All
   -- BP: If face-down Bohrok about to be attacked, activate set If You Wake One... (also do this before manual Flip)
+  if HasID(Act,C_WakeOne,FilterPosition,POS_FACEDOWN) then
+    local tc=Duel.GetAttackTarget()
+    if tc and tc:IsSetCard(0x15a) and tc:IsFacedown() then
+      print("Before Bohrok is attacked, You Wake One...")
+      return {COMMAND_ACTIVATE, CurrentIndex}
+    end
+  end
   -- EP: Search effect of If You Wake One...
+  if HasID(Act,C_WakeOne,WakeOneSearchCond) then
+    print("Search with If You Wake One...")
+    return {COMMAND_ACTIVATE, CurrentIndex}
+  end
   -- If no other way to Summon Bohrok available, do it via Krana
   -- Only activate ...You Wake Them All if you have at least 1 face-down Bohrok
-  if HasID(Act,C_WakeAll) and Archetype_Card_Count(0x15a,AIMon(),POS_FACEDOWN) > 0 then
+  if HasID(Act,C_WakeAll) and Archetype_Card_Count(AIMon(),0x15a,POS_FACEDOWN) > 0 then
     print("...You Wake Them All")
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
@@ -303,7 +312,6 @@ function UrgentRemovalNeeded()
     PriorityVals[C_Gahlok] = 0
   end
   
-  --Maybe better approach: First determine priority values, then just build one array based on those
   for i=1,#DangerIDs do
     if HasID(OppST(),DangerIDs[i],true,FilterPosition,POS_FACEUP) then
       PriorityVals[C_Tahnok] = 0
@@ -339,4 +347,7 @@ function InPriorityOrder(t,prio)
     end
   end
   return ordered
+end
+function WakeOneSearchCond(c)
+  return Duel.GetCurrentPhase(PHASE_END) or RemovalCheckCard(c)
 end
