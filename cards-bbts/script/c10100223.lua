@@ -37,7 +37,7 @@ function c10100223.target0(e,tp,eg,ep,ev,re,r,rp,chk)
 	e:SetLabel(0)
 	if Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and Duel.IsExistingMatchingCard(c10100223.filter0,tp,LOCATION_GRAVE,0,1,nil,e,tp) and Duel.SelectYesNo(tp,aux.Stringid(10100223,0)) then
 		e:SetLabel(1)
-		local g=Duel.GetMatchingGroup(c10100223.filter1,tp,LOCATION_GRAVE,0,nil,e,tp)
+		local g=Duel.GetMatchingGroup(c10100223.filter0,tp,LOCATION_GRAVE,0,nil,e,tp)
 		Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,g,1,0,0)
 	end
 end
@@ -50,8 +50,11 @@ function c10100223.operation0(e,tp,eg,ep,ev,re,r,rp)
 		end
 	end
 end
-function c10100223.filter1(c)
+function c10100223.filter1a(c)
 	return c:IsSetCard(0x15c) and c:IsFaceup()
+end
+function c10100223.filter1b(c,p)
+	return c:GetPreviousControler()==p
 end
 function c10100223.condition1(e,tp,eg,ep,ev,re,r,rp)
 	local rc=nil
@@ -64,10 +67,10 @@ function c10100223.condition1(e,tp,eg,ep,ev,re,r,rp)
 			rc=Duel.GetAttackTarget()
 		end
 	end
-	return rc and eg:IsExists(Card.GetPreviousControler,1,nil,1-tp) and rc:IsSetCard(0x15c)
+	return rc and eg:IsExists(c10100223.filter1b,1,nil,1-tp) and rc:IsSetCard(0x15c)
 end
 function c10100223.target1(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.IsExistingMatchingCard(c10100223.filter1,tp,LOCATION_MZONE,0,1,nil) end
+	if chk==0 then return Duel.IsExistingMatchingCard(c10100223.filter1a,tp,LOCATION_MZONE,0,1,nil) end
 end
 function c10100223.operation1(e,tp,eg,ep,ev,re,r,rp)
 	local e1=Effect.CreateEffect(e:GetHandler())
@@ -75,7 +78,7 @@ function c10100223.operation1(e,tp,eg,ep,ev,re,r,rp)
 	e1:SetCode(EFFECT_UPDATE_ATTACK)
 	e1:SetReset(RESET_EVENT+0x1fe0000+RESET_PHASE+PHASE_END)
 	e1:SetValue(400)
-	local g=Duel.GetMatchingGroup(c10100223.filter1,tp,LOCATION_MZONE,0,nil)
+	local g=Duel.GetMatchingGroup(c10100223.filter1a,tp,LOCATION_MZONE,0,nil)
 	local tc=g:GetFirst()
 	while tc do
 		tc:RegisterEffect(e1:Clone())

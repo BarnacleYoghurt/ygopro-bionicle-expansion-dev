@@ -46,7 +46,7 @@ function c10100247.cost1(e,tp,eg,ep,ev,re,r,rp,chk)
 end
 function c10100247.target1(e,tp,eg,ep,ev,re,r,rp,chk)
   if chk==0 then
-    return Duel.IsExistingMatchingCard(c10100247.filter1b, tp, LOCATION_HAND, 0, 1, nil, e, tp, e:GetLabelObject())
+    return Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and Duel.IsExistingMatchingCard(c10100247.filter1b, tp, LOCATION_HAND, 0, 1, nil, e, tp, e:GetLabelObject())
   end
   local g=Duel.GetMatchingGroup(c10100247.filter1b, tp, LOCATION_HAND, 0, nil, e, tp, e:GetLabelObject())
   Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON, g, 1, 0, 0)
