@@ -106,11 +106,11 @@ end
 
 DECK_BOHROK = NewDeck("Bohrok",C_Beware,BohrokStartup) 
 
-BohrokActivateBlacklist = {C_Beware,C_Nest,C_WakeOne,C_WakeAll} --Merge({Cs_Monsters,Cs_Spells,Cs_Traps})
+BohrokActivateBlacklist = Merge({Cs_Krana,{C_Beware,C_Nest,C_WakeOne,C_WakeAll}}) --Merge({Cs_Monsters,Cs_Spells,Cs_Traps})
 BohrokSummonBlacklist = Merge({Cs_Bohrok}) -- Merge({Cs_Monsters})
 BohrokSetBlacklist=  Merge({Cs_Bohrok,Cs_BohrokVa}) -- Merge({Cs_Monsters,Cs_Spells,Cs_Traps})
 BohrokRepoBlacklist= Merge({Cs_Bohrok,Cs_BohrokVa}) -- Merge({Cs_Monsters})
-BohrokUnchainable= {C_WakeAll} -- Merge({Cs_Traps,{C_Confrontation,C_BeforeTime}})
+BohrokUnchainable= {C_WakeOne,C_WakeAll} -- Merge({Cs_Traps,{C_Confrontation,C_BeforeTime}})
 
 
 BohrokPriorityList={                      
@@ -160,12 +160,14 @@ function BohrokInit(cards)
   local SetMon = cards.monster_setable_cards
   
   if HasID(Act,C_Beware) then --Always useful, therefore first priority (Possible exception: Planned plays will leave monster in GY that can be recovered)
-    --print(Act[CurrentIndex].description) --prints 0 --> set descriptions to distinguish effects!
     print("Beware the Swarm!")
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
-  if HasID(Act,C_Nest) then --Set up early for protection (shuffle effect should be before this even; TODO => Need descriptions!)
-    --print(Act[CurrentIndex].description)
+  if HasID(Act,C_Nest,false,nil,LOCATION_ONFIELD) then --Draw
+    print("Recycling via Bohrok Nest.")
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
+  if HasID(Act,C_Nest,false,nil,LOCATION_HAND) then --Set up early for protection
     print("Activating Bohrok Nest.")
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
@@ -182,6 +184,13 @@ function BohrokInit(cards)
   if SynchroCWComm then
     print("Taking a step as part of the Crystal Wing Combo.")
     return {SynchroCWComm,CurrentIndex}
+  end
+  --Equip Krana
+  for i=1,#Cs_Krana do
+    if HasID(Act,Cs_Krana[i],false,nil,LOCATION_HAND,ShouldEquipKrana) then
+    print("Equippin' Krana.")
+      return {COMMAND_ACTIVATE,CurrentIndex}
+    end
   end
   --Remove priority targets (Boxor etc)
   UrgentRemoval = UrgentRemovalNeeded()
@@ -230,6 +239,11 @@ function BohrokCard(cards,min,max,id,c)
     if HasID(cards,10100249) then -- Take out Boxor first
       return {CurrentIndex}
     end
+    local targetType=TARGET_DESTROY
+    if id == C_Kohrak then
+      targetType=TARGET_BANISH
+    end
+    return BestTarget(cards,1,targetType)
   end
 end
 
@@ -349,5 +363,13 @@ function InPriorityOrder(t,prio)
   return ordered
 end
 function WakeOneSearchCond(c)
-  return Duel.GetCurrentPhase(PHASE_END) or RemovalCheckCard(c)
+  return FilterPosition(c,POS_FACEUP) and Duel.GetCurrentPhase(PHASE_END) or RemovalCheckCard(c)
 end
+function ShouldEquipKrana(c)
+  return Duel.GetLocationCount(player_ai,LOCATION_SZONE) > 1 --Leave space in S/T Zone
+    and not HasID(AIST(),c.id,true) --Don't equip same Krana twice
+    and (c.id~=C_Yo or OppHasMonster()) --Don't use Yo when opp field is empty anyway
+    and (c.id~=C_Za or Archetype_Card_Count(AIMon(),0x15a,POS_FACEUP)>1) --Don't use Za if you have only 1 Bohrok
+    and (c.id~=C_Bo or CardsMatchingFilter(Merge({OppMon(),OppST()}),FilterPosition,POS_FACEDOWN)>0) --Don't use BO if opp has nothing face-down
+end
+    
