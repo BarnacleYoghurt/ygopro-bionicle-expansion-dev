@@ -21,6 +21,9 @@ function ExcludeId(t,excl)
   end
   return remainder
 end
+function DescOf(id,nr)
+  return id*16+nr
+end
 
 C_Tahnok = 10100201
 C_Gahlok= 10100202
@@ -77,9 +80,8 @@ function BohrokStartup(deck)
   deck.Card                 = BohrokCard
   deck.Chain                = BohrokChain
   deck.EffectYesNo          = BohrokEffectYesNo
-  --[[deck.Position             = ShaddollPosition
-  deck.YesNo                = ShaddollYesNo
-  deck.BattleCommand        = ShaddollBattleCommand
+  deck.YesNo                = BohrokYesNo
+  --[[deck.BattleCommand        = ShaddollBattleCommand
   deck.AttackTarget         = ShaddollAttackTarget
   deck.AttackBoost          = ShaddollAttackBoost
   deck.Tribute				      = ShaddollTribute
@@ -109,7 +111,7 @@ DECK_BOHROK = NewDeck("Bohrok",C_Beware,BohrokStartup)
 BohrokActivateBlacklist = Merge({Cs_Krana,{C_Beware,C_Nest,C_WakeOne,C_WakeAll,C_Invasion}}) --Merge({Cs_Monsters,Cs_Spells,Cs_Traps})
 BohrokSummonBlacklist = Merge({Cs_Bohrok}) -- Merge({Cs_Monsters})
 BohrokSetBlacklist=  Merge({Cs_Bohrok,Cs_BohrokVa}) -- Merge({Cs_Monsters,Cs_Spells,Cs_Traps})
-BohrokRepoBlacklist= Merge({Cs_Bohrok,Cs_BohrokVa}) -- Merge({Cs_Monsters})
+BohrokRepoBlacklist= Merge({}) -- Merge({Cs_Monsters})
 BohrokUnchainable= {C_WakeOne,C_WakeAll,C_Invasion} -- Merge({Cs_Traps,{C_Confrontation,C_BeforeTime}})
 
 
@@ -240,6 +242,10 @@ function BohrokInit(cards)
     print("...You Wake Them All")
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
+  if HasID(Act,C_Nest,FilterLocation,LOCATION_GRAVE) then --Destroy using Bohrok Nest
+    print("The nest has burst.")
+    return {COMMAND_ACTIVATE,CurrentIndex}
+  end
   print("Default to standard behavior")
 end
 function BohrokCard(cards,min,max,id,c) 
@@ -266,6 +272,13 @@ end
 function BohrokEffectYesNo(id, triggeringCard)
   if id==C_WakeOne then
     print("Summon Bohrok with If You Wake One...")
+    return 1
+  end
+end
+function BohrokYesNo(description_id)
+  print(description_id)
+  if description_id==DescOf(C_Invasion,0) then
+    print("Bohrok Invasion begins.")
     return 1
   end
 end
