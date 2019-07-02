@@ -237,13 +237,19 @@ function BohrokInit(cards)
     return {COMMAND_ACTIVATE, CurrentIndex}
   end
   -- If no other way to Summon Bohrok available, do it via Krana
+  for i=1,#Cs_Krana do
+    if HasID(Sum,Cs_Krana[i]) then
+      print("Preparing surprise Bohrok.")
+      return {COMMAND_SUMMON,CurrentIndex}
+    end
+    if HasID(Act,Cs_Krana[i],FilterLocation,LOCATION_MZONE) then
+      print("Surprise Bohrok.")
+      return {COMMAND_ACTIVATE,CurrentIndex}
+    end
+  end
   -- Only activate ...You Wake Them All if you have at least 1 face-down Bohrok
   if HasID(Act,C_WakeAll) and Archetype_Card_Count(AIMon(),0x15c,POS_FACEDOWN) > 0 then
     print("...You Wake Them All")
-    return {COMMAND_ACTIVATE,CurrentIndex}
-  end
-  if HasID(Act,C_Nest,FilterLocation,LOCATION_GRAVE) then --Destroy using Bohrok Nest
-    print("The nest has burst.")
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
   print("Default to standard behavior")
@@ -262,17 +268,32 @@ function BohrokCard(cards,min,max,id,c)
     end
     return BestTargets(cards,1,targetType)
   end
+  if id==C_Nest and FilterLocation(c,LOCATION_GRAVE) then
+    return BestTargets(cards,1,TARGET_DESTROY)
+  end
 end
 function BohrokChain(cards, only_chains_by_player, forced)
-  if HasID(cards,C_WakeOne,WakeOneSearchCond) then
+  if HasID(cards,C_WakeOne,WakeOneSearchCond) then --Search trap
     print("Search with If You Wake One...")
+    return 1,CurrentIndex
+  end
+  if HasIDNotNegated(cards,C_Vu,false,nil,LOCATION_SZONE,ChainNegation) then --Negate targeting effect with Vu
+    print("Literally Vu")
     return 1,CurrentIndex
   end
 end
 function BohrokEffectYesNo(id, triggeringCard)
-  if id==C_WakeOne then
+  if id==C_WakeOne then --Summon extra Bohrok
     print("Summon Bohrok with If You Wake One...")
     return 1
+  end
+  if id>=Cs_Krana[1] and id<=Cs_Krana[#Cs_Krana] and FilterLocation(triggeringCard,LOCATION_GRAVE) then --Steal with Krana
+    print("Yoinking that monster")
+    return 1
+  end
+  if id==C_Nest and FilterLocation(triggeringCard,LOCATION_GRAVE) then --Destroy using Bohrok Nest
+    print("The nest has burst.")
+    return {COMMAND_ACTIVATE,CurrentIndex}
   end
 end
 function BohrokYesNo(description_id)

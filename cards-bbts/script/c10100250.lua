@@ -118,7 +118,8 @@ function c10100250.filter4(c)
 end
 function c10100250.condition4(e,c)
   if c==nil then return true end
-	return Duel.GetLocationCount(c:GetControler(),LOCATION_MZONE)>0 and Duel.IsExistingMatchingCard(c10100250.filter4,c:GetControler(),LOCATION_MZONE,0,1,nil)
+  local mc=Duel.GetFieldGroupCount(c:GetControler(),LOCATION_MZONE,0)
+	return Duel.GetLocationCount(c:GetControler(),LOCATION_MZONE)>0 and mc>0 and Duel.IsExistingMatchingCard(c10100250.filter4,c:GetControler(),LOCATION_MZONE,0,mc,nil)
 end
 function c10100250.condition7(e)
   local ec=e:GetHandler():GetEquipTarget()

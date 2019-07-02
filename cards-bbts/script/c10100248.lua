@@ -3,7 +3,7 @@ function c10100248.initial_effect(c)
   --Search
   local e1=Effect.CreateEffect(c)
   e1:SetType(EFFECT_TYPE_IGNITION)
-  e1:SetRange(LOCATION_HAND)
+  e1:SetRange(LOCATION_HAND+LOCATION_MZONE)
   e1:SetCost(c10100248.cost1)
   e1:SetTarget(c10100248.target1)
   e1:SetOperation(c10100248.operation1)
