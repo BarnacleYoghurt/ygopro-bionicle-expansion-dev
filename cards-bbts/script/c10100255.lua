@@ -88,6 +88,7 @@ function c10100255.operation2(e,tp,eg,ep,ev,re,r,rp)
       local og=Duel.GetOperatedGroup()
       local mct=og:FilterCount(Card.IsPreviousLocation,nil,LOCATION_MZONE)
       if mct>0 then
+        Duel.BreakEffect()
         Duel.Damage(1-tp,1000*mct,REASON_EFFECT)
       end
     end
