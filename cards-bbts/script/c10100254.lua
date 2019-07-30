@@ -10,16 +10,17 @@ function c10100254.initial_effect(c)
   e1:SetCountLimit(1,10100254)
   c:RegisterEffect(e1)
 end
-function c10100254.filter1(c)
-  return c:IsType(TYPE_MONSTER) and c:IsSetCard(0x155) and c:IsAbleToRemove()
+function c10100254.filter1(c,e)
+  return c:IsType(TYPE_MONSTER) and c:IsSetCard(0x155) and c:IsAbleToRemove() and c:IsCanBeEffectTarget(e)
 end
 function c10100254.target1(e,tp,eg,ep,ev,re,r,rp,chk)
   if chk==0 then
-    return Duel.GetMatchingGroup(c10100254.filter1,tp,LOCATION_MZONE+LOCATION_GRAVE+LOCATION_HAND,0,nil):GetClassCount(Card.GetCode)>=6 
+    return Duel.GetMatchingGroup(c10100254.filter1,tp,LOCATION_MZONE+LOCATION_GRAVE+LOCATION_HAND,0,nil,e):GetClassCount(Card.GetCode)>=6 
+      and Duel.IsExistingMatchingCard(c10100254.filter1,tp,LOCATION_MZONE,0,2,nil,e)
       and Duel.IsExistingMatchingCard(Card.IsAbleToRemove,tp,LOCATION_ONFIELD,LOCATION_ONFIELD,1,nil)
   end
-  local g1=Duel.GetMatchingGroup(c10100254.filter1,tp,LOCATION_MZONE,0,nil)
-  local g2=Duel.GetMatchingGroup(c10100254.filter1,tp,LOCATION_MZONE+LOCATION_GRAVE+LOCATION_HAND,0,nil)
+  local g1=Duel.GetMatchingGroup(c10100254.filter1,tp,LOCATION_MZONE,0,nil,e)
+  local g2=Duel.GetMatchingGroup(c10100254.filter1,tp,LOCATION_MZONE+LOCATION_GRAVE+LOCATION_HAND,0,nil,e)
   local tg=Group.CreateGroup()
 	for i=1,6 do
 		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_REMOVE)
