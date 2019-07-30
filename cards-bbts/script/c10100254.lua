@@ -15,7 +15,7 @@ function c10100254.filter1a(c)
   return c:IsFaceup() and c:IsSetCard(0x155)
 end
 function c10100254.filter1b(c,g)
-  return c:IsSetCard(0x155) and c:IsAbleToRemove() and not g:IsExists(Card.IsCode,1,nil,c:GetCode())
+  return c:IsType(TYPE_MONSTER) and c:IsSetCard(0x155) and c:IsAbleToRemove() and not g:IsExists(Card.IsCode,1,nil,c:GetCode())
 end
 function c10100254.condition1(e,tp,eg,ep,ev,re,r,rp)
   return Duel.GetMatchingGroup(c10100254.filter1a,tp,LOCATION_MZONE,0,nil):GetClassCount(Card.GetCode)>=4

@@ -63,9 +63,9 @@ function c10100053.operation1(e,tp,eg,ep,ev,re,r,rp)
 		if not c:IsRelateToEffect(e) then return end
 		if Duel.GetLocationCount(tp,LOCATION_MZONE)<=0
 			or not Duel.IsPlayerCanSpecialSummonMonster(tp,10100053,0,0x155,0,0,6,RACE_ROCK,ATTRIBUTE_LIGHT) then return end
-		c:AddTrapMonsterAttribute(TYPE_NORMAL,ATTRIBUTE_LIGHT,RACE_ROCK,6,0,0)
-		Duel.SpecialSummon(c,0,tp,tp,true,false,POS_FACEUP)
-		c:TrapMonsterBlock()
+		c:AddMonsterAttribute(TYPE_NORMAL,ATTRIBUTE_LIGHT,RACE_ROCK,6,0,0)
+		Duel.SpecialSummonStep(c,0,tp,tp,true,false,POS_FACEUP)
+		c:AddMonsterAttributeComplete()
 		local e1=Effect.CreateEffect(c)
 		e1:SetType(EFFECT_TYPE_SINGLE)
 		e1:SetProperty(EFFECT_FLAG_SINGLE_RANGE)
@@ -73,6 +73,7 @@ function c10100053.operation1(e,tp,eg,ep,ev,re,r,rp)
 		e1:SetCode(EFFECT_INDESTRUCTABLE_EFFECT)
 		e1:SetValue(1)
 		c:RegisterEffect(e1)
+    Duel.SpecialSummonComplete()
 		activated=true
 	end
 	--Special Summon Toa
