@@ -20,6 +20,7 @@ function c10100257.initial_effect(c)
   e2:SetCondition(aux.exccon)
   e2:SetTarget(c10100257.target2)
   e2:SetOperation(c10100257.operation2)
+  e2:SetCountLimit(1,10100257)
   c:RegisterEffect(e2)
 end
 function c10100257.target1(e,tp,eg,ep,ev,re,r,rp,chk)
