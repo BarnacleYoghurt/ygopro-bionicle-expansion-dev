@@ -23,7 +23,7 @@ function c10100252.filter1a(c)
   return c:IsFaceup() and c:IsSetCard(0x15e)
 end
 function c10100252.filter1b(c,e,tp)
-  return c:IsSetCard(0x15e) and c:IsCanBeSpecialSummoned(e,SUMMON_TYPE_SPECIAL,tp,false,false)
+  return c:IsSetCard(0x15e) and c:IsType(TYPE_SYNCHRO) and c:IsCanBeSpecialSummoned(e,SUMMON_TYPE_SPECIAL,tp,false,false)
 end
 function c10100252.condition1(e,tp,eg,ep,ev,re,r,rp)
   return Duel.IsExistingMatchingCard(c10100252.filter1a,tp,LOCATION_ONFIELD,0,1,nil)

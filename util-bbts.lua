@@ -178,7 +178,7 @@ end
 
 function BBTS.bohrokva_krana(baseC)
 	local function filter_1(c)
-		return c:IsSetCard(0x15d) and c:IsFaceup() and c:IsAbleToHand()
+		return c:IsType(TYPE_MONSTER) and c:IsSetCard(0x15d) and c:IsFaceup() and c:IsAbleToHand()
 	end
 	local function target_1(e,tp,eg,ep,ev,re,r,rp,chk)
 		if chk==0 then return Duel.IsExistingMatchingCard(filter_1,tp,LOCATION_REMOVED,0,1,nil) end

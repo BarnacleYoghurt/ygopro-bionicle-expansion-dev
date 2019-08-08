@@ -14,7 +14,7 @@ function c10100222.initial_effect(c)
 	c:RegisterEffect(e1)
 end
 function c10100222.filter1a(c)
-	return c:IsSetCard(0x15d) and c:IsAbleToGraveAsCost()
+	return c:IsSetCard(0x15d) and c:IsType(TYPE_MONSTER) and c:IsAbleToGraveAsCost()
 end
 function c10100222.filter1b(c)
 	return c:IsSetCard(0x15c) and c:IsFaceup()
