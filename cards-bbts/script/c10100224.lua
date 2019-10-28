@@ -21,9 +21,11 @@ function c10100224.initial_effect(c)
 	c:RegisterEffect(e1b)
 	--Recycle
 	local e2=Effect.CreateEffect(c)
-	e2:SetType(EFFECT_TYPE_IGNITION)
+	e2:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O)
 	e2:SetRange(LOCATION_FZONE)
-	e2:SetCost(c10100224.cost2)
+  e2:SetProperty(EFFECT_FLAG_DELAY)
+  e2:SetCode(EVENT_TO_DECK)
+	e2:SetCost(c10100224.condition2)
 	e2:SetTarget(c10100224.target2)
 	e2:SetOperation(c10100224.operation2)
 	e2:SetCountLimit(1)
@@ -45,10 +47,11 @@ end
 function c10100224.filter2(c)
 	return c:IsSetCard(0x15c) and c:IsAbleToDeckAsCost()
 end
-function c10100224.cost2(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.IsExistingMatchingCard(c10100224.filter2,tp,LOCATION_GRAVE,0,1,nil) end
-	local g=Duel.SelectMatchingCard(tp,c10100224.filter2,tp,LOCATION_GRAVE,0,1,1,nil)
-	Duel.SendtoDeck(g,nil,2,REASON_COST)
+function c10100224.filter2(c,tp)
+  return c:IsSetCard(0x15c) and c:GetOwner() == tp
+end
+function c10100224.condition2(e,tp,eg,ep,ev,re,r,rp)
+	return eg:IsExists(c10100224.filter2,1,nil,tp)
 end
 function c10100224.target2(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsPlayerCanDraw(tp,1) end

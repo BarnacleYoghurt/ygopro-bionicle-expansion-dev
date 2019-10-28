@@ -96,4 +96,7 @@ function c10100202.operation2(e,tp,eg,ep,ev,re,r,rp)
 			Duel.Remove(sg,POS_FACEUP,REASON_EFFECT)
 		end
 	end
+  --To deck
+  local e1=bbts.bohrok_shuffledelayed(c)
+  Duel.RegisterEffect(e1,tp)
 end

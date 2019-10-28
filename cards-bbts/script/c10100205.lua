@@ -11,6 +11,7 @@ function c10100205.initial_effect(c)
 	e2:SetCategory(CATEGORY_REMOVE)
 	e2:SetType(EFFECT_TYPE_IGNITION)
 	e2:SetRange(LOCATION_MZONE)
+	e2:SetCondition(c10100205.condition2)
 	e2:SetCost(c10100205.cost2)
 	e2:SetTarget(c10100205.target2)
 	e2:SetOperation(c10100205.operation2)
@@ -37,14 +38,13 @@ end
 function c10100205.filter2(c)
 	return c:IsFaceup() and c:IsAbleToRemove()
 end
+function c10100205.condition2(e,tp,eg,ep,ev,re,r,rp)
+	return e:GetHandler():GetAttackAnnouncedCount()==0
+end
 function c10100205.cost2(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return e:GetHandler():GetAttackAnnouncedCount()==0 end
-	local e1=Effect.CreateEffect(e:GetHandler())
-	e1:SetType(EFFECT_TYPE_SINGLE)
-	e1:SetCode(EFFECT_CANNOT_ATTACK)
-	e1:SetProperty(EFFECT_FLAG_CANNOT_DISABLE+EFFECT_FLAG_OATH)
-	e1:SetReset(RESET_EVENT+0x1fe0000+RESET_PHASE+PHASE_END)
-	e:GetHandler():RegisterEffect(e1)
+  local c=e:GetHandler()
+	if chk==0 then return c:IsAbleToDeckAsCost() end
+	Duel.SendtoDeck(c,tp,2,REASON_COST)
 end
 function c10100205.target2(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingTarget(c10100205.filter2,tp,0,LOCATION_ONFIELD,1,nil) end
@@ -52,9 +52,8 @@ function c10100205.target2(e,tp,eg,ep,ev,re,r,rp,chk)
 	Duel.SetOperationInfo(0,CATEGORY_REMOVE,tg,1,0,0)
 end
 function c10100205.operation2(e,tp,eg,ep,ev,re,r,rp)
-	local c=e:GetHandler()
 	local tc=Duel.GetFirstTarget()
-	if c:IsRelateToEffect(e) and tc:IsRelateToEffect(e) then
+	if tc:IsRelateToEffect(e) then
 		Duel.Remove(tc,POS_FACEUP,REASON_EFFECT)
 	end
 end

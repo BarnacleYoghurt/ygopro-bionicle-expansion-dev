@@ -49,10 +49,13 @@ function c10100203.operation2(e,tp,eg,ep,ev,re,r,rp)
 		e1:SetRange(LOCATION_MZONE)
 		e1:SetCode(EFFECT_DISABLE_FIELD)
 		e1:SetOperation(c10100203.operation2_1)
-		e1:SetReset(RESET_EVENT+0x1ff0000)
+		e1:SetReset(RESET_PHASE+PHASE_STANDBY,2)
 		e1:SetLabel(seq)
-		e:GetHandler():RegisterEffect(e1)
+		Duel.RegisterEffect(e1,tp)
 	end
+  --To Deck
+  local e1=bbts.bohrok_shuffledelayed(c)
+  Duel.RegisterEffect(e1,tp)
 end
 function c10100203.operation2_1(e,tp)
 	return bit.lshift(0x1,e:GetLabel()+24)

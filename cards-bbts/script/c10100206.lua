@@ -37,5 +37,8 @@ function c10100206.operation2(e,tp,eg,ep,ev,re,r,rp)
 			Duel.ChangePosition(c,POS_FACEUP_DEFENSE)
 		end
 	end
+  --To Deck
+  local e1=bbts.bohrok_shuffledelayed(c)
+  Duel.RegisterEffect(e1,tp)
 end
 

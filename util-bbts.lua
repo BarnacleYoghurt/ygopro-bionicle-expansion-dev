@@ -1,6 +1,6 @@
 BBTS={}
 bbts=BBTS
---Bohrok Flip
+--Bohrok
 function BBTS.bohrok_flip(baseC)
   local function filter(c,e,tp)
     return c:IsSetCard(0x15c) and c:GetLevel()==4 and not c:IsCode(baseC:GetCode()) and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
@@ -26,6 +26,27 @@ function BBTS.bohrok_flip(baseC)
 	e:SetProperty(EFFECT_FLAG_DELAY)
 	e:SetTarget(target)
 	e:SetOperation(operation)
+	return e
+end
+function BBTS.bohrok_shuffledelayed(baseC)
+  local function condition(e,tp,eg,ep,ev,re,r,rp)
+    local c=e:GetHandler()
+    return c:IsFaceup() and c:GetFlagEffectLabel(baseC:GetCode())==e:GetLabel()
+  end
+  local function operation(e,tp,eg,ep,ev,re,r,rp)
+    Duel.SendtoDeck(e:GetHandler(),tp,2,REASON_EFFECT)
+  end
+  local fid=baseC:GetFieldID()
+  baseC:RegisterFlagEffect(baseC:GetCode(),RESET_EVENT+0x1fe0000+RESET_PHASE+PHASE_END,0,1,fid)
+  local e=Effect.CreateEffect(baseC)
+  e:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
+  e:SetCode(EVENT_PHASE+PHASE_END)
+  e:SetProperty(EFFECT_FLAG_IGNORE_IMMUNE)
+  e:SetCondition(condition)
+  e:SetOperation(operation)
+  e:SetLabel(fid)
+  e:SetReset(RESET_PHASE+PHASE_END)
+  e:SetCountLimit(1)
 	return e
 end
 --Krana

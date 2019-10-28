@@ -8,14 +8,15 @@ function c10100204.initial_effect(c)
   c:RegisterEffect(e1)
 	--Block effects during battle
 	local e2=Effect.CreateEffect(c)
-	e2:SetType(EFFECT_TYPE_FIELD)
-	e2:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
-	e2:SetCode(EFFECT_CANNOT_ACTIVATE)
+  e2:SetCode(EFFECT_CANNOT_BE_EFFECT_TARGET)
+	e2:SetType(EFFECT_TYPE_SINGLE)
 	e2:SetRange(LOCATION_MZONE)
-	e2:SetTargetRange(0,1)
-	e2:SetValue(c10100204.value2)
+	e2:SetValue(aux.tgoval)
 	e2:SetCondition(c10100204.condition2)
 	c:RegisterEffect(e2)
+  local e2a=e2:Clone()
+	e2a:SetCode(EFFECT_INDESTRUCTABLE_EFFECT)
+  c:RegisterEffect(e2a)
 	--Destroy
 	local e3=Effect.CreateEffect(c)
 	e3:SetCategory(CATEGORY_DESTROY)
@@ -24,6 +25,7 @@ function c10100204.initial_effect(c)
 	e3:SetRange(LOCATION_MZONE)
 	e3:SetProperty(EFFECT_FLAG_TARGET)
 	e3:SetCondition(c10100204.condition3)
+  e3:SetCost(c10100204.cost3)
 	e3:SetTarget(c10100204.target3)
 	e3:SetOperation(c10100204.operation3)
 	e3:SetCountLimit(1)
@@ -46,8 +48,8 @@ function c10100204.operation1(e,tp,eg,ep,ev,re,r,rp)
 		Duel.ConfirmCards(1-tp,g)
 	end
 end
-function c10100204.value2(e,re,tp)
-	return not re:GetHandler():IsImmuneToEffect(e)
+function c10100204.value2a(e,re,rp)
+	return re:GetHandlerPlayer()~=e:GetHandler()
 end
 function c10100204.condition2(e)
 	return Duel.GetAttacker()==e:GetHandler() or Duel.GetAttackTarget()==e:GetHandler()
@@ -55,15 +57,19 @@ end
 function c10100204.condition3(e,tp,eg,ep,ev,re,r,rp)
 	return e:GetHandler():GetBattledGroupCount()>0
 end
+function c10100204.cost3(e,tp,eg,ep,ev,re,r,rp,chk)
+  local c=e:GetHandler()
+	if chk==0 then return c:IsAbleToDeckAsCost() end
+	Duel.SendtoDeck(c,tp,2,REASON_COST)
+end
 function c10100204.target3(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingTarget(Card.IsDestructable,tp,0,LOCATION_ONFIELD,1,nil) end
 	local tg=Duel.SelectTarget(tp,Card.IsDestructable,tp,0,LOCATION_ONFIELD,1,1,nil)
 	Duel.SetOperationInfo(0,CATEGORY_DESTROY,tg,1,0,0)
 end
 function c10100204.operation3(e,tp,eg,ep,ev,re,r,rp)
-	local c=e:GetHandler()
 	local tc=Duel.GetFirstTarget()
-	if c:IsRelateToEffect(e) and tc:IsRelateToEffect(e) then 
+	if tc:IsRelateToEffect(e) then 
 		Duel.Destroy(tc,REASON_EFFECT)
 	end
 end
