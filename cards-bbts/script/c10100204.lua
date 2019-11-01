@@ -25,7 +25,6 @@ function c10100204.initial_effect(c)
 	e3:SetRange(LOCATION_MZONE)
 	e3:SetProperty(EFFECT_FLAG_TARGET)
 	e3:SetCondition(c10100204.condition3)
-  e3:SetCost(c10100204.cost3)
 	e3:SetTarget(c10100204.target3)
 	e3:SetOperation(c10100204.operation3)
 	e3:SetCountLimit(1)
@@ -57,11 +56,6 @@ end
 function c10100204.condition3(e,tp,eg,ep,ev,re,r,rp)
 	return e:GetHandler():GetBattledGroupCount()>0
 end
-function c10100204.cost3(e,tp,eg,ep,ev,re,r,rp,chk)
-  local c=e:GetHandler()
-	if chk==0 then return c:IsAbleToDeckAsCost() end
-	Duel.SendtoDeck(c,tp,2,REASON_COST)
-end
 function c10100204.target3(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingTarget(Card.IsDestructable,tp,0,LOCATION_ONFIELD,1,nil) end
 	local tg=Duel.SelectTarget(tp,Card.IsDestructable,tp,0,LOCATION_ONFIELD,1,1,nil)
@@ -72,4 +66,7 @@ function c10100204.operation3(e,tp,eg,ep,ev,re,r,rp)
 	if tc:IsRelateToEffect(e) then 
 		Duel.Destroy(tc,REASON_EFFECT)
 	end
+  --To deck
+  local e1=bbts.bohrok_shuffledelayed(e:GetHandler())
+  Duel.RegisterEffect(e1, tp)
 end

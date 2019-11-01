@@ -34,7 +34,7 @@ function BBTS.bohrok_shuffledelayed(baseC)
     return c:IsFaceup() and c:GetFlagEffectLabel(baseC:GetCode())==e:GetLabel()
   end
   local function operation(e,tp,eg,ep,ev,re,r,rp)
-    Duel.SendtoDeck(e:GetHandler(),tp,2,REASON_EFFECT)
+    Duel.SendtoDeck(e:GetHandler(),nil,2,REASON_EFFECT)
   end
   local fid=baseC:GetFieldID()
   baseC:RegisterFlagEffect(baseC:GetCode(),RESET_EVENT+0x1fe0000+RESET_PHASE+PHASE_END,0,1,fid)

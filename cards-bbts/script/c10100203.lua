@@ -35,22 +35,23 @@ function c10100203.operation1(e,tp,eg,ep,ev,re,r,rp)
 	end
 end
 function c10100203.target2(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.IsExistingTarget(Card.IsDestructable,tp,0,LOCATION_SZONE,1,nil) end
-	local tg=Duel.SelectTarget(tp,Card.IsDestructable,tp,0,LOCATION_SZONE,1,1,nil)
+	if chk==0 then return Duel.IsExistingTarget(Card.IsDestructable,tp,LOCATION_SZONE,LOCATION_SZONE,1,nil) end
+	local tg=Duel.SelectTarget(tp,Card.IsDestructable,tp,LOCATION_SZONE,LOCATION_SZONE,1,1,nil)
 	Duel.SetOperationInfo(0,CATEGORY_DESTROY,tg,1,0,0)
 end
 function c10100203.operation2(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
 	local tc=Duel.GetFirstTarget()
 	local seq=tc:GetSequence()
-	if c:IsRelateToEffect(e) and tc:IsRelateToEffect(e) and Duel.Destroy(tc,REASON_EFFECT) then
+  local tcp=tc:GetControler()
+	if c:IsRelateToEffect(e) and tc:IsRelateToEffect(e) and Duel.Destroy(tc,REASON_EFFECT) and seq<5 then
 		local e1=Effect.CreateEffect(e:GetHandler())
 		e1:SetType(EFFECT_TYPE_FIELD)
 		e1:SetRange(LOCATION_MZONE)
 		e1:SetCode(EFFECT_DISABLE_FIELD)
 		e1:SetOperation(c10100203.operation2_1)
 		e1:SetReset(RESET_PHASE+PHASE_STANDBY,2)
-		e1:SetLabel(seq)
+		e1:SetLabel(seq+8+(tcp-tp)*16)
 		Duel.RegisterEffect(e1,tp)
 	end
   --To Deck
@@ -58,5 +59,5 @@ function c10100203.operation2(e,tp,eg,ep,ev,re,r,rp)
   Duel.RegisterEffect(e1,tp)
 end
 function c10100203.operation2_1(e,tp)
-	return bit.lshift(0x1,e:GetLabel()+24)
+	return bit.lshift(0x1,e:GetLabel())
 end
