@@ -20,48 +20,16 @@ function c10100211.initial_effect(c)
 	--Revive
 	local e3=bbts.krana_revive(c)
 	c:RegisterEffect(e3)
-	--Return
-	local e4=Effect.CreateEffect(c)
-	e4:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
-	e4:SetCode(EVENT_TO_GRAVE)
-	e4:SetCondition(c10100211.condition4)
-	e4:SetTarget(c10100211.target4)
-	e4:SetOperation(c10100211.operation4)
-	c:RegisterEffect(e4)
-	--Summon
-	local e5=bbts.krana_summon(c)
-	c:RegisterEffect(e5)
-end
-function c10100211.filter2(c,tp)
-	return c:IsFaceup() and c:IsSetCard(0x15c) and c:IsDestructable()
 end
 function c10100211.target2(e,tp,eg,ep,ev,re,r,rp,chk)
 	local ec = e:GetHandler():GetEquipTarget()
-	if chk==0 then return Duel.IsExistingMatchingCard(c10100211.filter2,tp,LOCATION_MZONE,0,1,ec) end
+	if chk==0 then return Duel.IsExistingMatchingCard(Card.IsAbleToDeck,tp,LOCATION_MZONE,0,1,ec) end
 	return Duel.SelectYesNo(tp,aux.Stringid(10100023,3))
 end
 function c10100211.operation2(e,tp,eg,ep,ev,re,r,rp)
 	local ec = e:GetHandler():GetEquipTarget()
-	local g = Duel.SelectMatchingCard(tp,c10100211.filter2,tp,LOCATION_MZONE,0,1,1,ec)
+	local g = Duel.SelectMatchingCard(tp,Card.IsAbleToDeck,tp,LOCATION_MZONE,0,1,1,ec)
 	if g:GetCount() > 0 then
-		Duel.Destroy(g,REASON_EFFECT)
-	end
-end
-function c10100211.filter4(c)
-	return c:IsSetCard(0x15c) and c:IsAbleToHand()
-end
-function c10100211.condition4(e,tp,eg,ep,ev,re,r,rp)
-	return e:GetHandler():IsPreviousLocation(LOCATION_ONFIELD)
-end
-function c10100211.target4(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.IsExistingMatchingCard(c10100211.filter4,tp,LOCATION_GRAVE,0,1,nil) end
-	local g = Duel.GetMatchingGroup(c10100211.filter4,tp,LOCATION_GRAVE,0,nil)
-	Duel.SetOperationInfo(0,CATEGORY_ATOHAND,g,1,0,0)
-end
-function c10100211.operation4(e,tp,eg,ep,ev,re,r,rp)
-	local g = Duel.SelectMatchingCard(tp,c10100211.filter4,tp,LOCATION_GRAVE,0,1,1,nil)
-	if g:GetCount()>0 then
-		Duel.SendtoHand(g,nil,REASON_EFFECT)
-		Duel.ConfirmCards(1-tp,g)
+		Duel.SendtoDeck(g,nil,2,REASON_EFFECT)
 	end
 end

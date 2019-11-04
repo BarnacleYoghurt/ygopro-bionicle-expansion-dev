@@ -127,6 +127,7 @@ function BBTS.krana_revive(baseC)
 	e:SetCost(cost)
 	e:SetTarget(target)
 	e:SetOperation(operation)
+  e:SetCountLimit(1,baseC:GetCode())
 	return e
 end
 function BBTS.krana_summon(baseC)

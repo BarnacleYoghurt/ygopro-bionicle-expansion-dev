@@ -20,7 +20,4 @@ function c10100210.initial_effect(c)
 	--Revive
 	local e3=bbts.krana_revive(c)
 	c:RegisterEffect(e3)
-	--Summon
-	local e4=bbts.krana_summon(c)
-	c:RegisterEffect(e4)
 end

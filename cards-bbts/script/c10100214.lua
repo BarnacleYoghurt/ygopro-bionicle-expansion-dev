@@ -3,32 +3,45 @@ if not bbts then
 end
 --Krana Bo, Sentinel
 function c10100214.initial_effect(c)
-	--Equip
-	local e1=bbts.krana_equip(c)
-	c:RegisterEffect(e1)
-	--Check set
-	local e2=Effect.CreateEffect(c)
-	e2:SetType(EFFECT_TYPE_QUICK_O)
-	e2:SetRange(LOCATION_SZONE)
-	e2:SetCode(EVENT_FREE_CHAIN)
-	e2:SetCondition(bbts.krana_condition_equipped)
-	e2:SetTarget(c10100214.target2)
-	e2:SetOperation(c10100214.operation2)
-	e2:SetCountLimit(1)
-	c:RegisterEffect(e2)
+	--Banish in the dark
+	local e1a=Effect.CreateEffect(c)
+	e1a:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O)
+	e1a:SetRange(LOCATION_HAND)
+  e1a:SetProperty(EFFECT_FLAG_DELAY)
+	e1a:SetCode(EVENT_DESTROYED)
+	e1a:SetCondition(c10100214.condition1)
+	e1a:SetCost(c10100214.cost1)
+	e1a:SetTarget(c10100214.target1)
+	e1a:SetOperation(c10100214.operation1)
+	e1a:SetCountLimit(1,10100214)
+	c:RegisterEffect(e1a)
+  local e1b=e1a:Clone()
+  e1b:SetCode(EVENT_REMOVE)
+	c:RegisterEffect(e1b)
 	--Revive
-	local e3=bbts.krana_revive(c)
-	c:RegisterEffect(e3)
-	--Summon
-	local e4=bbts.krana_summon(c)
-	c:RegisterEffect(e4)
+	local e2=bbts.krana_revive(c)
+	c:RegisterEffect(e2)
 end
-function c10100214.target2(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.IsExistingMatchingCard(Card.IsFacedown,tp,0,LOCATION_ONFIELD,1,nil) end
+function c10100214.filter1(c,ec)
+  return c:IsCode(ec:GetCode()) and c:IsAbleToRemove()
 end
-function c10100214.operation2(e,tp,eg,ep,ev,re,r,rp)
-	if e:GetHandler():IsRelateToEffect(e) then
-		local cg=Duel.GetMatchingGroup(Card.IsFacedown,tp,0,LOCATION_ONFIELD,nil)
-		Duel.ConfirmCards(tp,cg)
-	end
+function c10100214.condition1(e,tp,eg,ep,ev,re,r,rp)
+	return re and re:GetHandler():IsSetCard(0x15c) and eg:GetCount()==1
+end
+function c10100214.cost1(e,tp,eg,ep,ev,re,r,rp,chk)
+  local c=e:GetHandler()
+	if chk==0 then return c:IsAbleToGraveAsCost() end
+  Duel.SendtoGrave(c,REASON_COST)
+end
+function c10100214.target1(e,tp,eg,ep,ev,re,r,rp,chk)
+	if chk==0 then return Duel.GetFieldGroupCount(tp,0,LOCATION_HAND)>0 end
+end
+function c10100214.operation1(e,tp,eg,ep,ev,re,r,rp)
+	local ec=eg:GetFirst()
+  local tg=Duel.GetFieldGroup(tp,0,LOCATION_HAND)
+  Duel.ConfirmCards(tp,tg)
+  tg=tg:Filter(c10100214.filter1,nil,ec)
+  if tg:GetCount()>0 then
+    Duel.Remove(tg,POS_FACEDOWN,REASON_EFFECT)
+  end
 end

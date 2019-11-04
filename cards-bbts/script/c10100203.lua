@@ -43,15 +43,16 @@ function c10100203.operation2(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
 	local tc=Duel.GetFirstTarget()
 	local seq=tc:GetSequence()
-  local tcp=tc:GetControler()
 	if c:IsRelateToEffect(e) and tc:IsRelateToEffect(e) and Duel.Destroy(tc,REASON_EFFECT) and seq<5 then
+    local of = tc:GetControler()-tp
+    if of<0 then of = -of end --0 if own card, 1 if opponent's
 		local e1=Effect.CreateEffect(e:GetHandler())
 		e1:SetType(EFFECT_TYPE_FIELD)
 		e1:SetRange(LOCATION_MZONE)
 		e1:SetCode(EFFECT_DISABLE_FIELD)
 		e1:SetOperation(c10100203.operation2_1)
 		e1:SetReset(RESET_PHASE+PHASE_STANDBY,2)
-		e1:SetLabel(seq+8+(tcp-tp)*16)
+		e1:SetLabel(seq+8+of*16)
 		Duel.RegisterEffect(e1,tp)
 	end
   --To Deck

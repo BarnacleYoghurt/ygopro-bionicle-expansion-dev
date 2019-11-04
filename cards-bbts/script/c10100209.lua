@@ -21,12 +21,9 @@ function c10100209.initial_effect(c)
 	e3:SetCondition(c10100209.condition3)
 	e3:SetOperation(c10100209.operation3)
 	c:RegisterEffect(e3)
-	--Revive
-	local e4=bbts.krana_revive(c)
-	c:RegisterEffect(e4)
 	--Summon
-	local e5=bbts.krana_summon(c)
-	c:RegisterEffect(e5)
+	local e4=bbts.krana_summon(c)
+	c:RegisterEffect(e4)
 end
 function c10100209.condition3(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler():GetEquipTarget()

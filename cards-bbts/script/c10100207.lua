@@ -3,30 +3,69 @@ if not bbts then
 end
 --Krana Xa, Swarm Commander
 function c10100207.initial_effect(c)
-	--Equip
-	local e1=bbts.krana_equip(c)
+	--Negate
+	local e1=Effect.CreateEffect(c)
+	e1:SetType(EFFECT_TYPE_QUICK_O)
+	e1:SetRange(LOCATION_HAND)
+	e1:SetCode(EVENT_CHAINING)
+  e1:SetCost(c10100207.cost1)
+  e1:SetCondition(c10100207.condition1)
+  e1:SetTarget(c10100207.target1)
+	e1:SetOperation(c10100207.operation1)
+	e1:SetCountLimit(1,10100207)
 	c:RegisterEffect(e1)
-	--Guard
-	local e2=Effect.CreateEffect(c)
-	e2:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
-	e2:SetRange(LOCATION_SZONE)
-	e2:SetCode(EVENT_CHAINING)
-	e2:SetCondition(bbts.krana_condition_equipped)
-	e2:SetOperation(c10100207.operation2)
-	e2:SetCountLimit(1)
-	c:RegisterEffect(e2)
-	--Revive
-	local e3=bbts.krana_revive(c)
-	c:RegisterEffect(e3)
 	--Summon
-	local e4=bbts.krana_summon(c)
-	c:RegisterEffect(e4)
+	local e2=bbts.krana_summon(c)
+	c:RegisterEffect(e2)
 end
-function c10100207.limit2(e,rp,tp)
-	return tp==rp
+function c10100207.filter1(c)
+  return c:IsSetCard(0x15c) and c:IsType(TYPE_MONSTER)
 end
-function c10100207.operation2(e,tp,eg,ep,ev,re,r,rp)
-	if re:GetHandler():IsType(TYPE_MONSTER) and re:GetHandler():IsSetCard(0x15c) then
-		Duel.SetChainLimit(c10100207.limit2)
-	end
+function c10100207.cost1(e,tp,eg,ep,ev,re,r,rp,chk)
+  local c=e:GetHandler()
+	if chk==0 then return c:IsAbleToGraveAsCost() end
+	Duel.SendtoGrave(c,REASON_COST)
+end
+function c10100207.condition1(e,tp,eg,ep,ev,re,r,rp)
+	local g=Group.CreateGroup()
+  for i=1,ev-1 do
+    local ce=Duel.GetChainInfo(i,CHAININFO_TRIGGERING_EFFECT)
+    if c10100207.filter1(ce:GetHandler()) then
+      return true
+    end
+  end
+  return false
+end
+function c10100207.target1(e,tp,eg,ep,ev,re,r,rp,chk)
+	local g=Group.CreateGroup()
+  for i=1,ev do
+    local ce=Duel.GetChainInfo(i,CHAININFO_TRIGGERING_EFFECT)
+    local tc=ce:GetHandler()
+    if tc:IsRelateToEffect(ce) and tc:IsFaceup() and Duel.IsChainDisablable(i) then
+      g:AddCard(ce:GetHandler())
+    end
+  end
+  if chk==0 then return g:GetCount()>0 end
+  Duel.SetOperationInfo(0,CATEGORY_DISABLE,g,g:GetCount(),0,0)
+end
+function c10100207.operation1(e,tp,eg,ep,ev,re,r,rp)
+  local c=e:GetHandler()
+  for i=1,ev do
+    local ce=Duel.GetChainInfo(i,CHAININFO_TRIGGERING_EFFECT)
+    local tc=ce:GetHandler()
+    if tc:IsRelateToEffect(ce) and tc:IsFaceup() and Duel.IsChainDisablable(i) then
+      Duel.NegateRelatedChain(tc,RESET_TURN_SET)
+      local e1=Effect.CreateEffect(c)
+      e1:SetType(EFFECT_TYPE_SINGLE)
+      e1:SetCode(EFFECT_DISABLE)
+      e1:SetReset(RESET_EVENT+0x1fe0000+RESET_PHASE+PHASE_END)
+      tc:RegisterEffect(e1)
+      local e2=Effect.CreateEffect(c)
+      e2:SetType(EFFECT_TYPE_SINGLE)
+      e2:SetCode(EFFECT_DISABLE_EFFECT)
+      e2:SetValue(RESET_TURN_SET)
+      e2:SetReset(RESET_EVENT+0x1fe0000+RESET_PHASE+PHASE_END)
+      tc:RegisterEffect(e2)
+      end
+  end
 end

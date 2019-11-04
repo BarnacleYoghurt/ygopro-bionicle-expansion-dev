@@ -3,46 +3,46 @@ if not bbts then
 end
 --Krana Ja, Scout
 function c10100213.initial_effect(c)
-	--Equip
-	local e1=bbts.krana_equip(c)
-	c:RegisterEffect(e1)
 	--Scout
-	local e2=Effect.CreateEffect(c)
-	e2:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_QUICK_O)
-	e2:SetRange(LOCATION_SZONE)
-	e2:SetCode(EVENT_FREE_CHAIN)
-	e2:SetCondition(bbts.krana_condition_equipped)
-	e2:SetTarget(c10100213.target2)
-	e2:SetOperation(c10100213.operation2)
-	e2:SetCountLimit(1)
-	c:RegisterEffect(e2)
-	--Revive
-	local e3=bbts.krana_revive(c)
-	c:RegisterEffect(e3)
+	local e1=Effect.CreateEffect(c)
+	e1:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_QUICK_O)
+	e1:SetRange(LOCATION_HAND)
+	e1:SetCode(EVENT_FREE_CHAIN)
+	e1:SetCost(c10100213.cost1)
+	e1:SetCondition(c10100213.condition1)
+	e1:SetOperation(c10100213.operation1)
+	e1:SetCountLimit(1,10100213)
+	c:RegisterEffect(e1)
 	--Summon
-	local e4=bbts.krana_summon(c)
-	c:RegisterEffect(e4)
+	local e2=bbts.krana_summon(c)
+	c:RegisterEffect(e2)
 end
-function c10100213.target2(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.IsExistingTarget(Card.IsFaceup,tp,0,LOCATION_ONFIELD,1,nil) end
-	Duel.SelectTarget(tp,Card.IsFaceup,tp,0,LOCATION_ONFIELD,1,1,nil)
+function c10100213.filter1(c)
+  return c:IsFaceup() and c:IsSetCard(0x15c)
 end
-function c10100213.operation2(e,tp,eg,ep,ev,re,r,rp)
-	local tc=Duel.GetFirstTarget()
-	if e:GetHandler():IsRelateToEffect(e) and tc:IsRelateToEffect(e) then
-		local e1=Effect.CreateEffect(e:GetHandler())
-		e1:SetType(EFFECT_TYPE_FIELD)
-		e1:SetCode(EFFECT_IMMUNE_EFFECT)
-		e1:SetTargetRange(LOCATION_MZONE,0)
-		e1:SetTarget(aux.TargetBoolFunction(Card.IsSetCard,0x15c))
-		e1:SetValue(c10100213.value2_1)
-		e1:SetReset(RESET_PHASE+PHASE_MAIN2,2)
-		e1:SetLabel(Duel.GetTurnCount()+1)
-		e1:SetLabelObject(tc)
-		Duel.RegisterEffect(e1,tp)
-	end
+function c10100213.cost1(e,tp,eg,ep,ev,re,r,rp,chk)
+  local c=e:GetHandler()
+	if chk==0 then return c:IsAbleToGraveAsCost() end
+	Duel.SendtoGrave(c,REASON_COST)
+end
+function c10100213.condition1(e,tp,eg,ep,ev,re,r,rp)
+	return Duel.IsExistingMatchingCard(c10100213.filter1, tp, LOCATION_MZONE, 0, 1, nil)
+end
+function c10100213.operation1(e,tp,eg,ep,ev,re,r,rp)
+  local g=Duel.GetMatchingGroup(Card.IsFaceup,tp,0,LOCATION_ONFIELD,nil)
+  g:KeepAlive()
+  local e1=Effect.CreateEffect(e:GetHandler())
+  e1:SetType(EFFECT_TYPE_FIELD)
+  e1:SetCode(EFFECT_IMMUNE_EFFECT)
+  e1:SetTargetRange(LOCATION_MZONE,0)
+  e1:SetTarget(aux.TargetBoolFunction(Card.IsSetCard,0x15c))
+  e1:SetValue(c10100213.value2_1)
+  e1:SetReset(RESET_PHASE+PHASE_END,2)
+  e1:SetLabel(Duel.GetTurnCount()+1)
+  e1:SetLabelObject(g)
+  Duel.RegisterEffect(e1,tp)
 end
 function c10100213.value2_1(e,re)
-	local ph=Duel.GetCurrentPhase()
-	return Duel.GetTurnCount()==e:GetLabel() and ph>=PHASE_BATTLE_START and ph<=PHASE_BATTLE and re:GetHandler() == e:GetLabelObject()
+  local g=e:GetLabelObject()
+	return Duel.GetTurnCount()==e:GetLabel() and g:IsExists(Card.IsCode,1,nil,re:GetHandler():GetCode())
 end
