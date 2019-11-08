@@ -15,6 +15,7 @@ function c10100221.initial_effect(c)
 	e2:SetCost(c10100221.cost2)
 	e2:SetTarget(c10100221.target2)
 	e2:SetOperation(c10100221.operation2)
+  e2:SetCountLimit(1,10100206)
 	c:RegisterEffect(e2)
 	--Return
 	local e3 = bbts.bohrokva_krana(c)
@@ -24,7 +25,7 @@ function c10100221.filter2(c)
 	return c:IsFaceup() and c:IsSetCard(0x15c)
 end
 function c10100221.condition2(e,tp,eg,ep,ev,re,r,rp)
-	return Duel.IsExistingMatchingCard(c10100221.filter2,tp,LOCATION_MZONE,0,1,e:GetHandler()) and rp==1-tp
+	return Duel.IsExistingMatchingCard(c10100221.filter2,tp,LOCATION_MZONE,0,1,e:GetHandler()) and re:IsHasType(EFFECT_TYPE_ACTIVATE) and rp==1-tp
 end
 function c10100221.cost2(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return e:GetHandler():IsReleasable() end

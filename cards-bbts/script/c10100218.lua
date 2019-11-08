@@ -16,7 +16,7 @@ function c10100218.initial_effect(c)
 	e2:SetCountLimit(1)
 	c:RegisterEffect(e2)
 	--Return
-	local e3=bbts.bohrokva_krana(c)
+	local e3=bbts.bohrokva_shuffle(c)
 	c:RegisterEffect(e3)
 end
 function c10100218.cost2(e,tp,eg,ep,ev,re,r,rp,chk)

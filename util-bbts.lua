@@ -236,6 +236,45 @@ function BBTS.bohrokva_krana(baseC)
 	e:SetOperation(operation)
 	return e
 end
+function BBTS.bohrokva_shuffle(baseC)
+	local function filter_1(c)
+		return c:IsType(TYPE_MONSTER) and c:IsSetCard(0x15c) and c:IsAbleToDeck() and not c:IsCode(baseC:GetCode())
+	end
+	local function target_1(e,tp,eg,ep,ev,re,r,rp,chk)
+		if chk==0 then return Duel.IsExistingMatchingCard(filter_1,tp,LOCATION_GRAVE,0,2,nil) and Duel.IsPlayerCanDraw(tp, 1) end
+		local g=Duel.GetMatchingGroup(filter_1,tp,LOCATION_GRAVE,0,nil)
+		Duel.SetOperationInfo(0,CATEGORY_TODECK,g,2,0,0)
+    Duel.SetOperationInfo(0,CATEGORY_DRAW,nil,0,tp,1)
+	end
+	local function operation_1(e,tp,eg,ep,ev,re,r,rp)
+		local g=Duel.SelectMatchingCard(tp,filter_1,tp,LOCATION_GRAVE,0,2,2,nil)
+		if g:GetCount()>1 and Duel.SendtoDeck(g,nil,2,REASON_EFFECT) then
+      Duel.BreakEffect()
+			Duel.Draw(tp,1,REASON_EFFECT)
+		end
+	end
+	local function operation(e,tp,eg,ep,ev,re,r,rp)
+		local c=e:GetHandler()
+		if c:IsPreviousLocation(LOCATION_ONFIELD) then
+			local e1=Effect.CreateEffect(c)
+			e1:SetCategory(CATEGORY_TODECK+CATEGORY_DRAW)
+			e1:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_F)
+			e1:SetCode(EVENT_PHASE+PHASE_END)
+			e1:SetRange(LOCATION_GRAVE)
+			e1:SetTarget(target_1)
+			e1:SetOperation(operation_1)
+			e1:SetCountLimit(1)
+			e1:SetReset(RESET_EVENT+0x1fe0000+RESET_PHASE+PHASE_END)
+			c:RegisterEffect(e1)
+		end
+	end
+	
+	local e=Effect.CreateEffect(baseC)
+	e:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_CONTINUOUS)
+	e:SetCode(EVENT_TO_GRAVE)
+	e:SetOperation(operation)
+	return e
+end
 --Bohrok Kaita
 function BBTS.bohrokkaita_krana(baseC)
 	local function filter(c)
