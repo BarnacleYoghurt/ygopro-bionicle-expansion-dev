@@ -24,6 +24,7 @@ function c10100232.initial_effect(c)
 	e2:SetCondition(c10100232.condition2)
 	e2:SetTarget(c10100232.target2)
 	e2:SetOperation(c10100232.operation2)
+	e2:SetCountLimit(1)
 	c:RegisterEffect(e2)
 	--Battle protect
 	local e3=Effect.CreateEffect(c)

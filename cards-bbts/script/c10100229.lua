@@ -28,16 +28,17 @@ function c10100229.filter2(c)
 end
 function c10100229.cost2(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingMatchingCard(c10100229.filter2,tp,LOCATION_GRAVE,0,1,nil) end
-	local g=Duel.SelectMatchingCard(tp,c10100229.filter2,tp,LOCATION_GRAVE,0,1,1,nil)
+	local g=Duel.SelectMatchingCard(tp,c10100229.filter2,tp,LOCATION_GRAVE,0,1,3,nil)
+  e:SetLabel(g:GetCount())
 	Duel.Remove(g,POS_FACEUP,REASON_COST)
 end
 function c10100229.target2(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingMatchingCard(Card.IsAbleToRemove,tp,0,LOCATION_GRAVE,1,nil) end
 	local g=Duel.GetMatchingGroup(Card.IsAbleToRemove,tp,0,LOCATION_GRAVE,nil)
-	Duel.SetOperationInfo(0,CATEGORY_REMOVE,g,2,0,0)
+	Duel.SetOperationInfo(0,CATEGORY_REMOVE,g,e:GetLabel(),0,0)
 end
 function c10100229.operation2(e,tp,eg,ep,ev,re,r,rp)
-	local g=Duel.SelectMatchingCard(tp,Card.IsAbleToRemove,tp,0,LOCATION_GRAVE,1,2,nil)
+	local g=Duel.SelectMatchingCard(tp,Card.IsAbleToRemove,tp,0,LOCATION_GRAVE,1,e:GetLabel()+1,nil)
 	if g:GetCount()>0 then
 		Duel.Remove(g,POS_FACEUP,REASON_EFFECT)
 	end

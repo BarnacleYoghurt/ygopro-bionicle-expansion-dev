@@ -15,15 +15,20 @@ function c10100231.initial_effect(c)
 	--Special Summon
 	local e3=Effect.CreateEffect(c)
 	e3:SetCategory(CATEGORY_SPECIAL_SUMMON)
-	e3:SetType(EFFECT_TYPE_IGNITION)
-	e3:SetRange(LOCATION_MZONE)
-	e3:SetCountLimit(1)
+	e3:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
+  e3:SetProperty(EFFECT_FLAG_DELAY)
+	e3:SetCode(EVENT_TO_GRAVE)
+	e3:SetCondition(c10100231.condition3)
 	e3:SetTarget(c10100231.target3)
 	e3:SetOperation(c10100231.operation3)
+	e3:SetCountLimit(1,10100231)
 	c:RegisterEffect(e3)
 end
 function c10100231.filter3(c,e,tp)
-	return c:IsSetCard(0x15c) and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
+	return c:IsSetCard(0x15c) and not c:IsCode(10100231) and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
+end
+function c10100231.condition3(e,tp,eg,ep,ev,re,r,rp)
+	return e:GetHandler():IsPreviousLocation(LOCATION_ONFIELD)
 end
 function c10100231.target3(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.GetLocationCount(tp,LOCATION_MZONE)>0

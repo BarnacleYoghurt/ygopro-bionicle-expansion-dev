@@ -292,27 +292,16 @@ function BBTS.bohrokkaita_krana(baseC)
 	end
 	local function operation(e,tp,eg,ep,ev,re,r,rp)
 		local c=e:GetHandler()
-		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_EQUIP)
+		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_ATOHAND)
 		local g=Duel.SelectMatchingCard(tp,filter,tp,LOCATION_DECK,0,1,3,nil)
 		if g:GetCount()>0 then
 			Duel.ConfirmCards(1-tp,g)
 			Duel.Hint(HINT_SELECTMSG,1-tp,HINTMSG_EQUIP)
 			local eg=g:Select(1-tp,1,1,nil)
 			if eg:GetCount()>0 then
-				local ec=eg:GetFirst()
-				if Duel.Equip(tp,ec,c,true) then
-					local function value_1(e,c)
-						return c==e:GetLabelObject()
-					end
-					local e1=Effect.CreateEffect(ec)
-					e1:SetType(EFFECT_TYPE_SINGLE)
-					e1:SetCode(EFFECT_EQUIP_LIMIT)
-					e1:SetValue(value_1)
-					e1:SetLabelObject(c)
-					e1:SetReset(RESET_EVENT+0x1fe0000)
-					ec:RegisterEffect(e1)
-					g:RemoveCard(ec)
-				end
+        if Duel.SendtoHand(eg,nil,REASON_EFFECT) then
+          g:RemoveCard(eg:GetFirst())
+        end
 			end
 			if g:GetCount()>0 then
 				Duel.SendtoGrave(g,REASON_EFFECT)

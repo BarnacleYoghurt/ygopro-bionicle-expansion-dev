@@ -9,14 +9,17 @@ function c10100233.initial_effect(c)
 	c:EnableReviveLimit()
 	--Flip
 	local e1=Effect.CreateEffect(c)
-	e1:SetType(EFFECT_TYPE_QUICK_O)
-	e1:SetCode(EVENT_FREE_CHAIN)
+	e1:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O)
+  e1:SetProperty(EFFECT_FLAG_DELAY)
+	e1:SetCode(EVENT_SUMMON_SUCCESS)
 	e1:SetRange(LOCATION_PZONE)
-	e1:SetProperty(EFFECT_FLAG_CARD_TARGET)
 	e1:SetCountLimit(1,10100233)
-	e1:SetTarget(c10100233.target1)
+	e1:SetCondition(c10100233.condition1)
 	e1:SetOperation(c10100233.operation1)
 	c:RegisterEffect(e1)
+  local e1b=e1:Clone()
+  e1b:SetCode(EVENT_SPSUMMON_SUCCESS)
+  c:RegisterEffect(e1b)
 	--Special Summon
 	local e2=Effect.CreateEffect(c)
 	e2:SetType(EFFECT_TYPE_IGNITION)
@@ -24,6 +27,7 @@ function c10100233.initial_effect(c)
 	e2:SetCondition(c10100233.condition2)
 	e2:SetTarget(c10100233.target2)
 	e2:SetOperation(c10100233.operation2)
+  e2:SetCountLimit(1)
 	c:RegisterEffect(e2)
 	--Effect Protect
 	local e3a=Effect.CreateEffect(c)
@@ -47,27 +51,30 @@ end
 function c10100233.filter1(c)
 	return c:IsSetCard(0x15c) and c:IsFaceup() and c:IsCanTurnSet()
 end
-function c10100233.target1(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.IsExistingTarget(c10100233.filter1,tp,LOCATION_MZONE,LOCATION_MZONE,1,nil) end
-	Duel.SelectTarget(tp,c10100233.filter1,tp,LOCATION_MZONE,LOCATION_MZONE,1,1,nil)
+function c10100233.condition1(e,tp,eg,ep,ev,re,r,rp)
+	return eg:IsExists(c10100233.filter1,1,nil)
 end
 function c10100233.operation1(e,tp,eg,ep,ev,re,r,rp)
-	local tc=Duel.GetFirstTarget()
-	if tc:IsRelateToEffect(e) and Duel.ChangePosition(tc,POS_FACEDOWN_DEFENSE) then
-		--Doesn't work properly - card remains indestructable after being flipped face-up
+	local g=eg:FilterSelect(tp,c10100233.filter1,1,1,nil)
+  local tc=g:GetFirst()
+	if Duel.ChangePosition(tc,POS_FACEDOWN_DEFENSE) then 
+    local rc=1
+    if Duel.GetTurnPlayer()==tp then
+      rc=2
+    end
 		local e1=Effect.CreateEffect(e:GetHandler())
 		e1:SetType(EFFECT_TYPE_SINGLE)
 		e1:SetCode(EFFECT_INDESTRUCTABLE_BATTLE)
 		e1:SetCondition(c10100233.condition1_1)
 		e1:SetValue(1)
-		e1:SetReset(RESET_EVENT+0x1fc0000+RESET_PHASE+PHASE_END)
+		e1:SetReset(RESET_EVENT+0x1fc0000+RESET_PHASE+PHASE_STANDBY,rc)
 		tc:RegisterEffect(e1)
 		local e2=Effect.CreateEffect(e:GetHandler())
 		e2:SetType(EFFECT_TYPE_SINGLE)
 		e2:SetCode(EFFECT_INDESTRUCTABLE_EFFECT)
 		e2:SetCondition(c10100233.condition1_2)
 		e2:SetValue(1)
-		e2:SetReset(RESET_EVENT+0x1fc0000+RESET_PHASE+PHASE_END)
+		e2:SetReset(RESET_EVENT+0x1fc0000+RESET_PHASE+PHASE_STANDBY,rc)
 		tc:RegisterEffect(e2)
 		--Check if face-down at start of Damage Step
 		local e3=Effect.CreateEffect(e:GetHandler())
@@ -75,7 +82,7 @@ function c10100233.operation1(e,tp,eg,ep,ev,re,r,rp)
 		e3:SetCode(EVENT_BATTLE_START)
 		e3:SetCondition(c10100233.condition1_3)
 		e3:SetOperation(c10100233.operation1_3)
-		e3:SetReset(RESET_EVENT+0x1fc0000+RESET_PHASE+PHASE_END)
+		e3:SetReset(RESET_EVENT+0x1fc0000+RESET_PHASE+PHASE_STANDBY,rc)
 		tc:RegisterEffect(e3)
 	end
 end

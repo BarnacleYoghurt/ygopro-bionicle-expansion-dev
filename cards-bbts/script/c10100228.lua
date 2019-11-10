@@ -36,13 +36,25 @@ function c10100228.cost2(e,tp,eg,ep,ev,re,r,rp,chk)
 end
 function c10100228.operation2(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
+  local ct=e:GetLabel()
 	if c:IsFaceup() and c:IsRelateToEffect(e) then
 		local e1=Effect.CreateEffect(c)
 		e1:SetType(EFFECT_TYPE_SINGLE)
 		e1:SetProperty(EFFECT_FLAG_COPY_INHERIT)
 		e1:SetCode(EFFECT_UPDATE_ATTACK)
-		e1:SetValue(e:GetLabel()*1000)
-		e1:SetReset(RESET_EVENT+0x1ff0000+RESET_PHASE+PHASE_END)
+		e1:SetValue(ct*1000)
+		e1:SetReset(RESET_EVENT+0x1fe0000+RESET_PHASE+PHASE_END)
 		c:RegisterEffect(e1)
+    if ct>1 then
+      local e2=Effect.CreateEffect(c)
+      e2:SetType(EFFECT_TYPE_SINGLE)
+      e2:SetCode(EFFECT_IMMUNE_EFFECT)
+      e2:SetValue(c10100228.value2_2)
+      e2:SetReset(RESET_EVENT+0x1fe0000+RESET_PHASE+PHASE_END)
+      c:RegisterEffect(e2)
+    end
 	end
+end
+function c10100228.value2_2(e,re)
+	return e:GetHandler()~=re:GetOwner()
 end

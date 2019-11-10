@@ -15,15 +15,20 @@ function c10100230.initial_effect(c)
 	--Search
 	local e3=Effect.CreateEffect(c)
 	e3:SetCategory(CATEGORY_TOHAND+CATEGORY_SEARCH)
-	e3:SetType(EFFECT_TYPE_IGNITION)
-	e3:SetRange(LOCATION_MZONE)
+	e3:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
+  e3:SetProperty(EFFECT_FLAG_DELAY)
+  e3:SetCode(EVENT_TO_GRAVE)
+  e3:SetCondition(c10100230.condition3)
 	e3:SetTarget(c10100230.target3)
 	e3:SetOperation(c10100230.operation3)
-	e3:SetCountLimit(1)
+	e3:SetCountLimit(1,10100230)
 	c:RegisterEffect(e3)
 end
 function c10100230.filter3(c)
 	return (c:IsSetCard(0x15c) or c:IsSetCard(0x15d)) and c:IsAbleToHand()
+end
+function c10100230.condition3(e,tp,eg,ep,ev,re,r,rp)
+	return e:GetHandler():IsPreviousLocation(LOCATION_ONFIELD)
 end
 function c10100230.target3(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingMatchingCard(c10100230.filter3,tp,LOCATION_DECK,0,1,nil) end
