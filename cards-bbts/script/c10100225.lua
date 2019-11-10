@@ -18,10 +18,10 @@ function c10100225.initial_effect(c)
 	c:RegisterEffect(e1)
 	--Relay
 	local e2=Effect.CreateEffect(c)
-	e2:SetType(EFFECT_TYPE_QUICK_O)
-	e2:SetCode(EVENT_FREE_CHAIN)
-	e2:SetRange(LOCATION_SZONE)
-	e2:SetCost(c10100225.cost2)
+	e2:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
+  e2:SetProperty(EFFECT_FLAG_DELAY)
+	e2:SetCode(EVENT_TO_GRAVE)
+	e2:SetCondition(c10100225.condition2)
 	e2:SetTarget(c10100225.target2)
 	e2:SetOperation(c10100225.operation2)
 	e2:SetCountLimit(1,11100225)
@@ -46,18 +46,38 @@ function c10100225.operation1(e,tp,eg,ep,ev,re,r,rp)
 		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
 		local g=Duel.SelectMatchingCard(tp,c10100225.filter1b,tp,LOCATION_DECK,0,1,1,nil,e,tp)
 		if g:GetCount() > 0 then
-			Duel.SpecialSummon(g,0,tp,tp,false,false,POS_FACEDOWN_DEFENSE)
-			Duel.ConfirmCards(1-tp,g)
+			if Duel.SpecialSummon(g,0,tp,tp,false,false,POS_FACEDOWN_DEFENSE) then
+        Duel.ConfirmCards(1-tp,g)
+        local c=e:GetHandler()
+        local fid=c:GetFieldID()
+        c:RegisterFlagEffect(10100225,RESET_EVENT+0x1fe0000+RESET_PHASE+PHASE_END,0,1,fid)
+        local e1=Effect.CreateEffect(e:GetHandler())
+        e1:SetType(EFFECT_TYPE_CONTINUOUS+EFFECT_TYPE_FIELD)
+        e1:SetCode(EVENT_PHASE+PHASE_END)
+        e1:SetProperty(EFFECT_FLAG_IGNORE_IMMUNE)
+        e1:SetCondition(c10100225.condition1_1)
+        e1:SetOperation(c10100225.operation1_1)
+        e1:SetLabel(fid)
+        e1:SetReset(RESET_PHASE+PHASE_END)
+        e1:SetCountLimit(1)
+        Duel.RegisterEffect(e1,tp)
+      end
 		end
 	end
+end 
+function c10100225.condition1_1(e,tp,eg,ep,ev,re,r,rp)
+    local c=e:GetHandler()
+    return c:IsFaceup() and c:GetFlagEffectLabel(10100225)==e:GetLabel()
+  end
+function c10100225.operation1_1(e,tp,eg,ep,ev,re,r,rp)
+	Duel.SendtoGrave(e:GetHandler(),REASON_EFFECT)
 end
 function c10100225.filter2(c)
-	return c:IsSetCard(0x15c) and c:IsType(TYPE_TRAP) and c:IsSSetable()
+	return c:IsSetCard(0x15c) and c:IsType(TYPE_TRAP) and not c:IsCode(10100225) and c:IsSSetable()
 end
-function c10100225.cost2(e,tp,eg,ep,ev,re,r,rp,chk)
-	local c=e:GetHandler()
-	if chk==0 then return c:IsAbleToGraveAsCost() end
-	Duel.SendtoGrave(c,REASON_COST)
+function c10100225.condition2(e,tp,eg,ep,ev,re,r,rp)
+  local c=e:GetHandler()
+  return c:IsPreviousLocation(LOCATION_ONFIELD) and c:IsPreviousPosition(POS_FACEUP)
 end
 function c10100225.target2(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingMatchingCard(c10100225.filter2,tp,LOCATION_DECK,0,1,nil) end

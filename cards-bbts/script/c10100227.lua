@@ -8,6 +8,18 @@ function c10100227.initial_effect(c)
 	e1:SetTarget(c10100227.target1)
 	e1:SetOperation(c10100227.operation1)
 	c:RegisterEffect(e1)
+  --Shuffle
+  local e2=Effect.CreateEffect(c)
+  e2:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O)
+  e2:SetProperty(EFFECT_FLAG_DELAY)
+  e2:SetRange(LOCATION_GRAVE)
+  e2:SetCode(EVENT_REMOVE)
+  e2:SetCondition(c10100227.condition2)
+  e2:SetCost(c10100227.cost2)
+  e2:SetTarget(c10100227.target2)
+  e2:SetOperation(c10100227.operation2)
+  e2:SetCountLimit(1,10100227)
+  c:RegisterEffect(e2)
 end
 function c10100227.filter1a(c,e)
 	return not c:IsImmuneToEffect(e)
@@ -66,26 +78,29 @@ function c10100227.operation1(e,tp,eg,ep,ev,re,r,rp)
 		end
 		tc:CompleteProcedure()
 	end
-	--End Phase effect
-	local e1_1=Effect.CreateEffect(e:GetHandler())
-	e1_1:SetCategory(CATEGORY_TOHAND)
-	e1_1:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_F)
-	e1_1:SetCode(EVENT_PHASE+PHASE_END)
-	e1_1:SetReset(RESET_PHASE+PHASE_END)
-	e1_1:SetCountLimit(1)
-	e1_1:SetTarget(c10100227.target1_1)
-	e1_1:SetOperation(c10100227.operation1_1)
-	Duel.RegisterEffect(e1_1,tp)
 end
-function c10100227.filter1_1(c)
-	return c:IsType(TYPE_MONSTER) and c:IsSetCard(0x15c) and c:IsAbleToHand()
+function c10100227.filter2(c,tp)
+  return c:IsPreviousLocation(LOCATION_GRAVE) and c:IsControler(tp) and c:IsSetCard(0x15c)
 end
-function c10100227.target1_1(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.IsExistingMatchingCard(c10100227.filter1_1,tp,LOCATION_GRAVE,0,1,nil) end
+function c10100227.condition2(e,tp,eg,ep,ev,re,r,rp)
+  return eg and eg:IsExists(c10100227.filter2,1,nil,tp)
 end
-function c10100227.operation1_1(e,tp,eg,ep,ev,re,r,rp)
-	local g=Duel.SelectMatchingCard(tp,c10100227.filter1_1,tp,LOCATION_GRAVE,0,1,1,nil)
-	if g:GetCount() > 0 then
-		Duel.SendtoHand(g,nil,REASON_EFFECT)
-	end
+function c10100227.cost2(e,tp,eg,ep,ev,re,r,rp,chk)
+  local c=e:GetHandler()
+  if chk==0 then return c:IsAbleToRemoveAsCost() end
+  Duel.Remove(c,POS_FACEUP,REASON_COST)
+end
+function c10100227.target2(e,tp,eg,ep,ev,re,r,rp,chk)
+  local sg=eg:Filter(c10100227.filter2,nil,tp):Filter(Card.IsAbleToDeck,nil)
+  if chk==0 then return sg:GetCount() > 0 and Duel.IsPlayerCanDraw(tp,1) end
+  Duel.SetOperationInfo(0,CATEGORY_TODECK,sg,sg:GetCount(),0,0)
+  Duel.SetOperationInfo(0,CATEGORY_DRAW,nil,0,tp,1)
+end
+function c10100227.operation2(e,tp,eg,ep,ev,re,r,rp)
+  local sg=eg:Filter(c10100227.filter2,nil,tp):Filter(Card.IsAbleToDeck,nil)
+  if sg:GetCount()>0 and Duel.SendtoDeck(sg,nil,2,REASON_EFFECT) then
+    if sg:IsExists(Card.IsLocation,1,nil,LOCATION_DECK) then Duel.ShuffleDeck(tp) end
+    Duel.BreakEffect()
+    Duel.Draw(tp,1,REASON_EFFECT)
+  end
 end

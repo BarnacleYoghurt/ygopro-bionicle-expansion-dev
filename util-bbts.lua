@@ -248,7 +248,8 @@ function BBTS.bohrokva_shuffle(baseC)
 	end
 	local function operation_1(e,tp,eg,ep,ev,re,r,rp)
 		local g=Duel.SelectMatchingCard(tp,filter_1,tp,LOCATION_GRAVE,0,2,2,nil)
-		if g:GetCount()>1 and Duel.SendtoDeck(g,nil,2,REASON_EFFECT) then
+		if g:GetCount()>1 and Duel.SendtoDeck(g,nil,2,REASON_EFFECT)>1 then
+      if g:IsExists(Card.IsLocation,1,nil,LOCATION_DECK) then Duel.ShuffleDeck(tp) end
       Duel.BreakEffect()
 			Duel.Draw(tp,1,REASON_EFFECT)
 		end
