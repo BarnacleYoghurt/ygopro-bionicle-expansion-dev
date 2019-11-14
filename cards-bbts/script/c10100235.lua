@@ -1,4 +1,4 @@
---Infernavika, Lava Bird Rahi
+  --Infernavika, Lava Bird Rahi
 function c10100235.initial_effect(c)
 	aux.EnablePendulumAttribute(c)
 	--Fiyah
@@ -6,8 +6,8 @@ function c10100235.initial_effect(c)
 	e1:SetDescription(aux.Stringid(10100235,0))
 	e1:SetProperty(EFFECT_FLAG_CARD_TARGET)
 	e1:SetRange(LOCATION_PZONE)
-	e1:SetType(EFFECT_TYPE_QUICK_O)
-	e1:SetCode(EVENT_FREE_CHAIN)
+	e1:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O)
+	e1:SetCode(EVENT_PHASE+PHASE_BATTLE_START)
 	e1:SetTarget(c10100235.target1)
 	e1:SetOperation(c10100235.operation1)
 	e1:SetCountLimit(1)

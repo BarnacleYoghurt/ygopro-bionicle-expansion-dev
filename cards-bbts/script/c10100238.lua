@@ -43,7 +43,7 @@ function c10100238.operation1(e,tp,eg,ep,ev,re,r,rp)
 	end
 end
 function c10100238.filter2(c)
-	return c:IsSetCard(0x15a) and not c:IsCode(10100238) and c:IsAbleToHand()
+	return c:IsSetCard(0x15a) and c:IsType(TYPE_PENDULUM) and not c:IsCode(10100238) and c:IsAbleToHand()
 end
 function c10100238.target2(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingMatchingCard(c10100238.filter2,tp,LOCATION_DECK+LOCATION_GRAVE,0,1,nil) end

@@ -15,14 +15,13 @@ function c10100237.initial_effect(c)
 	--Change BP
 	local e2=Effect.CreateEffect(c)
 	e2:SetDescription(aux.Stringid(10100237,1))
-	e2:SetCategory(CATEGORY_POSITION)
-	e2:SetProperty(EFFECT_FLAG_CARD_TARGET)
-	e2:SetType(EFFECT_TYPE_QUICK_O)
-	e2:SetCode(EVENT_FREE_CHAIN)
+	e2:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O)
+  e2:SetProperty(EFFECT_FLAG_DELAY)
+	e2:SetCode(EVENT_CHANGE_POS)
 	e2:SetRange(LOCATION_PZONE)
-	e2:SetTarget(c10100237.target2)
+	e2:SetCondition(c10100237.condition2)
 	e2:SetOperation(c10100237.operation2)
-	e2:SetCountLimit(2)
+	e2:SetCountLimit(1,10100237)
 	c:RegisterEffect(e2)
 	--Buffs
 	local e3=Effect.CreateEffect(c)
@@ -45,21 +44,51 @@ function c10100237.operation1(e,tp,eg,ep,ev,re,r,rp)
 		Duel.SpecialSummon(e:GetHandler(),0,tp,tp,false,false,POS_FACEUP)
 	end
 end
-function c10100237.filter2(c)
-	return c:IsFaceup() and c:IsSetCard(0x15a) -- and c:IsCanChangePosition()
+function c10100237.filter2(c,tp)
+  return c:IsFaceup() and c:IsControler(tp)
 end
-function c10100237.target2(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.IsExistingTarget(c10100237.filter2,tp,LOCATION_MZONE,0,1,nil) end
-	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_POSCHANGE)
-	local g=Duel.SelectTarget(tp,c10100237.filter2,tp,LOCATION_MZONE,0,1,1,nil)
-	Duel.SetOperationInfo(0,CATEGORY_POSITION,g,1,0,0)
+function c10100237.condition2(e,tp,eg,ep,ev,re,r,rp)
+	return eg:FilterCount(c10100237.filter2,nil,tp)==1
 end
 function c10100237.operation2(e,tp,eg,ep,ev,re,r,rp)
-	local tc=Duel.GetFirstTarget()
-	if tc:IsRelateToEffect(e) then
-		--Faceup attack -> faceup defense, faceup defense or facedown (either position) -> faceup attack
-		Duel.ChangePosition(tc,POS_FACEUP_DEFENSE,POS_FACEUP_ATTACK,POS_FACEUP_ATTACK,POS_FACEUP_ATTACK)
-	end
+  local g=eg:Filter(c10100237.filter2,nil,tp)
+	if g:GetCount()==1 then
+    local tc=g:GetFirst()
+    if tc:IsPosition(POS_FACEUP_DEFENSE) then
+      local e1=Effect.CreateEffect(e:GetHandler())
+      e1:SetType(EFFECT_TYPE_SINGLE)
+      e1:SetCode(EFFECT_INDESTRUCTABLE_BATTLE)
+      e1:SetValue(1)
+      e1:SetReset(RESET_EVENT+0x1fe0000+RESET_PHASE+PHASE_END)
+      tc:RegisterEffect(e1)
+      e1a=e1:Clone()
+      e1a:SetCode(EFFECT_INDESTRUCTABLE_EFFECT)
+      tc:RegisterEffect(e1a)
+    else
+      local e2=Effect.CreateEffect(e:GetHandler())
+      e2:SetType(EFFECT_TYPE_SINGLE)
+      e2:SetCode(EFFECT_UPDATE_ATTACK)
+      if tc:IsType(TYPE_XYZ) then
+        e2:SetValue(200*tc:GetRank())
+      else
+        e2:SetValue(200*tc:GetLevel())
+      end
+      e2:SetReset(RESET_EVENT+0x1fe0000+RESET_PHASE+PHASE_END)
+      tc:RegisterEffect(e2)
+    end
+  end
+end
+function c10100237.condition2_2(e,tp,eg,ep,ev,re,r,rp)
+	return e:GetHandler():IsPosition(POS_FACEUP_ATTACK)
+end
+function c10100237.operation2_2(e,tp,eg,ep,ev,re,r,rp)
+	local c=e:GetHandler()
+	local e1=Effect.CreateEffect(c)
+	e1:SetType(EFFECT_TYPE_SINGLE)
+	e1:SetCode(EFFECT_UPDATE_ATTACK)
+	e1:SetValue(100*c:GetLevel())
+	e1:SetReset(RESET_EVENT+0x1fe0000+RESET_PHASE+PHASE_END)
+	c:RegisterEffect(e1)
 end
 function c10100237.condition3(e,tp,eg,ep,ev,re,r,rp)
 	return r==REASON_SYNCHRO
@@ -67,46 +96,32 @@ end
 function c10100237.operation3(e,tp,eg,ep,ev,re,r,rp)
 	local c=re:GetHandler()
 	local e1=Effect.CreateEffect(c)
-	e1:SetType(EFFECT_TYPE_SINGLE)
-	e1:SetProperty(EFFECT_FLAG_SINGLE_RANGE)
+	e1:SetDescription(aux.Stringid(10100237,2))
+	e1:SetCategory(CATEGORY_POSITION)
+	e1:SetType(EFFECT_TYPE_QUICK_O)
+	e1:SetCode(EVENT_FREE_CHAIN)
 	e1:SetRange(LOCATION_MZONE)
-	e1:SetCode(EFFECT_INDESTRUCTABLE_COUNT)
-	e1:SetRange(LOCATION_MZONE)
-	e1:SetValue(c10100237.value3_1)
+	e1:SetTarget(c10100237.target3_1)
+	e1:SetOperation(c10100237.operation3_1)
 	e1:SetCountLimit(1)
-	e1:SetReset(RESET_EVENT+0x1fe0000)
 	c:RegisterEffect(e1)
-	local e2=Effect.CreateEffect(c)
-	e2:SetDescription(aux.Stringid(10100237,2))
-	e2:SetProperty(EFFECT_FLAG_CLIENT_HINT)
-	e2:SetCategory(CATEGORY_ATKCHANGE)
-	e2:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_F)
-	e2:SetCode(EVENT_CHANGE_POS)
-	e2:SetCondition(c10100237.condition3_2)
-	e2:SetTarget(c10100237.operation3_2)
-	e2:SetReset(RESET_EVENT+0x1fe0000)
-	c:RegisterEffect(e2)
-	if not c:IsType(TYPE_EFFECT) then
-		local e3=Effect.CreateEffect(e:GetHandler())
-		e3:SetType(EFFECT_TYPE_SINGLE)
-		e3:SetCode(EFFECT_ADD_TYPE)
-		e3:SetValue(TYPE_EFFECT)
-		e3:SetReset(RESET_EVENT+0x1fe0000)
-		c:RegisterEffect(e3,true)
-	end
 end
-function c10100237.value3_1(e,re,r,rp)
-	return e:GetHandler():IsPosition(POS_FACEUP_DEFENSE) and (bit.band(r,REASON_BATTLE)~=0 or bit.band(r,REASON_EFFECT)~=0)
+function c10100237.filter3_1(c,pos)
+  return c:IsFaceup() and not c:IsPosition(pos)
 end
-function c10100237.condition3_2(e,tp,eg,ep,ev,re,r,rp)
-	return e:GetHandler():IsPosition(POS_FACEUP_ATTACK)
+function c10100237.target3_1(e,tp,eg,ep,ev,re,r,rp,chk)
+	if chk==0 then return true end
+	Duel.SetOperationInfo(0,CATEGORY_POSITION,e:GetHandler(),1,0,0)
 end
-function c10100237.operation3_2(e,tp,eg,ep,ev,re,r,rp)
+function c10100237.operation3_1(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
-	local e1=Effect.CreateEffect(c)
-	e1:SetType(EFFECT_TYPE_SINGLE)
-	e1:SetCode(EFFECT_UPDATE_ATTACK)
-	e1:SetValue(100*c:GetLevel())
-	e1:SetReset(RESET_EVENT+0x1ff0000+RESET_PHASE+PHASE_END)
-	c:RegisterEffect(e1)
+	if c:IsRelateToEffect(e) then
+		if Duel.ChangePosition(c,POS_FACEUP_DEFENSE,POS_FACEUP_ATTACK,POS_FACEUP_ATTACK,POS_FACEUP_ATTACK) and Duel.SelectYesNo(tp,aux.Stringid(10100237,3)) then
+      Duel.BreakEffect()
+      local g=Duel.SelectMatchingCard(tp,c10100237.filter3_1,tp,LOCATION_MZONE,LOCATION_MZONE,1,1,c,c:GetPosition())
+      if g:GetCount()>0 then
+        Duel.ChangePosition(g,POS_FACEUP_DEFENSE,POS_FACEUP_ATTACK,POS_FACEUP_ATTACK,POS_FACEUP_ATTACK)
+      end
+    end
+	end
 end
