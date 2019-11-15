@@ -1,9 +1,8 @@
 --Bohrok Servant
 function c10100242.initial_effect(c)
-	c:SetSPSummonOnce(10100242)
   --fusion material
 	c:EnableReviveLimit()
-  aux.AddFusionProcFun2(c, c10100242.genFilter0a(c), c10100242.genFilter0b(c), true)
+  aux.AddFusionProcFun2(c, aux.FilterBoolFunction(Card.IsFusionSetCard,0x15d), c10100242.genFilter0(c), true)
 	--spsummon condition
 	local e1=Effect.CreateEffect(c)
 	e1:SetType(EFFECT_TYPE_SINGLE)
@@ -19,67 +18,50 @@ function c10100242.initial_effect(c)
 	e2:SetRange(LOCATION_EXTRA)
 	e2:SetCondition(c10100242.condition2)
 	e2:SetOperation(c10100242.operation2)
-  e2:SetValue(242)
 	c:RegisterEffect(e2)
-  --atk/def
-	local e3=Effect.CreateEffect(c)
-	e3:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_CONTINUOUS)
-	e3:SetCode(EVENT_SPSUMMON_SUCCESS)
-	e3:SetCondition(c10100242.condition3)
-	e3:SetOperation(c10100242.operation3)
-	c:RegisterEffect(e3)
 end
---Generate filter functions that can discriminate by owner
-function c10100242.genFilter0a(sc)
-  return function(c)
-    local tp=sc:GetControler()
-    return c:IsType(TYPE_MONSTER) and c:IsSetCard(0x15d) and c:GetOwner()==tp 
-  end
-end
-function c10100242.genFilter0b(sc)
+--Generate filter function that can discriminate by owner
+function c10100242.genFilter0(sc)
 	return function(c) 
     local tp=sc:GetControler()
-    return c:IsType(TYPE_MONSTER) and c:GetOwner()==1-tp 
+    return c:GetOwner()==1-tp 
   end
 end
 function c10100242.value1(e,se,sp,st)
-	return bit.band(st,SUMMON_TYPE_FUSION)==SUMMON_TYPE_FUSION
+	return not e:GetHandler():IsLocation(LOCATION_EXTRA)
 end
-function c10100242.filter2(c,fc,ff)
-	return ff(c) and c:IsCanBeFusionMaterial(fc) and c:IsAbleToRemoveAsCost()
+function c10100242.filter2a(c,fc)
+	return c:IsFusionSetCard(0x15d) and c:IsCanBeFusionMaterial(fc) and c:IsAbleToRemoveAsCost() and Duel.IsExistingMatchingCard(c10100242.filter2b,fc:GetControler(),LOCATION_ONFIELD+LOCATION_GRAVE+LOCATION_HAND,0,1,c,fc)
+end
+function c10100242.filter2b(c,fc)
+	return c10100242.genFilter0(fc)(c) and c:IsCanBeFusionMaterial(fc) and c:IsAbleToRemoveAsCost()
 end
 function c10100242.condition2(e,c)
 	if c==nil then return true end
 	local tp=c:GetControler()
-	return Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and Duel.IsExistingMatchingCard(c10100242.filter2,tp,LOCATION_GRAVE,LOCATION_GRAVE,1,nil,c,c10100242.genFilter0a(c)) and Duel.IsExistingMatchingCard(c10100242.filter2,tp,LOCATION_GRAVE,LOCATION_GRAVE,1,nil,c,c10100242.genFilter0b(c))
+	return Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and Duel.IsExistingMatchingCard(c10100242.filter2a,tp,LOCATION_ONFIELD+LOCATION_GRAVE+LOCATION_HAND,0,1,nil,c)
 end
 function c10100242.operation2(e,tp,eg,ep,ev,re,r,rp,c)
-	local g=Duel.SelectMatchingCard(tp,c10100242.filter2,tp,LOCATION_GRAVE,LOCATION_GRAVE,1,1,nil,c,c10100242.genFilter0a(c))
-	local g2=Duel.SelectMatchingCard(tp,c10100242.filter2,tp,LOCATION_GRAVE,LOCATION_GRAVE,1,1,nil,c,c10100242.genFilter0b(c))
+	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_REMOVE)
+	local g=Duel.SelectMatchingCard(tp,c10100242.filter2a,tp,LOCATION_ONFIELD+LOCATION_GRAVE+LOCATION_HAND,0,1,1,nil,c)
+	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_REMOVE)
+	local g2=Duel.SelectMatchingCard(tp,c10100242.filter2b,tp,LOCATION_ONFIELD+LOCATION_GRAVE+LOCATION_HAND,0,1,1,g:GetFirst(),c)
   g:Merge(g2)
 	c:SetMaterial(g)
-	Duel.Remove(g,POS_FACEUP,REASON_COST+REASON_FUSION+REASON_MATERIAL)
-end
-function c10100242.condition3(e,tp,eg,ep,ev,re,r,rp)
-	return bit.band(e:GetHandler():GetSummonType(),SUMMON_TYPE_FUSION)==SUMMON_TYPE_FUSION or e:GetHandler():GetSummonType()==SUMMON_TYPE_SPECIAL+242
-end
-function c10100242.filter3(c,tp)
-  return c:GetOwner()==1-tp
-end
-function c10100242.operation3(e,tp,eg,ep,ev,re,r,rp)
-	local c=e:GetHandler()
-	local g=c:GetMaterial()
-	local tc=g:Filter(aux.FilterBoolFunction(c10100242.filter3,tp),nil):GetFirst()
+	Duel.Remove(g,POS_FACEUP,REASON_COST)
+  --ATK/DEF
+  local tc=g2:GetFirst()
   local atk=tc:GetBaseAttack()
   local def=tc:GetBaseDefense()
   if atk<0 then atk=0 end
   if def<0 then def=0 end
+  Debug.Message(atk)
 	if atk~=0 or def~=0 then
 		local e1=Effect.CreateEffect(c)
 		e1:SetType(EFFECT_TYPE_SINGLE)
 		e1:SetCode(EFFECT_SET_BASE_ATTACK)
 		e1:SetValue(atk)
-		e1:SetReset(RESET_EVENT+0x1ff0000)
+		e1:SetReset(RESET_EVENT+0xff0000)
 		c:RegisterEffect(e1)
 		local e2=e1:Clone()
 		e2:SetCode(EFFECT_SET_BASE_DEFENSE)
