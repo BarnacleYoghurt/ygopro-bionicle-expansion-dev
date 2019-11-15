@@ -31,7 +31,7 @@ end
 function BBTS.bohrok_shuffledelayed(baseC)
   local function condition(e,tp,eg,ep,ev,re,r,rp)
     local c=e:GetHandler()
-    return c:IsFaceup() and c:GetFlagEffectLabel(baseC:GetCode())==e:GetLabel()
+    return c:IsLocation(LOCATION_MZONE) and c:IsFaceup() and c:GetFlagEffectLabel(baseC:GetCode())==e:GetLabel()
   end
   local function operation(e,tp,eg,ep,ev,re,r,rp)
     Duel.SendtoDeck(e:GetHandler(),nil,2,REASON_EFFECT)
@@ -95,9 +95,19 @@ function BBTS.krana_equip(baseC)
 end
 function BBTS.krana_revive(baseC)
 	local function condition(e,tp,eg,ep,ev,re,r,rp)
-		local c=e:GetHandler()
-		local rc=eg:GetFirst()
-		return rc:IsRelateToBattle() and rc:IsSetCard(0x15c) and rc:IsFaceup() and rc:IsControler(tp)
+		local rc=nil
+    if re then
+      rc=re:GetHandler()
+    elseif Duel.GetAttacker() then
+      if Duel.GetAttacker():GetControler() == tp then
+        rc=Duel.GetAttacker()
+      elseif Duel.GetAttackTarget() then
+        rc=Duel.GetAttackTarget()
+      end
+    end
+    if eg:GetCount()~=1 then return false end
+    local tc=eg:GetFirst()
+    return tc:IsLocation(LOCATION_GRAVE) and tc:GetPreviousControler()==1-tp and rc and rc:IsType(TYPE_MONSTER) and rc:IsSetCard(0x15c)
 	end
 	local function cost(e,tp,eg,ep,ev,re,r,rp,chk)
 		local c=e:GetHandler()
@@ -105,29 +115,40 @@ function BBTS.krana_revive(baseC)
 		Duel.Remove(c,POS_FACEUP,REASON_COST)
 	end
 	local function target(e,tp,eg,ep,ev,re,r,rp,chk)
-		local bc=eg:GetFirst():GetBattleTarget()
-		if chk==0 then return bc and Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and bc:IsCanBeSpecialSummoned(e,0,tp,false,false) end
-		Duel.SetTargetCard(bc)
-		Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,rc,1,0,0)
+		local tc=eg:GetFirst()
+		if chk==0 then return tc and Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and tc:IsCanBeSpecialSummoned(e,0,tp,false,false) end
+		Duel.SetTargetCard(tc)
+		Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,tc,1,0,0)
 	end
+  local function target_1(e,c)
+    local tp=e:GetHandlerPlayer()
+    return c:IsLocation(LOCATION_GRAVE) and c:IsControler(1-tp)
+  end
 	local function operation(e,tp,eg,ep,ev,re,r,rp)
 		local tc=Duel.GetFirstTarget()
 		if tc:IsRelateToEffect(e) then
 			Duel.SpecialSummon(tc,0,tp,tp,false,false,POS_FACEDOWN_DEFENSE)
 		end
+    local e1=Effect.CreateEffect(e:GetHandler())
+    e1:SetType(EFFECT_TYPE_FIELD)
+    e1:SetCode(EFFECT_CANNOT_SPECIAL_SUMMON)
+    e1:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
+    e1:SetTargetRange(1,0)
+    e1:SetTarget(target_1)
+    e1:SetReset(RESET_PHASE+PHASE_END)
+    Duel.RegisterEffect(e1,tp)
 	end
 	
 	local e=Effect.CreateEffect(baseC)
 	e:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O)
+  e:SetProperty(EFFECT_FLAG_DAMAGE_STEP)
 	e:SetRange(LOCATION_GRAVE)
-	e:SetCode(EVENT_BATTLE_DESTROYING)
-	e:SetProperty(EFFECT_FLAG_DELAY)
+	e:SetCode(EVENT_DESTROYED)
 	e:SetCategory(CATEGORY_SPECIAL_SUMMON)
 	e:SetCondition(condition)
 	e:SetCost(cost)
 	e:SetTarget(target)
 	e:SetOperation(operation)
-  e:SetCountLimit(1,baseC:GetCode())
 	return e
 end
 function BBTS.krana_summon(baseC)
