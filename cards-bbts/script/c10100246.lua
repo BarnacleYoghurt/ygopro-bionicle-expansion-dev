@@ -7,6 +7,7 @@ function c10100246.initial_effect(c)
   e1:SetTargetRange(0,LOCATION_MZONE)
   e1:SetCode(EFFECT_UPDATE_ATTACK)
   e1:SetCondition(c10100246.condition1)
+  e1:SetTarget(c10100246.target1)
   e1:SetValue(-800)
   c:RegisterEffect(e1)
   --To hand
@@ -19,9 +20,16 @@ function c10100246.initial_effect(c)
   e2:SetCountLimit(1,10100246)
   c:RegisterEffect(e2)
 end
+function c10100246.filter1(c,atk)
+  return c:GetBaseAttack()>atk
+end
 function c10100246.condition1(e)
   local ph=Duel.GetCurrentPhase()
   return ph >= PHASE_BATTLE_START and ph <= PHASE_BATTLE
+end
+function c10100246.target1(e,c)
+  local tp=e:GetHandler():GetControler()
+  return not Duel.IsExistingMatchingCard(c10100246.filter1,tp,0,LOCATION_MZONE,1,nil,c:GetBaseAttack())
 end
 function c10100246.filter2(c)
   return Duel.IsPlayerCanDraw(c:GetOwner(),1)
