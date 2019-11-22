@@ -47,9 +47,8 @@ function c10100250.initial_effect(c)
   --Boost
   local e7=Effect.CreateEffect(c)
   e7:SetType(EFFECT_TYPE_EQUIP)
-  e7:SetCode(EFFECT_SET_ATTACK)
-  e7:SetCondition(c10100250.condition7)
-  e7:SetValue(c10100250.value7)
+  e7:SetCode(EFFECT_UPDATE_ATTACK)
+  e7:SetValue(2000)
   c:RegisterEffect(e7)
 	--eqlimit
 	local e8=Effect.CreateEffect(c)
@@ -121,22 +120,6 @@ function c10100250.condition4(e,c)
   local mc=Duel.GetFieldGroupCount(c:GetControler(),LOCATION_MZONE,0)
 	return Duel.GetLocationCount(c:GetControler(),LOCATION_MZONE)>0 and mc>0 and Duel.IsExistingMatchingCard(c10100250.filter4,c:GetControler(),LOCATION_MZONE,0,mc,nil)
 end
-function c10100250.condition7(e)
-  local ec=e:GetHandler():GetEquipTarget()
-  local a=Duel.GetAttacker()
-  local d=Duel.GetAttackTarget()
-  return a and d 
-    and (
-      (ec==a and d:IsAttackAbove(a:GetAttack())) 
-      or 
-      (ec==d and a:IsAttackAbove(d:GetAttack()))
-    )
-end
-function c10100250.value7(e,c)
-  local oc=Duel.GetAttackTarget()
-  if oc==c then oc=Duel.GetAttacker() end
-  return oc:GetAttack()+1000
-end
 function c10100250.value8(e,c)
 	return (c:IsSetCard(0x155)) or e:GetHandler():GetEquipTarget()==c
 end
@@ -156,7 +139,7 @@ end
 function c10100250.operation9(e,tp,eg,ep,ev,re,r,rp)
 	local tc=Duel.GetFirstMatchingCard(c10100250.filter9,tp,LOCATION_DECK,0,nil)
   if tc then
-    Duel.SendtoHand(tc,nil,REASON_EFFECT)
+    Duel.SSet(tp,tc)
     Duel.ConfirmCards(1-tp,tc)
   end
 end

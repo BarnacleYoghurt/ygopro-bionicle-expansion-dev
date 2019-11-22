@@ -9,7 +9,7 @@ function c10100255.initial_effect(c)
   e1:SetTarget(c10100255.target1)
   e1:SetOperation(c10100255.operation1)
   c:RegisterEffect(e1)
-  --To Deck
+  --Flip
   local e2=Effect.CreateEffect(c)
   e2:SetType(EFFECT_TYPE_ACTIVATE)
   e2:SetCode(EVENT_FREE_CHAIN)
@@ -66,31 +66,48 @@ function c10100255.operation1_1(e,tp,eg,ep,ev,re,r,rp)
     end
   end
 end
-function c10100255.filter2a(c)
+function c10100255.filter2(c)
   return c:IsFaceup() and c:IsLevelAbove(8)
-end
-function c10100255.filter2b(c)
-  return c:IsFacedown() and c:IsAbleToDeck()
 end
 function c10100255.target2(e,tp,eg,ep,ev,re,r,rp,chk)
   if chk==0 then
-    return Duel.IsExistingMatchingCard(c10100255.filter2a,tp,LOCATION_MZONE,0,1,nil)
-      and Duel.IsExistingMatchingCard(c10100255.filter2b,tp,LOCATION_ONFIELD,LOCATION_ONFIELD,1,nil)
+    return Duel.IsExistingMatchingCard(c10100255.filter2,tp,LOCATION_MZONE,0,1,nil)
+      and Duel.IsExistingMatchingCard(Card.IsFaceup,tp,0,LOCATION_MZONE,1,nil)
   end
-  local g=Duel.GetMatchingGroup(c10100255.filter2b,tp,LOCATION_ONFIELD,LOCATION_ONFIELD,nil)
-  Duel.SetOperationInfo(0,CATEGORY_TODECK,g,Duel.GetMatchingGroupCount(c10100255.filter2a,tp,LOCATION_MZONE,0,nil),0,0)
+  local g=Duel.GetMatchingGroup(Card.IsFaceup,tp,0,LOCATION_MZONE,nil)
+  Duel.SetOperationInfo(0,CATEGORY_POSITION,g,Duel.GetMatchingGroupCount(c10100255.filter2,tp,LOCATION_MZONE,0,nil),0,0)
 end
 function c10100255.operation2(e,tp,eg,ep,ev,re,r,rp)
-  local max=Duel.GetMatchingGroupCount(c10100255.filter2a,tp,LOCATION_MZONE,0,nil)
-  local g=Duel.SelectMatchingCard(tp,c10100255.filter2b,tp,LOCATION_ONFIELD,LOCATION_ONFIELD,1,max,nil)
+  local max=Duel.GetMatchingGroupCount(c10100255.filter2,tp,LOCATION_MZONE,0,nil)
+  local g=Duel.SelectMatchingCard(tp,Card.IsFaceup,tp,0,LOCATION_MZONE,1,max,nil)
   if g:GetCount()>0 then
-    if Duel.SendtoDeck(g,nil,2,REASON_EFFECT) then
+    if Duel.ChangePosition(g,POS_FACEDOWN_DEFENSE) then
       local og=Duel.GetOperatedGroup()
-      local mct=og:FilterCount(Card.IsPreviousLocation,nil,LOCATION_MZONE)
-      if mct>0 then
-        Duel.BreakEffect()
-        Duel.Damage(1-tp,1000*mct,REASON_EFFECT)
+      local tc=og:GetFirst()
+      while tc do
+        local e1=Effect.CreateEffect(e:GetHandler())
+        e1:SetType(EFFECT_TYPE_SINGLE)
+        e1:SetCode(EFFECT_CANNOT_CHANGE_POSITION)
+        e1:SetReset(RESET_EVENT+0x1fe0000)
+        tc:RegisterEffect(e1)
+        local e2=Effect.CreateEffect(e:GetHandler())
+        e2:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_CONTINUOUS)
+        e2:SetCode(EVENT_FLIP)
+        e2:SetOperation(c10100255.operation2_2)
+        e2:SetReset(RESET_EVENT+0x1fe0000)
+        e2:SetLabel(tp)
+        tc:RegisterEffect(e2)
+        tc=og:GetNext()
       end
     end
   end
+end
+function c10100255.operation2_2(e,tp,eg,ep,ev,re,r,rp)
+  local otp=e:GetLabel()
+  local e1=Effect.CreateEffect(e:GetHandler())
+  e1:SetType(EFFECT_TYPE_SINGLE)
+  e1:SetCode(EFFECT_DISABLE)
+  e1:SetReset(RESET_EVENT+0x1fe0000)
+  e:GetHandler():RegisterEffect(e1)
+  Duel.Damage(1-otp,1000,REASON_EFFECT)
 end
