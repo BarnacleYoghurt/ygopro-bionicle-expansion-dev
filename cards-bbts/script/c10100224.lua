@@ -49,7 +49,7 @@ function c10100224.filter2(c)
 	return c:IsSetCard(0x15c) and c:IsAbleToDeckAsCost()
 end
 function c10100224.filter2(c,tp)
-  return c:IsSetCard(0x15c) and c:GetOwner() == tp
+  return c:IsSetCard(0x15c) and c:GetOwner() == tp and c:IsPreviousPosition(POS_FACEUP) and c:IsPosition(POS_FACEDOWN)
 end
 function c10100224.condition2(e,tp,eg,ep,ev,re,r,rp)
 	return eg:IsExists(c10100224.filter2,1,nil,tp)
