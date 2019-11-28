@@ -16,6 +16,7 @@ function c10100211.initial_effect(c)
 	e2:SetTarget(c10100211.target2)
 	e2:SetValue(1)
 	e2:SetOperation(c10100211.operation2)
+  e2:SetCountLimit(1)
 	c:RegisterEffect(e2)
 	--Revive
 	local e3=bbts.krana_revive(c)
@@ -29,7 +30,9 @@ end
 function c10100211.operation2(e,tp,eg,ep,ev,re,r,rp)
 	local ec = e:GetHandler():GetEquipTarget()
 	local g = Duel.SelectMatchingCard(tp,Card.IsAbleToDeck,tp,LOCATION_MZONE,0,1,1,ec)
-	if g:GetCount() > 0 then
-		Duel.SendtoDeck(g,nil,2,REASON_EFFECT)
+	if g:GetCount() > 0 and Duel.SendtoDeck(g,nil,2,REASON_EFFECT) then
+    if g:IsExists(Card.IsLocation,1,nil,LOCATION_DECK) then Duel.ShuffleDeck(tp) end
+    Duel.BreakEffect()
+    Duel.Draw(tp,1,REASON_EFFECT)
 	end
 end
