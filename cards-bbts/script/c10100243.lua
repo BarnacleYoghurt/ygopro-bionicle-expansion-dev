@@ -2,7 +2,8 @@
 function c10100243.initial_effect(c)
   --Attach from GY
   local e1=Effect.CreateEffect(c)
-	e1:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_F)
+	e1:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O)
+  e1:SetProperty(EFFECT_FLAG_DELAY)
 	e1:SetCode(EVENT_FLIP)
 	e1:SetRange(LOCATION_GRAVE)
 	e1:SetCondition(c10100243.condition1)
@@ -73,6 +74,10 @@ function c10100243.operation2(e,tp,eg,ep,ev,re,r,rp)
       e2:SetReset(RESET_EVENT+0x1fe0000)
       tc:RegisterEffect(e2)
     end
+    local e3=Effect.CreateEffect(c)
+    e3:SetType(EFFECT_TYPE_SINGLE)
+    e3:SetCode(EFFECT_CANNOT_TRIGGER)
+    tc:RegisterEffect(e3)
   end
 end
 function c10100243.condition2_1(e)

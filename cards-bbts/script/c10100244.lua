@@ -60,6 +60,9 @@ function c10100244.condition2(e,tp,eg,ep,ev,re,r,rp)
 end
 function c10100244.operation2(e,tp,eg,ep,ev,re,r,rp)
 	local rc=e:GetHandler():GetReasonCard()
+  
+  Duel.GetControl(rc,tp,PHASE_END,1)
+  
   local e1=Effect.CreateEffect(rc)
   e1:SetRange(RANGE_MZONE)
   e1:SetType(EFFECT_TYPE_SINGLE)

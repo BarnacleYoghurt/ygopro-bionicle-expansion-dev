@@ -31,7 +31,7 @@ function c10100242.value1(e,se,sp,st)
 	return not e:GetHandler():IsLocation(LOCATION_EXTRA)
 end
 function c10100242.filter2a(c,fc)
-	return c:IsFusionSetCard(0x15d) and c:IsCanBeFusionMaterial(fc) and c:IsAbleToRemoveAsCost() and Duel.IsExistingMatchingCard(c10100242.filter2b,fc:GetControler(),LOCATION_ONFIELD+LOCATION_GRAVE+LOCATION_HAND,0,1,c,fc)
+	return c:IsFusionSetCard(0x15d) and c:IsType(TYPE_MONSTER) and c:IsCanBeFusionMaterial(fc) and c:IsAbleToRemoveAsCost() and Duel.IsExistingMatchingCard(c10100242.filter2b,fc:GetControler(),LOCATION_ONFIELD+LOCATION_GRAVE+LOCATION_HAND,0,1,c,fc)
 end
 function c10100242.filter2b(c,fc)
 	return c10100242.genFilter0(fc)(c) and c:IsCanBeFusionMaterial(fc) and c:IsAbleToRemoveAsCost()
@@ -55,7 +55,6 @@ function c10100242.operation2(e,tp,eg,ep,ev,re,r,rp,c)
   local def=tc:GetBaseDefense()
   if atk<0 then atk=0 end
   if def<0 then def=0 end
-  Debug.Message(atk)
 	if atk~=0 or def~=0 then
 		local e1=Effect.CreateEffect(c)
 		e1:SetType(EFFECT_TYPE_SINGLE)
