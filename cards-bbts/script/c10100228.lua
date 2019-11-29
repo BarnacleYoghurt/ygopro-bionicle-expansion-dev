@@ -19,9 +19,6 @@ function c10100228.initial_effect(c)
 	e2:SetCost(c10100228.cost2)
 	e2:SetOperation(c10100228.operation2)
 	c:RegisterEffect(e2)
-	--Special Summon
-	local e3=bbts.bohrokkaita_ss(c)
-	c:RegisterEffect(e3)
 end
 function c10100228.filter2(c)
 	return c:IsSetCard(0x15c) and c:IsType(TYPE_MONSTER) and c:IsAbleToRemoveAsCost()

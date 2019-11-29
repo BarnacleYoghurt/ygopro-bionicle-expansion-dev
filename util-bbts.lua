@@ -338,34 +338,6 @@ function BBTS.bohrokkaita_krana(baseC)
 	e:SetOperation(operation)
 	return e
 end
-function BBTS.bohrokkaita_ss(baseC)
-	local function filter(c,e,tp)
-		return c:IsSetCard(0x15c) and c:GetLevel()==4 and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
-	end
-	local function target(e,tp,eg,ep,ev,re,r,rp,chk)
-		if chk==0 then 
-			return Duel.IsExistingMatchingCard(filter,tp,LOCATION_GRAVE,0,1,nil,e,tp)
-			and Duel.GetLocationCount(tp,LOCATION_MZONE)>0
-		end
-		local g=Duel.GetMatchingGroup(filter,tp,LOCATION_GRAVE,0,nil,e,tp)
-		Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,g,1,0,0)
-	end
-	local function operation(e,tp,eg,ep,ev,re,r,rp)
-		local g=Duel.SelectMatchingCard(tp,filter,tp,LOCATION_GRAVE,0,1,1,nil,e,tp)
-		if g:GetCount() > 0 then
-			Duel.SpecialSummon(g,0,tp,tp,false,false,POS_FACEDOWN_DEFENSE)
-			Duel.ConfirmCards(1-tp,g)
-		end
-	end
-	
-	local e=Effect.CreateEffect(baseC)
-	e:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
-	e:SetCode(EVENT_LEAVE_FIELD)
-	e:SetProperty(EFFECT_FLAG_DAMAGE_STEP)
-	e:SetTarget(target)
-	e:SetOperation(operation)
-	return e
-end
 --Bohrok Va Kaita
 function BBTS.bohrokvakaita_synchrolimit(baseC)	
 	function filter(c,syncard,tuner,f)

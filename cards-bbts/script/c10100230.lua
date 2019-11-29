@@ -14,29 +14,41 @@ function c10100230.initial_effect(c)
 	c:RegisterEffect(e2)
 	--Search
 	local e3=Effect.CreateEffect(c)
-	e3:SetCategory(CATEGORY_TOHAND+CATEGORY_SEARCH)
-	e3:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
-  e3:SetProperty(EFFECT_FLAG_DELAY)
-  e3:SetCode(EVENT_TO_GRAVE)
-  e3:SetCondition(c10100230.condition3)
-	e3:SetTarget(c10100230.target3)
+	e3:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_CONTINUOUS)
+	e3:SetCode(EVENT_TO_GRAVE)
 	e3:SetOperation(c10100230.operation3)
-	e3:SetCountLimit(1,10100230)
 	c:RegisterEffect(e3)
 end
-function c10100230.filter3(c)
+function c10100230.operation3(e,tp,eg,ep,ev,re,r,rp)
+  local c=e:GetHandler()
+  if c:IsPreviousLocation(LOCATION_ONFIELD) then
+    local e1=Effect.CreateEffect(c)
+    e1:SetCategory(CATEGORY_TOHAND+CATEGORY_SEARCH)
+    e1:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O)
+    e1:SetProperty(EFFECT_FLAG_DELAY)
+    e1:SetCode(EVENT_PHASE+PHASE_END)
+    e1:SetRange(LOCATION_GRAVE)
+    e1:SetCondition(c10100230.condition3_1)
+    e1:SetTarget(c10100230.target3_1)
+    e1:SetOperation(c10100230.operation3_1)
+    e1:SetCountLimit(1,10100230)
+    e1:SetReset(RESET_EVENT+0x1fe0000+RESET_PHASE+PHASE_END)
+    c:RegisterEffect(e1)
+  end
+end
+function c10100230.filter3_1(c)
 	return (c:IsSetCard(0x15c) or c:IsSetCard(0x15d)) and c:IsAbleToHand()
 end
-function c10100230.condition3(e,tp,eg,ep,ev,re,r,rp)
+function c10100230.condition3_1(e,tp,eg,ep,ev,re,r,rp)
 	return e:GetHandler():IsPreviousLocation(LOCATION_ONFIELD)
 end
-function c10100230.target3(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.IsExistingMatchingCard(c10100230.filter3,tp,LOCATION_DECK,0,1,nil) end
+function c10100230.target3_1(e,tp,eg,ep,ev,re,r,rp,chk)
+	if chk==0 then return Duel.IsExistingMatchingCard(c10100230.filter3_1,tp,LOCATION_DECK,0,1,nil) end
 	Duel.SetOperationInfo(0,CATEGORY_TOHAND,nil,1,tp,LOCATION_DECK)
 end
-function c10100230.operation3(e,tp,eg,ep,ev,re,r,rp)
+function c10100230.operation3_1(e,tp,eg,ep,ev,re,r,rp)
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_ATOHAND)
-	local g=Duel.SelectMatchingCard(tp,c10100230.filter3,tp,LOCATION_DECK,0,1,1,nil)
+	local g=Duel.SelectMatchingCard(tp,c10100230.filter3_1,tp,LOCATION_DECK,0,1,1,nil)
 	if g:GetCount()>0 then
 		Duel.SendtoHand(g,nil,REASON_EFFECT)
 		Duel.ConfirmCards(1-tp,g)
