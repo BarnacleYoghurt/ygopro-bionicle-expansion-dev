@@ -33,9 +33,9 @@ function c10100224.initial_effect(c)
 	--Destroy
 	local e3=Effect.CreateEffect(c)
 	e3:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
-	e3:SetCode(EVENT_TO_GRAVE)
+	e3:SetCode(EVENT_DESTROYED)
 	e3:SetCategory(CATEGORY_DESTROY)
-	e3:SetProperty(EFFECT_FLAG_CARD_TARGET+EFFECT_FLAG_DELAY)
+	e3:SetProperty(EFFECT_FLAG_CARD_TARGET+EFFECT_FLAG_DELAY+EFFECT_FLAG_DAMAGE_STEP)
 	e3:SetCondition(c10100224.condition3)
 	e3:SetTarget(c10100224.target3)
 	e3:SetOperation(c10100224.operation3)
@@ -66,7 +66,7 @@ function c10100224.operation2(e,tp,eg,ep,ev,re,r,rp)
 end
 function c10100224.condition3(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
-	return c:IsPreviousLocation(LOCATION_ONFIELD) and c:IsReason(REASON_DESTROY)
+  return c:IsReason(REASON_EFFECT) and c:IsPreviousLocation(LOCATION_SZONE) and c:GetPreviousSequence()==5
 end
 function c10100224.target3(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingTarget(Card.IsDestructable,tp,0,LOCATION_ONFIELD,1,nil) end

@@ -13,6 +13,7 @@ function BBTS.bohrok_flip(baseC)
     Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,g,1,0,0)
   end
   function operation(e,tp,eg,ep,ev,re,r,rp)
+    if Duel.GetLocationCount(tp,LOCATION_MZONE)<=0 then return end
     local c=e:GetHandler()
     local g=Duel.SelectMatchingCard(tp,filter,tp,LOCATION_DECK,0,1,1,nil,e,tp)
     if g:GetCount() > 0 then
