@@ -51,6 +51,7 @@ end
 function c10100251.target1(e,tp,eg,ep,ev,re,r,rp,chk)
   if chk==0 then 
     return Duel.GetLocationCount(tp,LOCATION_MZONE)>0
+      and Duel.GetLocationCount(tp,LOCATION_SZONE)>0
       and Duel.IsExistingMatchingCard(c10100251.filter1a,tp,LOCATION_HAND,0,1,nil,e,tp) 
       and Duel.IsExistingMatchingCard(c10100251.filter1b,tp,LOCATION_DECK+LOCATION_GRAVE,0,1,nil) 
   end
@@ -60,10 +61,12 @@ function c10100251.target1(e,tp,eg,ep,ev,re,r,rp,chk)
   Duel.SetOperationInfo(0,CATEGORY_EQUIP,g2,1,0,0)
 end
 function c10100251.operation1(e,tp,eg,ep,ev,re,r,rp)
+  if Duel.GetLocationCount(tp,LOCATION_MZONE)<=0 and Duel.GetLocationCount(tp,LOCATION_SZONE)<=0 then return end
   local g1=Duel.SelectMatchingCard(tp,c10100251.filter1a,tp,LOCATION_HAND,0,1,1,nil,e,tp)
   if g1:GetCount()>0 and Duel.SpecialSummon(g1,SUMMON_TYPE_SPECIAL,tp,tp,false,false,POS_FACEUP) then
     local g2=Duel.SelectMatchingCard(tp,c10100251.filter1b,tp,LOCATION_DECK+LOCATION_GRAVE,0,1,1,nil)
     if g2:GetCount()>0 then
+      Duel.BreakEffect()
       Duel.Equip(tp,g2:GetFirst(),g1:GetFirst())
     end
   end

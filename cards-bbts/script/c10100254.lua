@@ -10,17 +10,20 @@ function c10100254.initial_effect(c)
   e1:SetCountLimit(1,10100254)
   c:RegisterEffect(e1)
 end
-function c10100254.filter1(c,e)
+function c10100254.filter1a(c,e)
   return c:IsType(TYPE_MONSTER) and c:IsSetCard(0x155) and c:IsAbleToRemove() and c:IsCanBeEffectTarget(e)
+end
+function c10100254.filter1b(c)
+  return c:IsLocation(LOCATION_MZONE) and c:IsSummonType(SUMMON_TYPE_NORMAL)
 end
 function c10100254.target1(e,tp,eg,ep,ev,re,r,rp,chk)
   if chk==0 then
-    return Duel.GetMatchingGroup(c10100254.filter1,tp,LOCATION_MZONE+LOCATION_GRAVE+LOCATION_HAND,0,nil,e):GetClassCount(Card.GetCode)>=6 
-      and Duel.IsExistingMatchingCard(c10100254.filter1,tp,LOCATION_MZONE,0,1,nil,e)
+    return Duel.GetMatchingGroup(c10100254.filter1a,tp,LOCATION_MZONE+LOCATION_GRAVE+LOCATION_HAND,0,nil,e):GetClassCount(Card.GetCode)>=6 
+      and Duel.IsExistingMatchingCard(c10100254.filter1a,tp,LOCATION_MZONE,0,1,nil,e)
       and Duel.IsExistingMatchingCard(Card.IsAbleToRemove,tp,LOCATION_ONFIELD,LOCATION_ONFIELD,1,nil)
   end
-  local g1=Duel.GetMatchingGroup(c10100254.filter1,tp,LOCATION_MZONE,0,nil,e)
-  local g2=Duel.GetMatchingGroup(c10100254.filter1,tp,LOCATION_MZONE+LOCATION_GRAVE+LOCATION_HAND,0,nil,e)
+  local g1=Duel.GetMatchingGroup(c10100254.filter1a,tp,LOCATION_MZONE,0,nil,e)
+  local g2=Duel.GetMatchingGroup(c10100254.filter1a,tp,LOCATION_MZONE+LOCATION_GRAVE+LOCATION_HAND,0,nil,e)
   local tg=Group.CreateGroup()
 	for i=1,6 do
 		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_REMOVE)
@@ -51,7 +54,7 @@ end
 function c10100254.operation1(e,tp,eg,ep,ev,re,r,rp)
   local tg=Duel.GetChainInfo(0,CHAININFO_TARGET_CARDS)
   local bg=tg:Filter(Card.IsLocation,nil,LOCATION_HAND+LOCATION_GRAVE)
-  local fgc=tg:FilterCount(Card.IsLocation,nil,LOCATION_MZONE)
+  local fgc=tg:FilterCount(c10100254.filter1b,nil,LOCATION_MZONE)
   
   if bg:GetCount()==0 or Duel.Remove(bg,POS_FACEUP,REASON_EFFECT) then
     local handc=Duel.GetFieldGroupCount(tp,0,LOCATION_HAND)

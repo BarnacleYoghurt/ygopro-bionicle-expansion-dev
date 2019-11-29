@@ -13,7 +13,7 @@ function c10100252.filter1a(c,e,tp)
   return c:IsSetCard(0x15e) and c:IsFacedown() and c:IsType(TYPE_PENDULUM) and Duel.GetMatchingGroup(c10100252.filter1b,tp,LOCATION_HAND+LOCATION_MZONE+LOCATION_GRAVE,0,nil):CheckWithSumEqual(Card.GetLevel,c:GetLevel(),1,c:GetLevel())
 end
 function c10100252.filter1b(c)
-  return c:IsType(TYPE_MONSTER) and c:IsSetCard(0x15c) and c:IsAbleToDeckOrExtraAsCost()
+  return c:IsType(TYPE_MONSTER) and c:IsSetCard(0x15c) and c:IsFaceup() and c:IsAbleToDeckOrExtraAsCost()
 end
 function c10100252.condition1(e,tp,eg,ep,ev,re,r,rp)
   return Duel.GetFieldGroupCount(tp,LOCATION_PZONE,0)==0

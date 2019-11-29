@@ -90,24 +90,30 @@ function c10100255.operation2(e,tp,eg,ep,ev,re,r,rp)
         e1:SetCode(EFFECT_CANNOT_CHANGE_POSITION)
         e1:SetReset(RESET_EVENT+0x1fe0000)
         tc:RegisterEffect(e1)
+        tc:RegisterFlagEffect(10100255,RESET_EVENT+0x1fe0000,0,1)
         local e2=Effect.CreateEffect(e:GetHandler())
-        e2:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_CONTINUOUS)
-        e2:SetCode(EVENT_FLIP)
+        e2:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
+        e2:SetCode(EVENT_BATTLE_START)
+        e2:SetRange(LOCATION_MZONE)
+        e2:SetCondition(c10100255.condition2_2)
         e2:SetOperation(c10100255.operation2_2)
-        e2:SetReset(RESET_EVENT+0x1fe0000)
-        e2:SetLabel(tp)
-        tc:RegisterEffect(e2)
+        e2:SetLabelObject(tc)
+        Duel.RegisterEffect(e2,tp)
         tc=og:GetNext()
       end
     end
   end
 end
+function c10100255.condition2_2(e,tp,eg,ep,ev,re,r,rp)
+  local tc=e:GetLabelObject()
+  local at=Duel.GetAttackTarget()
+  return at and at==tc and tc:GetFlagEffect(10100255)~=0
+end
 function c10100255.operation2_2(e,tp,eg,ep,ev,re,r,rp)
-  local otp=e:GetLabel()
-  local e1=Effect.CreateEffect(e:GetHandler())
-  e1:SetType(EFFECT_TYPE_SINGLE)
-  e1:SetCode(EFFECT_DISABLE)
-  e1:SetReset(RESET_EVENT+0x1fe0000)
-  e:GetHandler():RegisterEffect(e1)
-  Duel.Damage(1-otp,1000,REASON_EFFECT)
+  local tc=e:GetLabelObject()
+  if Duel.SendtoGrave(tc,REASON_EFFECT) then
+    Duel.BreakEffect()
+    Duel.Damage(1-tp,1000,REASON_EFFECT)
+    e:Reset()
+  end
 end
