@@ -13,7 +13,7 @@ function c10100218.initial_effect(c)
 	e2:SetCost(c10100218.cost2)
 	e2:SetTarget(c10100218.target2)
 	e2:SetOperation(c10100218.operation2)
-	e2:SetCountLimit(1)
+	e2:SetCountLimit(1,10100218)
 	c:RegisterEffect(e2)
 	--Return
 	local e3=bbts.bohrokva_shuffle(c)

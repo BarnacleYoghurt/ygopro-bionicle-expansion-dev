@@ -12,7 +12,7 @@ function c10100217.initial_effect(c)
 	e2:SetRange(LOCATION_MZONE)
 	e2:SetTarget(c10100217.target2)
 	e2:SetOperation(c10100217.operation2)
-	e2:SetCountLimit(1)
+	e2:SetCountLimit(1,10100217)
 	c:RegisterEffect(e2)
 	--Return
 	local e3=bbts.bohrokva_shuffle(c)
