@@ -8,6 +8,8 @@ function c10100219.initial_effect(c)
 	c:RegisterEffect(e1)
 	--Return to deck
 	local e2 = Effect.CreateEffect(c)
+  e2:SetCategory(CATEGORY_TODECK)
+  e2:SetDescription(aux.Stringid(10100219,0))
 	e2:SetType(EFFECT_TYPE_IGNITION)
 	e2:SetRange(LOCATION_MZONE)
 	e2:SetTarget(c10100219.target2)
