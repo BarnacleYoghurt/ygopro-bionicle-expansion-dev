@@ -6,7 +6,7 @@ function c10100204.initial_effect(c)
 	--flip
   local e1=bbts.bohrok_flip(c)
   c:RegisterEffect(e1)
-	--Block effects during battle
+	--Protection during battle
 	local e2=Effect.CreateEffect(c)
   e2:SetCode(EFFECT_CANNOT_BE_EFFECT_TARGET)
 	e2:SetType(EFFECT_TYPE_SINGLE)
@@ -20,10 +20,11 @@ function c10100204.initial_effect(c)
 	--Destroy
 	local e3=Effect.CreateEffect(c)
 	e3:SetCategory(CATEGORY_DESTROY)
+  e3:SetDescription(aux.Stringid(10100204,1))
 	e3:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O)
-	e3:SetCode(EVENT_PHASE+PHASE_BATTLE)
-	e3:SetRange(LOCATION_MZONE)
 	e3:SetProperty(EFFECT_FLAG_TARGET)
+	e3:SetRange(LOCATION_MZONE)
+	e3:SetCode(EVENT_PHASE+PHASE_BATTLE)
 	e3:SetCondition(c10100204.condition3)
 	e3:SetTarget(c10100204.target3)
 	e3:SetOperation(c10100204.operation3)

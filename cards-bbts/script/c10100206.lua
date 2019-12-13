@@ -9,6 +9,7 @@ function c10100206.initial_effect(c)
 	--Destroy
 	local e2=Effect.CreateEffect(c)
 	e2:SetCategory(CATEGORY_DESTROY)
+  e2:SetDescription(aux.Stringid(10100206,1))
 	e2:SetType(EFFECT_TYPE_IGNITION)
 	e2:SetRange(LOCATION_MZONE)
 	e2:SetCondition(c10100206.condition2)

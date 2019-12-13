@@ -41,14 +41,15 @@ function BBTS.bohrok_shuffledelayed(baseC)
   local fid=baseC:GetFieldID()
   baseC:RegisterFlagEffect(baseC:GetOriginalCode(),RESET_EVENT+0x1fe0000+RESET_PHASE+PHASE_END,0,1,fid)
   local e=Effect.CreateEffect(baseC)
+  e:SetCategory(CATEGORY_TODECK)
   e:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
-  e:SetCode(EVENT_PHASE+PHASE_END)
   e:SetProperty(EFFECT_FLAG_IGNORE_IMMUNE)
+  e:SetCode(EVENT_PHASE+PHASE_END)
   e:SetCondition(condition)
   e:SetOperation(operation)
   e:SetLabel(fid)
-  e:SetReset(RESET_PHASE+PHASE_END)
   e:SetCountLimit(1)
+  e:SetReset(RESET_PHASE+PHASE_END)
 	return e
 end
 --Krana

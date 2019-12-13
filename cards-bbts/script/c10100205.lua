@@ -9,6 +9,7 @@ function c10100205.initial_effect(c)
 	--Banish
 	local e2=Effect.CreateEffect(c)
 	e2:SetCategory(CATEGORY_REMOVE)
+  e2:SetDescription(aux.Stringid(10100205,1))
 	e2:SetType(EFFECT_TYPE_IGNITION)
 	e2:SetRange(LOCATION_MZONE)
 	e2:SetCondition(c10100205.condition2)
