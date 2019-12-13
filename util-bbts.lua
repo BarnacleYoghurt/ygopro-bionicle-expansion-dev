@@ -3,7 +3,7 @@ bbts=BBTS
 --Bohrok
 function BBTS.bohrok_flip(baseC)
   local function filter(c,e,tp)
-    return c:IsSetCard(0x15c) and c:GetLevel()==4 and not c:IsCode(baseC:GetCode()) and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
+    return c:IsSetCard(0x15c) and c:GetLevel()==4 and not c:IsCode(baseC:GetOriginalCode()) and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
   end
   local function target(e,tp,eg,ep,ev,re,r,rp,chk)
     if chk==0 then 
@@ -23,6 +23,7 @@ function BBTS.bohrok_flip(baseC)
   end
   local e=Effect.CreateEffect(baseC)
 	e:SetCategory(CATEGORY_SPECIAL_SUMMON)
+  e:SetDescription(aux.Stringid(baseC:GetOriginalCode(),0))
 	e:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_FLIP)
 	e:SetProperty(EFFECT_FLAG_DELAY)
 	e:SetTarget(target)
@@ -32,13 +33,13 @@ end
 function BBTS.bohrok_shuffledelayed(baseC)
   local function condition(e,tp,eg,ep,ev,re,r,rp)
     local c=e:GetHandler()
-    return c:IsLocation(LOCATION_MZONE) and c:IsFaceup() and c:GetFlagEffectLabel(baseC:GetCode())==e:GetLabel()
+    return c:IsLocation(LOCATION_MZONE) and c:IsFaceup() and c:GetFlagEffectLabel(baseC:GetOriginalCode())==e:GetLabel()
   end
   local function operation(e,tp,eg,ep,ev,re,r,rp)
     Duel.SendtoDeck(e:GetHandler(),nil,2,REASON_EFFECT)
   end
   local fid=baseC:GetFieldID()
-  baseC:RegisterFlagEffect(baseC:GetCode(),RESET_EVENT+0x1fe0000+RESET_PHASE+PHASE_END,0,1,fid)
+  baseC:RegisterFlagEffect(baseC:GetOriginalCode(),RESET_EVENT+0x1fe0000+RESET_PHASE+PHASE_END,0,1,fid)
   local e=Effect.CreateEffect(baseC)
   e:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
   e:SetCode(EVENT_PHASE+PHASE_END)
@@ -216,7 +217,7 @@ function BBTS.bohrokva_selfss(baseC,reqCode)
 	e:SetRange(LOCATION_HAND)
 	e:SetCondition(condition)
 	e:SetValue(1)
-	e:SetCountLimit(1,baseC:GetCode())
+	e:SetCountLimit(1,baseC:GetOriginalCode())
 	return e
 end
 
@@ -260,7 +261,7 @@ function BBTS.bohrokva_krana(baseC)
 end
 function BBTS.bohrokva_shuffle(baseC)
 	local function filter_1(c)
-		return c:IsType(TYPE_MONSTER) and c:IsSetCard(0x15c) and c:IsAbleToDeck() and not c:IsCode(baseC:GetCode())
+		return c:IsType(TYPE_MONSTER) and c:IsSetCard(0x15c) and c:IsAbleToDeck() and not c:IsCode(baseC:GetOriginalCode())
 	end
 	local function target_1(e,tp,eg,ep,ev,re,r,rp,chk)
 		if chk==0 then return Duel.IsExistingMatchingCard(filter_1,tp,LOCATION_GRAVE,0,2,nil) and Duel.IsPlayerCanDraw(tp, 1) end

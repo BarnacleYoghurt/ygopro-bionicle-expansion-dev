@@ -8,29 +8,14 @@ function c10100202.initial_effect(c)
   c:RegisterEffect(e1)
 	--be unpredictable
 	local e2=Effect.CreateEffect(c)
+  e2:SetCategory(CATEGORY_DESTROY+CATEGORY_REMOVE+CATEGORY_ATKCHANGE+CATEGORY_DISABLE)
+  e2:SetDescription(aux.Stringid(10100202,1))
 	e2:SetType(EFFECT_TYPE_IGNITION)
 	e2:SetRange(LOCATION_MZONE)
 	e2:SetTarget(c10100202.target2)
 	e2:SetOperation(c10100202.operation2)
 	e2:SetCountLimit(1)
 	c:RegisterEffect(e2)
-end
-function c10100202.filter1(c,e,tp)
-	return c:IsSetCard(0x15c) and c:GetLevel()==4 and not c:IsCode(10100202) and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
-end
-function c10100202.target1(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.GetLocationCount(tp,LOCATION_MZONE)>0
-		and Duel.IsExistingMatchingCard(c10100202.filter1,tp,LOCATION_DECK,0,1,nil,e,tp) end
-	local g=Duel.GetMatchingGroup(c10100202.filter1,tp,LOCATION_DECK,0,nil,e,tp)
-	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,g,1,0,0)
-end
-function c10100202.operation1(e,tp,eg,ep,ev,re,r,rp)
-	local c=e:GetHandler()
-	local g=Duel.SelectMatchingCard(tp,c10100202.filter1,tp,LOCATION_DECK,0,1,1,nil,e,tp)
-	if g:GetCount() > 0 then
-		Duel.SpecialSummon(g,0,tp,tp,false,false,POS_FACEDOWN_DEFENSE)
-		Duel.ConfirmCards(1-tp,g)
-	end
 end
 function c10100202.target2(e,tp,eg,ep,ev,re,r,rp,chk)
 	local g=Duel.GetFieldGroup(tp,0,LOCATION_GRAVE)
@@ -57,7 +42,7 @@ function c10100202.target2(e,tp,eg,ep,ev,re,r,rp,chk)
 		Duel.SetOperationInfo(0,CATEGORY_DESTROY,tg,1,0,0)
 	elseif bit.band(top:GetType(),0x2) == 0x2 then
 		local tg=Duel.GetMatchingGroup(Card.IsFaceup,tp,0,LOCATION_MZONE,nil)
-		Duel.SetOperationInfo(0,CATEGORY_DISABLE,tg,1,0,0)
+		Duel.SetOperationInfo(0,CATEGORY_ATKCHANGE+CATEGORY_DISABLE,tg,1,0,0)
 	elseif bit.band(top:GetType(),0x4) then
 		local tg=Duel.GetMatchingGroup(Card.IsAbleToRemove,tp,0,LOCATION_HAND,nil)
 		Duel.SetOperationInfo(0,CATEGORY_REMOVE,tg,1,0,0)
