@@ -5,11 +5,13 @@ end
 function c10100207.initial_effect(c)
 	--Negate
 	local e1=Effect.CreateEffect(c)
+  e1:SetCategory(CATEGORY_DISABLE)
+  e1:SetDescription(aux.Stringid(10100207,0))
 	e1:SetType(EFFECT_TYPE_QUICK_O)
 	e1:SetRange(LOCATION_HAND)
 	e1:SetCode(EVENT_CHAINING)
-  e1:SetCost(c10100207.cost1)
   e1:SetCondition(c10100207.condition1)
+  e1:SetCost(c10100207.cost1)
   e1:SetTarget(c10100207.target1)
 	e1:SetOperation(c10100207.operation1)
 	e1:SetCountLimit(1,10100207)
@@ -21,11 +23,6 @@ end
 function c10100207.filter1(c)
   return c:IsSetCard(0x15c) and c:IsType(TYPE_MONSTER)
 end
-function c10100207.cost1(e,tp,eg,ep,ev,re,r,rp,chk)
-  local c=e:GetHandler()
-	if chk==0 then return c:IsAbleToGraveAsCost() end
-	Duel.SendtoGrave(c,REASON_COST)
-end
 function c10100207.condition1(e,tp,eg,ep,ev,re,r,rp)
   for i=1,ev-1 do
     local ce=Duel.GetChainInfo(i,CHAININFO_TRIGGERING_EFFECT)
@@ -34,6 +31,11 @@ function c10100207.condition1(e,tp,eg,ep,ev,re,r,rp)
     end
   end
   return false
+end
+function c10100207.cost1(e,tp,eg,ep,ev,re,r,rp,chk)
+  local c=e:GetHandler()
+	if chk==0 then return c:IsAbleToGraveAsCost() end
+	Duel.SendtoGrave(c,REASON_COST)
 end
 function c10100207.target1(e,tp,eg,ep,ev,re,r,rp,chk)
 	local g=Group.CreateGroup()

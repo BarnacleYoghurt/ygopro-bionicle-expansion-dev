@@ -5,6 +5,8 @@ end
 function c10100214.initial_effect(c)
 	--Banish in the dark
 	local e1a=Effect.CreateEffect(c)
+  e1a:SetCategory(CATEGORY_REMOVE)
+  e1a:SetDescription(aux.Stringid(10100214,0))
 	e1a:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O)
 	e1a:SetRange(LOCATION_HAND)
 	e1a:SetCode(EVENT_DESTROYED)

@@ -8,7 +8,6 @@ function c10100211.initial_effect(c)
 	c:RegisterEffect(e1)
 	--Sacrifice
 	local e2=Effect.CreateEffect(c)
-	e2:SetDescription(aux.Stringid(10100023,1))
 	e2:SetType(EFFECT_TYPE_CONTINUOUS+EFFECT_TYPE_EQUIP)
 	e2:SetCode(EFFECT_DESTROY_REPLACE)
 	e2:SetRange(LOCATION_SZONE)
@@ -25,7 +24,7 @@ end
 function c10100211.target2(e,tp,eg,ep,ev,re,r,rp,chk)
 	local ec = e:GetHandler():GetEquipTarget()
 	if chk==0 then return Duel.IsExistingMatchingCard(Card.IsAbleToDeck,tp,LOCATION_MZONE,0,1,ec) end
-	return Duel.SelectYesNo(tp,aux.Stringid(10100023,3))
+	return Duel.SelectYesNo(tp,aux.Stringid(10100211,2))
 end
 function c10100211.operation2(e,tp,eg,ep,ev,re,r,rp)
 	local ec = e:GetHandler():GetEquipTarget()
