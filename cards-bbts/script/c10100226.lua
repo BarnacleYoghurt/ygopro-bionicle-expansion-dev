@@ -2,10 +2,11 @@
 function c10100226.initial_effect(c)
 	--Mass Flip
 	local e1=Effect.CreateEffect(c)
+  e1:SetCategory(CATEGORY_POSITION)
 	e1:SetType(EFFECT_TYPE_ACTIVATE)
 	e1:SetProperty(EFFECT_FLAG_CARD_TARGET)
-	e1:SetCode(EVENT_FREE_CHAIN)
 	e1:SetRange(LOCATION_SZONE)
+	e1:SetCode(EVENT_FREE_CHAIN)
 	e1:SetTarget(c10100226.target1)
 	e1:SetOperation(c10100226.operation1)
 	e1:SetCountLimit(1,10100226)
