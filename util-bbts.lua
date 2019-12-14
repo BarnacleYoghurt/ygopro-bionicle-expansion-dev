@@ -339,6 +339,8 @@ function BBTS.bohrokkaita_krana(baseC)
 	end
 	
 	local e=Effect.CreateEffect(baseC)
+  e:SetCategory(CATEGORY_SEARCH+CATEGORY_TOHAND+CATEGORY_TOGRAVE)
+  e:SetDescription(aux.Stringid(baseC:GetOriginalCode(),0))
 	e:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_F)
 	e:SetCode(EVENT_SPSUMMON_SUCCESS)
 	e:SetCondition(condition)
@@ -399,9 +401,11 @@ function BBTS.bohrokvakaita_switch(baseC)
 		end
 	end
 	local e=Effect.CreateEffect(baseC)
+  e:SetCategory(CATEGORY_SPECIAL_SUMMON)
+  e:SetDescription(aux.Stringid(baseC:GetOriginalCode(),0))
 	e:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O)
-	e:SetCode(EVENT_PHASE+PHASE_STANDBY)
 	e:SetRange(LOCATION_MZONE)
+	e:SetCode(EVENT_PHASE+PHASE_STANDBY)
 	e:SetCondition(condition)
 	e:SetCost(cost)
 	e:SetTarget(target)

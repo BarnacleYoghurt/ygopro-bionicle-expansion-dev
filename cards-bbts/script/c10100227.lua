@@ -10,6 +10,8 @@ function c10100227.initial_effect(c)
 	c:RegisterEffect(e1)
   --Shuffle
   local e2=Effect.CreateEffect(c)
+  e2:SetCategory(CATEGORY_TODECK+CATEGORY_DRAW)
+  e2:SetDescription(aux.Stringid(10100227,0))
   e2:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O)
   e2:SetProperty(EFFECT_FLAG_DELAY)
   e2:SetRange(LOCATION_GRAVE)

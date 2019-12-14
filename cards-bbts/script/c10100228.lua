@@ -6,18 +6,20 @@ function c10100228.initial_effect(c)
 	--Fusion Material
 	aux.AddFusionProcCode3(c,10100201,10100203,10100204,true,true)
 	c:EnableReviveLimit()
-	--Equip Krana
+	--Search Krana
 	local e1=bbts.bohrokkaita_krana(c)
 	c:RegisterEffect(e1)
 	--Gain ATK
 	local e2=Effect.CreateEffect(c)
+  e2:SetCategory(CATEGORY_ATKCHANGE)
+  e2:SetDescription(aux.Stringid(10100228,1))
 	e2:SetType(EFFECT_TYPE_QUICK_O)
-	e2:SetCode(EVENT_FREE_CHAIN)
-	e2:SetRange(LOCATION_MZONE)
 	e2:SetProperty(EFFECT_FLAG_CARD_TARGET)
-	e2:SetCountLimit(1)
+	e2:SetRange(LOCATION_MZONE)
+	e2:SetCode(EVENT_FREE_CHAIN)
 	e2:SetCost(c10100228.cost2)
 	e2:SetOperation(c10100228.operation2)
+	e2:SetCountLimit(1)
 	c:RegisterEffect(e2)
 end
 function c10100228.filter2(c)
