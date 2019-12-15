@@ -427,9 +427,10 @@ function bbts.bahrag_pendset(baseC)
 		end
 	end
 	local e=Effect.CreateEffect(baseC)
+  e:SetDescription(aux.Stringid(baseC:GetOriginalCode(),2))
 	e:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O)
-	e:SetCode(EVENT_PHASE+PHASE_STANDBY)
 	e:SetRange(LOCATION_EXTRA)
+	e:SetCode(EVENT_PHASE+PHASE_STANDBY)
 	e:SetCondition(condition)
 	e:SetTarget(target)
 	e:SetOperation(operation)
