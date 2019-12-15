@@ -2,14 +2,14 @@
 function c10100236.initial_effect(c)
 	--Reduce ATK
 	local e1=Effect.CreateEffect(c)
-	e1:SetDescription(aux.Stringid(10100236,0))
 	e1:SetCategory(CATEGORY_ATKCHANGE)
+	e1:SetDescription(aux.Stringid(10100236,0))
 	e1:SetType(EFFECT_TYPE_QUICK_O)
+	e1:SetRange(LOCATION_HAND+LOCATION_MZONE)
 	e1:SetCode(EVENT_FREE_CHAIN)	
 	e1:SetCost(c10100236.cost1)
 	e1:SetTarget(c10100236.target1)
 	e1:SetOperation(c10100236.operation1)
-	e1:SetRange(LOCATION_HAND+LOCATION_MZONE)
 	c:RegisterEffect(e1)
 end
 function c10100236.filter1a(c)

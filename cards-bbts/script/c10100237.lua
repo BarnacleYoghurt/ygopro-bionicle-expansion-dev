@@ -4,26 +4,26 @@ function c10100237.initial_effect(c)
 	aux.EnablePendulumAttribute(c)
 	--Special Summon
 	local e1=Effect.CreateEffect(c)
-	e1:SetDescription(aux.Stringid(10100237,0))
 	e1:SetCategory(CATEGORY_SPECIAL_SUMMON)
+	e1:SetDescription(aux.Stringid(10100237,0))
 	e1:SetType(EFFECT_TYPE_IGNITION)
 	e1:SetRange(LOCATION_PZONE)
 	e1:SetCost(c10100237.condition1)
 	e1:SetTarget(c10100237.target1)
 	e1:SetOperation(c10100237.operation1)
 	c:RegisterEffect(e1)
-	--Change BP
+	--Buffs
 	local e2=Effect.CreateEffect(c)
 	e2:SetDescription(aux.Stringid(10100237,1))
 	e2:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O)
   e2:SetProperty(EFFECT_FLAG_DELAY)
-	e2:SetCode(EVENT_CHANGE_POS)
 	e2:SetRange(LOCATION_PZONE)
+	e2:SetCode(EVENT_CHANGE_POS)
 	e2:SetCondition(c10100237.condition2)
 	e2:SetOperation(c10100237.operation2)
 	e2:SetCountLimit(1,10100237)
 	c:RegisterEffect(e2)
-	--Buffs
+	--Change BP
 	local e3=Effect.CreateEffect(c)
 	e3:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_CONTINUOUS)
 	e3:SetProperty(EFFECT_FLAG_DELAY)
@@ -78,29 +78,18 @@ function c10100237.operation2(e,tp,eg,ep,ev,re,r,rp)
     end
   end
 end
-function c10100237.condition2_2(e,tp,eg,ep,ev,re,r,rp)
-	return e:GetHandler():IsPosition(POS_FACEUP_ATTACK)
-end
-function c10100237.operation2_2(e,tp,eg,ep,ev,re,r,rp)
-	local c=e:GetHandler()
-	local e1=Effect.CreateEffect(c)
-	e1:SetType(EFFECT_TYPE_SINGLE)
-	e1:SetCode(EFFECT_UPDATE_ATTACK)
-	e1:SetValue(100*c:GetLevel())
-	e1:SetReset(RESET_EVENT+0x1fe0000+RESET_PHASE+PHASE_END)
-	c:RegisterEffect(e1)
-end
 function c10100237.condition3(e,tp,eg,ep,ev,re,r,rp)
 	return r==REASON_SYNCHRO
 end
 function c10100237.operation3(e,tp,eg,ep,ev,re,r,rp)
 	local c=re:GetHandler()
 	local e1=Effect.CreateEffect(c)
-	e1:SetDescription(aux.Stringid(10100237,2))
 	e1:SetCategory(CATEGORY_POSITION)
+	e1:SetDescription(aux.Stringid(10100237,2))
 	e1:SetType(EFFECT_TYPE_QUICK_O)
-	e1:SetCode(EVENT_FREE_CHAIN)
+  e1:SetProperty(EFFECT_FLAG_CLIENT_HINT)
 	e1:SetRange(LOCATION_MZONE)
+	e1:SetCode(EVENT_FREE_CHAIN)
 	e1:SetTarget(c10100237.target3_1)
 	e1:SetOperation(c10100237.operation3_1)
 	e1:SetCountLimit(1)
