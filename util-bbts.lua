@@ -3,7 +3,7 @@ bbts=BBTS
 --Bohrok
 function BBTS.bohrok_flip(baseC)
   local function filter(c,e,tp)
-    return c:IsSetCard(0x15c) and c:GetLevel()==4 and not c:IsCode(baseC:GetOriginalCode()) and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
+    return c:IsSetCard(0x15c) and c:GetLevel()==4 and not c:IsCode(baseC:GetOriginalCode()) and c:IsCanBeSpecialSummoned(e,0,tp,false,false,POS_FACEDOWN_DEFENSE)
   end
   local function target(e,tp,eg,ep,ev,re,r,rp,chk)
     if chk==0 then 
@@ -25,7 +25,6 @@ function BBTS.bohrok_flip(baseC)
 	e:SetCategory(CATEGORY_SPECIAL_SUMMON)
   e:SetDescription(aux.Stringid(baseC:GetOriginalCode(),0))
 	e:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_FLIP)
-	e:SetProperty(EFFECT_FLAG_DELAY)
 	e:SetTarget(target)
 	e:SetOperation(operation)
 	return e

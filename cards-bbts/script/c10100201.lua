@@ -35,7 +35,7 @@ function c10100201.target2(e,tp,eg,ep,ev,re,r,rp,chk)
 end
 function c10100201.operation2(e,tp,eg,ep,ev,re,r,rp)
 	local tc=Duel.GetFirstTarget()
-	if tc:IsRelateToEffect(e) then
+	if tc:IsRelateToEffect(e) and c10100201.filter2(tc) then
 		Duel.Destroy(tc,REASON_EFFECT)
 	end
 end
