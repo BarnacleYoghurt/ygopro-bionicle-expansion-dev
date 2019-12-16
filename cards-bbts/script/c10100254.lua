@@ -2,7 +2,7 @@
 function c10100254.initial_effect(c)
   --Seal
   local e1=Effect.CreateEffect(c)
-  e1:SetDescription(aux.Stringid(10100254,0))
+  e1:SetCategory(CATEGORY_REMOVE)
   e1:SetType(EFFECT_TYPE_ACTIVATE)
   e1:SetCode(EVENT_FREE_CHAIN)
   e1:SetTarget(c10100254.target1)
@@ -59,7 +59,7 @@ function c10100254.operation1(e,tp,eg,ep,ev,re,r,rp)
   if bg:GetCount()==0 or Duel.Remove(bg,POS_FACEUP,REASON_EFFECT) then
     local handc=Duel.GetFieldGroupCount(tp,0,LOCATION_HAND)
     local handgc=0
-    if math.min(fgc,handc)>0 and Duel.SelectYesNo(tp,aux.Stringid(10100254,1)) then
+    if math.min(fgc,handc)>0 and Duel.SelectYesNo(tp,aux.Stringid(10100254,0)) then
       if math.min(fgc,handc)==1 then
         handgc=1
       elseif math.min(fgc,handc)==2 then
@@ -75,7 +75,7 @@ function c10100254.operation1(e,tp,eg,ep,ev,re,r,rp)
       end
     end
     local g=Group.CreateGroup()
-    if handgc < 6 and Duel.SelectYesNo(tp,aux.Stringid(10100254,2)) then
+    if handgc < 6 and Duel.SelectYesNo(tp,aux.Stringid(10100254,1)) then
       g=Duel.SelectMatchingCard(tp,Card.IsAbleToRemove,tp,0,LOCATION_ONFIELD+LOCATION_GRAVE,1,6-handgc,nil)
     end
     if handgc>0 then

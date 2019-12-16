@@ -8,8 +8,8 @@ function c10100256.initial_effect(c)
 	--destroy replace
 	local e1=Effect.CreateEffect(c)
 	e1:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
-	e1:SetCode(EFFECT_DESTROY_REPLACE)
 	e1:SetRange(LOCATION_SZONE)
+	e1:SetCode(EFFECT_DESTROY_REPLACE)
 	e1:SetTarget(c10100256.target1)
 	e1:SetValue(c10100256.value1)
 	e1:SetOperation(c10100256.operation1)
@@ -17,6 +17,8 @@ function c10100256.initial_effect(c)
 	c:RegisterEffect(e1)
   --To hand
   local e2=Effect.CreateEffect(c)
+  e2:SetCategory(CATEGORY_TOHAND)
+  e2:SetDescription(aux.Stringid(10100256,0))
   e2:SetType(EFFECT_TYPE_IGNITION)
   e2:SetRange(LOCATION_SZONE)
   e2:SetCondition(c10100256.condition2)
@@ -36,7 +38,7 @@ function c10100256.target1(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then 
     return eg:IsExists(c10100256.filter1a,1,nil,tp) and Duel.IsExistingMatchingCard(c10100256.filter1b,tp,LOCATION_GRAVE,LOCATION_GRAVE,1,nil) 
   end
-	if Duel.SelectEffectYesNo(tp,e:GetHandler()) then
+	if Duel.SelectYesNo(tp,aux.Stringid(10100256,1)) then
 		local g=eg:Filter(c10100256.filter1a,nil,tp)
 		if g:GetCount()==1 then
 			e:SetLabelObject(g:GetFirst())
