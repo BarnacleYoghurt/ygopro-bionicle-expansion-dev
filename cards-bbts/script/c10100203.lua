@@ -18,16 +18,19 @@ function c10100203.initial_effect(c)
 	e2:SetCountLimit(1)
 	c:RegisterEffect(e2)
 end
+function c10100203.filter2(c)
+  return c:IsType(TYPE_SPELL+TYPE_TRAP) and c:IsDestructable()
+end
 function c10100203.target2(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.IsExistingTarget(Card.IsDestructable,tp,LOCATION_SZONE,LOCATION_SZONE,1,nil) end
-	local tg=Duel.SelectTarget(tp,Card.IsDestructable,tp,LOCATION_SZONE,LOCATION_SZONE,1,1,nil)
+	if chk==0 then return Duel.IsExistingTarget(c10100203.filter2,tp,LOCATION_ONFIELD,LOCATION_ONFIELD,1,nil) end
+	local tg=Duel.SelectTarget(tp,c10100203.filter2,tp,LOCATION_ONFIELD,LOCATION_ONFIELD,1,1,nil)
 	Duel.SetOperationInfo(0,CATEGORY_DESTROY,tg,1,0,0)
 end
 function c10100203.operation2(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
 	local tc=Duel.GetFirstTarget()
 	local seq=tc:GetSequence()
-	if c:IsRelateToEffect(e) and tc:IsRelateToEffect(e) and Duel.Destroy(tc,REASON_EFFECT) and seq<5 then
+	if tc:IsRelateToEffect(e) and Duel.Destroy(tc,REASON_EFFECT) and tc:IsPreviousLocation(LOCATION_SZONE) and seq<5 then
     local of = tc:GetControler()-tp
     if of<0 then of = -of end --0 if own card, 1 if opponent's
 		local e1=Effect.CreateEffect(c)
