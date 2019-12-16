@@ -16,7 +16,6 @@ function c10100206.initial_effect(c)
 	e2:SetCost(c10100206.cost2)
 	e2:SetTarget(c10100206.target2)
 	e2:SetOperation(c10100206.operation2)
-	e2:SetCountLimit(1)
 	c:RegisterEffect(e2)
 end
 function c10100206.condition2(e,tp,eg,ep,ev,re,r,rp)
@@ -28,15 +27,14 @@ function c10100206.cost2(e,tp,eg,ep,ev,re,r,rp,chk)
   Duel.SendtoDeck(c,nil,2,REASON_COST)
 end
 function c10100206.target2(e,tp,eg,ep,ev,re,r,rp,chk)
-	local c=e:GetHandler()
-	if chk==0 then return Duel.IsExistingMatchingCard(Card.IsDestructable,tp,LOCATION_ONFIELD,LOCATION_ONFIELD,1,c) end
-	local g=Duel.GetMatchingGroup(Card.IsDestructable,tp,LOCATION_ONFIELD,LOCATION_ONFIELD,c)
+	if chk==0 then return Duel.IsExistingMatchingCard(Card.IsDestructable,tp,LOCATION_ONFIELD,LOCATION_ONFIELD,1,nil) end
+	local g=Duel.GetMatchingGroup(Card.IsDestructable,tp,LOCATION_ONFIELD,LOCATION_ONFIELD,nil)
 	Duel.SetOperationInfo(0,CATEGORY_DESTROY,g,1,0,0)
 end
 function c10100206.operation2(e,tp,eg,ep,ev,re,r,rp)
 	local g=Duel.SelectMatchingCard(tp,Card.IsDestructable,tp,LOCATION_ONFIELD,LOCATION_ONFIELD,1,1,nil)
 	if g:GetCount()>0 then
-    Duel.Destroy(g,REASON_EFFECT) 
+    Duel.Destroy(g,REASON_EFFECT)
 	end
 end
 
