@@ -31,9 +31,6 @@ function c10100204.initial_effect(c)
 	e3:SetCountLimit(1)
 	c:RegisterEffect(e3)
 end
-function c10100204.value2a(e,re,rp)
-	return re:GetHandlerPlayer()~=e:GetHandler()
-end
 function c10100204.condition2(e)
 	return Duel.GetAttacker()==e:GetHandler() or Duel.GetAttackTarget()==e:GetHandler()
 end
