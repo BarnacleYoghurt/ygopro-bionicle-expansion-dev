@@ -20,13 +20,10 @@ function c10100207.initial_effect(c)
 	local e2=bbts.krana_summon(c)
 	c:RegisterEffect(e2)
 end
-function c10100207.filter1(c)
-  return c:IsSetCard(0x15c) and c:IsType(TYPE_MONSTER)
-end
 function c10100207.condition1(e,tp,eg,ep,ev,re,r,rp)
   for i=1,ev-1 do
     local ce=Duel.GetChainInfo(i,CHAININFO_TRIGGERING_EFFECT)
-    if c10100207.filter1(ce:GetHandler()) then
+    if ce:IsActiveType(TYPE_MONSTER) and ce:GetHandler():IsSetCard(0x15c) then
       return true
     end
   end
@@ -42,7 +39,7 @@ function c10100207.target1(e,tp,eg,ep,ev,re,r,rp,chk)
   for i=1,ev do
     local ce=Duel.GetChainInfo(i,CHAININFO_TRIGGERING_EFFECT)
     local tc=ce:GetHandler()
-    if tc:IsRelateToEffect(ce) and tc:IsFaceup() and not tc:IsSetCard(0x15c) and Duel.IsChainDisablable(i) then
+    if tc:IsRelateToEffect(ce) and tc:IsFaceup() and tc:IsLocation(LOCATION_ONFIELD) and not tc:IsSetCard(0x15c) and Duel.IsChainDisablable(i) then
       g:AddCard(ce:GetHandler())
     end
   end
@@ -54,7 +51,7 @@ function c10100207.operation1(e,tp,eg,ep,ev,re,r,rp)
   for i=1,ev do
     local ce=Duel.GetChainInfo(i,CHAININFO_TRIGGERING_EFFECT)
     local tc=ce:GetHandler()
-    if tc:IsRelateToEffect(ce) and tc:IsFaceup() and not tc:IsSetCard(0x15c) and Duel.IsChainDisablable(i) then
+    if tc:IsRelateToEffect(ce) and tc:IsFaceup() and tc:IsLocation(LOCATION_ONFIELD) and not tc:IsSetCard(0x15c) and Duel.IsChainDisablable(i) then
       Duel.NegateRelatedChain(tc,RESET_TURN_SET)
       local e1=Effect.CreateEffect(c)
       e1:SetType(EFFECT_TYPE_SINGLE)

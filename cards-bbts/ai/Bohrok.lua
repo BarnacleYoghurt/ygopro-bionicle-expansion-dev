@@ -108,18 +108,42 @@ end
 
 DECK_BOHROK = NewDeck("Bohrok",C_Beware,BohrokStartup) 
 
-BohrokActivateBlacklist = Merge({Cs_Krana,{C_Beware,C_Nest,C_WakeOne,C_WakeAll,C_Invasion}}) --Merge({Cs_Monsters,Cs_Spells,Cs_Traps})
-BohrokSummonBlacklist = Merge({Cs_Bohrok}) -- Merge({Cs_Monsters})
-BohrokSetBlacklist=  Merge({Cs_Bohrok,Cs_BohrokVa}) -- Merge({Cs_Monsters,Cs_Spells,Cs_Traps})
+BohrokActivateBlacklist = {C_Tahnok} --Merge({Cs_Krana,{C_Beware,C_Nest,C_WakeOne,C_WakeAll,C_Invasion}}) --Merge({Cs_Monsters,Cs_Spells,Cs_Traps})
+BohrokSummonBlacklist = {C_Tahnok} --Merge({Cs_Bohrok}) -- Merge({Cs_Monsters})
+BohrokSetBlacklist=   {C_Tahnok} --Merge({Cs_Bohrok,Cs_BohrokVa}) -- Merge({Cs_Monsters,Cs_Spells,Cs_Traps})
 BohrokRepoBlacklist= Merge({}) -- Merge({Cs_Monsters})
 BohrokUnchainable= {C_WakeOne,C_WakeAll,C_Invasion} -- Merge({Cs_Traps,{C_Confrontation,C_BeforeTime}})
 
+function IsFacedownBohrokSummonEffect(code)
+  return (code >= 10100201 and code <= 10100206) -- Bohrok
+    or code = 10100223 -- Bohrok Invasion
+    or code = 10100231 -- Va Kaita Za
+end
+--Tahnok
+function IsTahnokTarget(c)
+  return c:IsFaceup() and c:IsDestructable()
+end
+function TahnokCond(loc,c)
+  if loc==PRIO_TOFIELD or loc==PRIO_TOHAND then
+    local e=Duel.GetChainInfo(0,CHAININFO_TRIGGERING_EFFECT)
+    local rc=nil
+    if e then
+      rc=e:GetHandler()
+      print("Checking potential Tahnok summon triggered by "..rc:GetCode())
+    end
+    return Duel.IsExistingMatchingCard(IsTahnokTarget,player_ai,0,LOCATION_MZONE,1,nil) -- Opponent has target for destruction effect
+      and (loc==PRIO_TOFIELD or NormalSummonCheck(player_ai)) -- Can get Tahnok on the field this turn
+      and not (rc and IsFacedownBohrokSummonEffect(rc:GetCode())) -- Not being summoned face-down (more general check would be nice)
+  end
+  return true
+end
 
+--For adding to: hand, hand+, field, field+, grave, grave+, misc, misc+, banish, banish+ (+ applies if condition false)
 BohrokPriorityList={                      
 --[12345678] = {1,1,1,1,1,1,1,1,1,1,XXXCond},  -- Format
 
 -- Bohrok
-[C_Tahnok]        = {1,1,1,1,1,1,1,1,1,1},
+[C_Tahnok]        = {5,2,5,3,1,1,1,1,1,1,TahnokCond},
 [C_Gahlok]        = {1,1,1,1,1,1,1,1,1,1},
 [C_Nuhvok]        = {1,1,1,1,1,1,1,1,1,1},
 [C_Pahrak]        = {1,1,1,1,1,1,1,1,1,1},
@@ -141,7 +165,7 @@ BohrokPriorityList={
 [C_LehvakVa]      = {1,1,1,1,1,1,1,1,1,1},
 [C_Confrontation] = {1,1,1,1,1,1,1,1,1,1},
 [C_Invasion]      = {1,1,1,1,1,1,1,1,1,1},
-[C_Nest]          = {9,9,1,1,1,1,1,1,1,1},
+[C_Nest]          = {1,1,1,1,1,1,1,1,1,1},
 [C_WakeOne]       = {1,1,1,1,1,1,1,1,1,1},
 [C_WakeAll]       = {1,1,1,1,1,1,1,1,1,1},
 [C_SwarmFusion]   = {1,1,1,1,1,1,1,1,1,1},
@@ -161,7 +185,13 @@ function BohrokInit(cards)
   local Rep = cards.repositionable_cards
   local SetMon = cards.monster_setable_cards
   
-  if HasID(Act,C_Beware) then --Always useful, therefore first priority (Possible exception: Planned plays will leave monster in GY that can be recovered)
+  -- Set Bohrok; prioritize by DEF (Careful: Don't crowd field too much)
+  if CanSetBohrok(SetMon) then
+    print("Settin' Bohrok.")
+    return {COMMAND_SET_MONSTER,CurrentIndex}
+  end
+  
+  --[[if HasID(Act,C_Beware) then --Always useful, therefore first priority (Possible exception: Planned plays will leave monster in GY that can be recovered)
     print("Beware the Swarm!")
     return {COMMAND_ACTIVATE,CurrentIndex}
   end
@@ -251,11 +281,11 @@ function BohrokInit(cards)
   if HasID(Act,C_WakeAll) and Archetype_Card_Count(AIMon(),0x15c,POS_FACEDOWN) > 0 then
     print("...You Wake Them All")
     return {COMMAND_ACTIVATE,CurrentIndex}
-  end
+  end--]]
   print("Default to standard behavior")
 end
 function BohrokCard(cards,min,max,id,c) 
-  if id == C_Beware then
+  --[[if id == C_Beware then
     return Add(cards)
   end
   if id >= C_Tahnok and id <= C_Lehvak then
@@ -270,20 +300,20 @@ function BohrokCard(cards,min,max,id,c)
   end
   if id==C_Nest and FilterLocation(c,LOCATION_GRAVE) then
     return BestTargets(cards,1,TARGET_DESTROY)
-  end
+  end-]]
 end
 function BohrokChain(cards, only_chains_by_player, forced)
-  if HasID(cards,C_WakeOne,WakeOneSearchCond) then --Search trap
+  --[[if HasID(cards,C_WakeOne,WakeOneSearchCond) then --Search trap
     print("Search with If You Wake One...")
     return 1,CurrentIndex
   end
   if HasIDNotNegated(cards,C_Vu,false,nil,LOCATION_SZONE,ChainNegation) then --Negate targeting effect with Vu
     print("Literally Vu")
     return 1,CurrentIndex
-  end
+  end--]]
 end
 function BohrokEffectYesNo(id, triggeringCard)
-  if id==C_WakeOne then --Summon extra Bohrok
+  --[[if id==C_WakeOne then --Summon extra Bohrok
     print("Summon Bohrok with If You Wake One...")
     return 1
   end
@@ -294,14 +324,14 @@ function BohrokEffectYesNo(id, triggeringCard)
   if id==C_Nest and FilterLocation(triggeringCard,LOCATION_GRAVE) then --Destroy using Bohrok Nest
     print("The nest has burst.")
     return {COMMAND_ACTIVATE,CurrentIndex}
-  end
+  end--]]
 end
 function BohrokYesNo(description_id)
-  print(description_id)
+  --[[print(description_id)
   if description_id==DescOf(C_Invasion,0) then
     print("Bohrok Invasion begins.")
     return 1
-  end
+  end--]]
 end
 
 function CanSynchroCW(Sum,SpSum)
