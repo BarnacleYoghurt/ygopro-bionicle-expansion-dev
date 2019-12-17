@@ -42,8 +42,6 @@ function c10100208.target1(e,tp,eg,ep,ev,re,r,rp,chk)
 end
 function c10100208.operation1(e,tp,eg,ep,ev,re,r,rp)
 	if Duel.NegateActivation(ev) and re:GetHandler():IsRelateToEffect(re) then
-		if Duel.Destroy(eg,REASON_EFFECT) then
-			Duel.Destroy(e:GetHandler(),REASON_EFFECT)
-		end 
+		Duel.Destroy(eg,REASON_EFFECT)
 	end
 end
