@@ -28,6 +28,7 @@ function c10100211.target2(e,tp,eg,ep,ev,re,r,rp,chk)
 end
 function c10100211.operation2(e,tp,eg,ep,ev,re,r,rp)
 	local ec = e:GetHandler():GetEquipTarget()
+  Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TODECK)
 	local g = Duel.SelectMatchingCard(tp,Card.IsAbleToDeck,tp,LOCATION_MZONE,0,1,1,ec)
 	if g:GetCount() > 0 and Duel.SendtoDeck(g,nil,2,REASON_EFFECT)~=0 then
     if g:IsExists(Card.IsLocation,1,nil,LOCATION_DECK) then Duel.ShuffleDeck(tp) end
