@@ -22,7 +22,7 @@ function c10100212.initial_effect(c)
 	c:RegisterEffect(e3)
 end
 function c10100212.target2(e,c)
-	return c:IsFaceup() and c:IsLocation(LOCATION_MZONE) and c:IsSetCard(0x15c) and c:IsReason(REASON_BATTLE)
+	return c:IsFaceup() and c:IsSetCard(0x15c)
 end
 function c10100212.value2(e,re,r,rp)
 	return bit.band(r,REASON_BATTLE)~=0
