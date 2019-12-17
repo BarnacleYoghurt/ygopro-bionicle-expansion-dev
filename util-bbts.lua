@@ -15,6 +15,7 @@ function BBTS.bohrok_flip(baseC)
   function operation(e,tp,eg,ep,ev,re,r,rp)
     if Duel.GetLocationCount(tp,LOCATION_MZONE)<=0 then return end
     local c=e:GetHandler()
+    Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
     local g=Duel.SelectMatchingCard(tp,filter,tp,LOCATION_DECK,0,1,1,nil,e,tp)
     if g:GetCount() > 0 then
       Duel.SpecialSummon(g,0,tp,tp,false,false,POS_FACEDOWN_DEFENSE)
@@ -171,6 +172,8 @@ function BBTS.krana_summon(baseC)
 		Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,g,1,0,0)
 	end
 	local function operation(e,tp,eg,ep,ev,re,r,rp)
+    if Duel.GetLocationCount(tp,LOCATION_MZONE)<=0 then return end
+    Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
 		local g=Duel.SelectMatchingCard(tp,filter,tp,LOCATION_DECK,0,1,1,nil,e,tp)
 		if g:GetCount() > 0 then
 			if Duel.SpecialSummon(g,0,tp,tp,false,false,POS_FACEUP_ATTACK) then

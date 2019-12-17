@@ -38,6 +38,7 @@ function c10100202.target2(e,tp,eg,ep,ev,re,r,rp,chk)
 		end
 	end
 	if top:IsType(TYPE_MONSTER) then
+		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_DESTROY)
 		local tg=Duel.SelectTarget(tp,Card.IsDestructable,tp,0,LOCATION_ONFIELD,1,1,nil)
 		Duel.SetOperationInfo(0,CATEGORY_DESTROY,tg,1,0,0)
 	elseif top:IsType(TYPE_SPELL) then

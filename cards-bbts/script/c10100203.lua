@@ -23,6 +23,7 @@ function c10100203.filter2(c)
 end
 function c10100203.target2(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingTarget(c10100203.filter2,tp,LOCATION_ONFIELD,LOCATION_ONFIELD,1,nil) end
+  Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_DESTROY)
 	local tg=Duel.SelectTarget(tp,c10100203.filter2,tp,LOCATION_ONFIELD,LOCATION_ONFIELD,1,1,nil)
 	Duel.SetOperationInfo(0,CATEGORY_DESTROY,tg,1,0,0)
 end

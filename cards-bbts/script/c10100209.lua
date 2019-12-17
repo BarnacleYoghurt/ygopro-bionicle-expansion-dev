@@ -17,7 +17,7 @@ function c10100209.initial_effect(c)
 	local e3=Effect.CreateEffect(c)
 	e3:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
 	e3:SetRange(LOCATION_SZONE)
-	e3:SetCode(EVENT_PRE_BATTLE_DAMAGE)
+	e3:SetCode(EVENT_PRE_BATTLE_DAMAGE)a
 	e3:SetCondition(c10100209.condition3)
 	e3:SetOperation(c10100209.operation3)
 	c:RegisterEffect(e3)
