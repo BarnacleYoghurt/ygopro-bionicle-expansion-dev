@@ -31,7 +31,7 @@ function c10100203.operation2(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
 	local tc=Duel.GetFirstTarget()
 	local seq=tc:GetSequence()
-	if tc:IsRelateToEffect(e) and Duel.Destroy(tc,REASON_EFFECT) and tc:IsPreviousLocation(LOCATION_SZONE) and seq<5 then
+	if tc:IsRelateToEffect(e) and Duel.Destroy(tc,REASON_EFFECT)>0 and tc:IsPreviousLocation(LOCATION_SZONE) and seq<5 then
     local of = tc:GetControler()-tp
     if of<0 then of = -of end --0 if own card, 1 if opponent's
 		local e1=Effect.CreateEffect(c)

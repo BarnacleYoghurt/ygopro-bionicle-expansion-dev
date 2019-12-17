@@ -64,6 +64,6 @@ function c10100207.operation1(e,tp,eg,ep,ev,re,r,rp)
       e2:SetValue(RESET_TURN_SET)
       e2:SetReset(RESET_EVENT+0x1fe0000+RESET_PHASE+PHASE_END)
       tc:RegisterEffect(e2)
-      end
+    end
   end
 end

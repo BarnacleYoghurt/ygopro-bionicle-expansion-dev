@@ -176,7 +176,7 @@ function BBTS.krana_summon(baseC)
     Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
 		local g=Duel.SelectMatchingCard(tp,filter,tp,LOCATION_DECK,0,1,1,nil,e,tp)
 		if g:GetCount() > 0 then
-			if Duel.SpecialSummon(g,0,tp,tp,false,false,POS_FACEUP_ATTACK) then
+			if Duel.SpecialSummon(g,0,tp,tp,false,false,POS_FACEUP_ATTACK)>0 then
 				Duel.BreakEffect()
 				Duel.SkipPhase(tp,PHASE_MAIN1,RESET_PHASE+PHASE_END,1)
 				local e1=Effect.CreateEffect(e:GetHandler())
