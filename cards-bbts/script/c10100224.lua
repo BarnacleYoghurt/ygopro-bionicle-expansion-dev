@@ -49,7 +49,7 @@ function c10100224.value1b(e,re,rp)
 	return rp~=e:GetHandlerPlayer()
 end
 function c10100224.filter2(c,tp)
-  return c:IsSetCard(0x15c) and c:GetOwner() == tp and c:IsPreviousPosition(POS_FACEUP) and c:IsPosition(POS_FACEDOWN)
+  return c:IsSetCard(0x15c) and c:GetOwner()==tp and c:IsPreviousPosition(POS_FACEUP) and c:IsPosition(POS_FACEDOWN)
 end
 function c10100224.condition2(e,tp,eg,ep,ev,re,r,rp)
 	return eg:IsExists(c10100224.filter2,1,nil,tp)
@@ -70,13 +70,14 @@ function c10100224.condition3(e,tp,eg,ep,ev,re,r,rp)
 end
 function c10100224.target3(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingTarget(Card.IsDestructable,tp,0,LOCATION_ONFIELD,1,nil) end
+  Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_DESTROY)
 	local g=Duel.SelectTarget(tp,Card.IsDestructable,tp,0,LOCATION_ONFIELD,1,1,nil)
 	Duel.SetOperationInfo(0,CATEGORY_DESTROY,tc,1,0,0)
 end
 function c10100224.operation3(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
 	local tc=Duel.GetFirstTarget()
-	if c:IsRelateToEffect(e) and tc:IsRelateToEffect(e) then 
+	if tc:IsRelateToEffect(e) then 
 		Duel.Destroy(tc,REASON_EFFECT)
 	end
 end

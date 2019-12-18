@@ -37,7 +37,7 @@ function c10100222.target1(e,tp,eg,ep,ev,re,r,rp,chk)
 end
 function c10100222.operation1(e,tp,eg,ep,ev,re,r,rp)
 	local tc=Duel.GetFirstTarget()
-	if tc:IsRelateToEffect(e) and tc:IsFaceup() then
+	if tc:IsRelateToEffect(e) and c10100222.filter1b(tc) then
 		local e1a=Effect.CreateEffect(e:GetHandler())
 		e1a:SetType(EFFECT_TYPE_SINGLE)
 		e1a:SetCode(EFFECT_UPDATE_ATTACK)

@@ -34,7 +34,7 @@ function c10100223.initial_effect(c)
 	c:RegisterEffect(e2)
 end
 function c10100223.filter0(c,e,tp)
-	return c:IsSetCard(0x15c) and c:GetLevel()==4 and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
+	return c:IsSetCard(0x15c) and c:GetLevel()==4 and c:IsCanBeSpecialSummoned(e,0,tp,false,false,POS_FACEDOWN_DEFENSE)
 end
 function c10100223.target0(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return true end
@@ -46,7 +46,8 @@ function c10100223.target0(e,tp,eg,ep,ev,re,r,rp,chk)
 	end
 end
 function c10100223.operation0(e,tp,eg,ep,ev,re,r,rp)
-	if Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and e:GetLabel()>0 then
+	if e:GetHandler():IsRelateToEffect(e) and Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and e:GetLabel()>0 then
+    Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
 		local g=Duel.SelectMatchingCard(tp,c10100223.filter0,tp,LOCATION_GRAVE,0,1,1,nil,e,tp)
 		if g:GetCount() > 0 then
 			Duel.SpecialSummon(g,0,tp,tp,false,false,POS_FACEDOWN_DEFENSE)
@@ -77,15 +78,16 @@ function c10100223.target1(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingMatchingCard(c10100223.filter1a,tp,LOCATION_MZONE,0,1,nil) end
 end
 function c10100223.operation1(e,tp,eg,ep,ev,re,r,rp)
-	local e1=Effect.CreateEffect(e:GetHandler())
-	e1:SetType(EFFECT_TYPE_SINGLE)
-	e1:SetCode(EFFECT_UPDATE_ATTACK)
-	e1:SetValue(400)
-	e1:SetReset(RESET_EVENT+0x1fe0000+RESET_PHASE+PHASE_END)
+  if not e:GetHandler():IsRelateToEffect(e) then return end
 	local g=Duel.GetMatchingGroup(c10100223.filter1a,tp,LOCATION_MZONE,0,nil)
 	local tc=g:GetFirst()
 	while tc do
-		tc:RegisterEffect(e1:Clone())
+    local e1=Effect.CreateEffect(e:GetHandler())
+    e1:SetType(EFFECT_TYPE_SINGLE)
+    e1:SetCode(EFFECT_UPDATE_ATTACK)
+    e1:SetValue(400)
+    e1:SetReset(RESET_EVENT+0x1fe0000+RESET_PHASE+PHASE_END)
+		tc:RegisterEffect(e1)
 		tc=g:GetNext()
 	end
 end
@@ -100,15 +102,15 @@ function c10100223.target2(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingMatchingCard(c10100223.filter2,tp,LOCATION_MZONE,0,1,nil) end
 end
 function c10100223.operation2(e,tp,eg,ep,ev,re,r,rp)
-	local e1=Effect.CreateEffect(e:GetHandler())
-	e1:SetType(EFFECT_TYPE_SINGLE)
-	e1:SetCode(EFFECT_UPDATE_DEFENSE)
-	e1:SetValue(800)
-	e1:SetReset(RESET_EVENT+0x1fe0000+RESET_PHASE+PHASE_END)
 	local g=Duel.GetMatchingGroup(c10100223.filter2,tp,LOCATION_MZONE,0,nil)
 	local tc=g:GetFirst()
 	while tc do
-		tc:RegisterEffect(e1:Clone())
+    local e1=Effect.CreateEffect(e:GetHandler())
+    e1:SetType(EFFECT_TYPE_SINGLE)
+    e1:SetCode(EFFECT_UPDATE_DEFENSE)
+    e1:SetValue(800)
+    e1:SetReset(RESET_EVENT+0x1fe0000+RESET_PHASE+PHASE_END)
+		tc:RegisterEffect(e1)
 		tc=g:GetNext()
 	end
 end
