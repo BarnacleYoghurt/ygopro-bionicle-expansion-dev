@@ -14,7 +14,7 @@ function c10100215.filter1a(c)
 	return c:IsSetCard(0x15c) and c:IsAbleToHand()
 end
 function c10100215.filter1b(c,lvl)
-	return c10100215.filter1a(c) and c:IsType(TYPE_MONSTER) and c:GetLevel()~=lvl
+	return c10100215.filter1a(c) and c:IsLevelAbove(0) and c:GetLevel()~=lvl
 end
 function c10100215.target1(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingMatchingCard(c10100215.filter1a,tp,LOCATION_DECK,0,1,nil) end
@@ -33,11 +33,11 @@ function c10100215.operation1(e,tp,eg,ep,ev,re,r,rp)
 				Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_ATOHAND)
 				local g2=Duel.SelectMatchingCard(tp,c10100215.filter1b,tp,LOCATION_GRAVE,0,1,1,nil,lvl)
 				if g2:GetCount()>0 then
-					if Duel.SendtoHand(g2,nil,REASON_EFFECT) then
+					if Duel.SendtoHand(g2,nil,REASON_EFFECT)>0 then
             Duel.ConfirmCards(1-tp,g2)
-            Duel.BreakEffect()
             local dg=Duel.SelectMatchingCard(tp,Card.IsAbleToDeck,tp,LOCATION_HAND,0,1,1,nil)
             if dg:GetCount()>0 then
+              Duel.BreakEffect()
               Duel.SendtoDeck(dg,nil,2,REASON_EFFECT)
             end
           end
