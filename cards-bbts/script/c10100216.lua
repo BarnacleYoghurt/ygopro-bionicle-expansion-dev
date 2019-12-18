@@ -21,18 +21,21 @@ function c10100216.initial_effect(c)
 	c:RegisterEffect(e3)
 end
 function c10100216.target2(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.GetFieldGroupCount(tp,LOCATION_DECK,0)>2 end
+	if chk==0 then return Duel.GetFieldGroupCount(tp,LOCATION_DECK,0)>2 and Duel.IsExistingMatchingCard(Card.IsAbleToRemove,tp,LOCATION_DECK,0,1,nil) end
 end
 function c10100216.operation2(e,tp,eg,ep,ev,re,r,rp)
+  if Duel.GetFieldGroupCount(tp,LOCATION_DECK,0)<=2 then return end
 	local c=e:GetHandler()
+  Duel.ConfirmDecktop(tp, 3)
 	local g=Duel.GetDecktopGroup(tp,3)
 	if g:GetCount()>0 then
+    Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_REMOVE)
 		local bg = g:FilterSelect(tp,Card.IsAbleToRemove,1,1,nil)
 		if bg:GetCount()>0 then
 			Duel.DisableShuffleCheck()
 			Duel.Remove(bg,POS_FACEUP,REASON_EFFECT)
 			local tc = bg:GetFirst()
-			if tc:IsSetCard(0x15c) then
+			if tc:IsSetCard(0x15c) and tc:IsLevelAbove(0) then
 				local e1=Effect.CreateEffect(c)
 				e1:SetType(EFFECT_TYPE_SINGLE)
 				e1:SetProperty(EFFECT_FLAG_COPY_INHERIT)

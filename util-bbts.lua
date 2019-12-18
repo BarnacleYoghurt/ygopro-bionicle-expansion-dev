@@ -236,6 +236,7 @@ function BBTS.bohrokva_krana(baseC)
 		Duel.SetOperationInfo(0,CATEGORY_TOHAND,g,1,0,0)
 	end
 	local function operation_1(e,tp,eg,ep,ev,re,r,rp)
+    Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_ATOHAND)
 		local g=Duel.SelectMatchingCard(tp,filter_1,tp,LOCATION_REMOVED,0,1,1,nil)
 		if g:GetCount()>0 then
 			Duel.SendtoHand(g,nil,REASON_EFFECT)
