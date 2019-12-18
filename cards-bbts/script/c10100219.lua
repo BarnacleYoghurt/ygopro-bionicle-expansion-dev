@@ -29,6 +29,7 @@ function c10100219.target2(e,tp,eg,ep,ev,re,r,rp,chk)
 	Duel.SetOperationInfo(0,CATEGORY_TODECK,g,1,0,0)
 end
 function c10100219.operation2(e,tp,eg,ep,ev,re,r,rp)
+  Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TODECK)
 	local g = Duel.SelectMatchingCard(tp,c10100219.filter2,tp,LOCATION_GRAVE,0,1,1,nil)
 	if g:GetCount()>0 then
 		Duel.SendtoDeck(g:GetFirst(),nil,0,REASON_EFFECT)
