@@ -19,7 +19,7 @@ function c10100240.filter1a(c)
 	return c:IsType(TYPE_MONSTER) and c:IsSetCard(0x15a) and c:IsAbleToRemoveAsCost()
 end
 function c10100240.filter1b(c)
-	return c:IsType(TYPE_MONSTER) and c:IsAttackAbove(2000)
+	return c:IsType(TYPE_MONSTER) and c:IsFaceup() and c:IsAttackAbove(2000)
 end
 function c10100240.cost1(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return e:GetHandler():IsAbleToRemoveAsCost() and Duel.IsExistingMatchingCard(c10100240.filter1a,tp,LOCATION_GRAVE,0,1,nil) end
@@ -40,7 +40,8 @@ function c10100240.target1(e,tp,eg,ep,ev,re,r,rp,chk)
 end
 function c10100240.operation1(e,tp,eg,ep,ev,re,r,rp)
 	local tc=Duel.GetFirstTarget()
-	if tc:IsRelateToEffect(e) and Duel.Remove(tc,POS_FACEUP,REASON_EFFECT+REASON_TEMPORARY) then
+  local cond=c10100240.filter1b(tc)
+	if tc:IsRelateToEffect(e) and Duel.Remove(tc,POS_FACEUP,REASON_EFFECT+REASON_TEMPORARY)>0 then
 		tc:RegisterFlagEffect(10100240,RESET_EVENT+0x1fe0000+RESET_PHASE+PHASE_END,0,1)
 		local e1=Effect.CreateEffect(e:GetHandler())
 		e1:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
@@ -51,7 +52,7 @@ function c10100240.operation1(e,tp,eg,ep,ev,re,r,rp)
 		e1:SetCountLimit(1)
 		e1:SetReset(RESET_PHASE+PHASE_END)
 		Duel.RegisterEffect(e1,tp)
-		if c10100240.filter1b(tc) then
+		if cond then
 			local g=Duel.GetMatchingGroup(Card.IsAbleToRemove,tp,0,LOCATION_HAND,nil)
 			if g:GetCount()>0 then
 				local sg=g:RandomSelect(tp,1)

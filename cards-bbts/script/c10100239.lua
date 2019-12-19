@@ -57,7 +57,7 @@ function c10100239.filter3a(c)
 	return c:IsFaceup() and c:IsCode(10100239)
 end
 function c10100239.filter3b(c)
-	return c:IsPosition(POS_FACEUP_ATTACK) and c:IsLevelBelow(4) and c:IsSetCard(0x15a) -- and c:IsCanChangePosition()
+	return c:IsPosition(POS_FACEUP_ATTACK) and c:IsLevelBelow(4) and c:IsSetCard(0x15a)
 end
 function c10100239.condition3(e,c)
 	if c==nil then return true end
