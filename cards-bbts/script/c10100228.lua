@@ -30,8 +30,7 @@ function c10100228.cost2(e,tp,eg,ep,ev,re,r,rp,chk)
 		return Duel.IsExistingMatchingCard(c10100228.filter2,tp,LOCATION_GRAVE,0,1,nil)
 	end
 	local g=Duel.SelectMatchingCard(tp,c10100228.filter2,tp,LOCATION_GRAVE,0,1,3,nil)
-	e:SetLabel(g:GetCount())
-	Duel.Remove(g,POS_FACEUP,REASON_COST)
+	e:SetLabel(Duel.Remove(g,POS_FACEUP,REASON_COST))
 end
 function c10100228.operation2(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()

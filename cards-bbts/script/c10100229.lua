@@ -28,8 +28,7 @@ end
 function c10100229.cost2(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingMatchingCard(c10100229.filter2,tp,LOCATION_GRAVE,0,1,nil) end
 	local g=Duel.SelectMatchingCard(tp,c10100229.filter2,tp,LOCATION_GRAVE,0,1,3,nil)
-  e:SetLabel(g:GetCount())
-	Duel.Remove(g,POS_FACEUP,REASON_COST)
+	e:SetLabel(Duel.Remove(g,POS_FACEUP,REASON_COST))
 end
 function c10100229.target2(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingMatchingCard(Card.IsAbleToRemove,tp,0,LOCATION_GRAVE,1,nil) end

@@ -312,16 +312,14 @@ end
 --Bohrok Kaita
 function BBTS.bohrokkaita_krana(baseC)
 	local function filter(c)
-		return c:IsType(TYPE_MONSTER) and c:IsSetCard(0x15d) and c:IsAbleToGrave()
+		return c:IsType(TYPE_MONSTER) and c:IsSetCard(0x15d) and c:IsAbleToHand()
 	end
 	local function condition(e,tp,eg,ep,ev,re,r,rp)
 		return bit.band(e:GetHandler():GetSummonType(),SUMMON_TYPE_FUSION)==SUMMON_TYPE_FUSION
 	end
 	local function target(e,tp,eg,ep,ev,re,r,rp,chk)
-		if chk==0 then 
-			return Duel.IsExistingMatchingCard(filter,tp,LOCATION_DECK,0,1,nil) 
-			and Duel.GetLocationCount(tp,LOCATION_SZONE)>0 
-		end
+		if chk==0 then return Duel.IsExistingMatchingCard(filter,tp,LOCATION_DECK,0,1,nil) end
+    Duel.SetOperationInfo(0,CATEGORY_TOHAND,nil,1,tp,LOCATION_DECK)
 	end
 	local function operation(e,tp,eg,ep,ev,re,r,rp)
 		local c=e:GetHandler()
@@ -330,10 +328,10 @@ function BBTS.bohrokkaita_krana(baseC)
 		if g:GetCount()>0 then
 			Duel.ConfirmCards(1-tp,g)
 			Duel.Hint(HINT_SELECTMSG,1-tp,HINTMSG_EQUIP)
-			local eg=g:Select(1-tp,1,1,nil)
-			if eg:GetCount()>0 then
-        if Duel.SendtoHand(eg,nil,REASON_EFFECT) then
-          g:RemoveCard(eg:GetFirst())
+			local ag=g:Select(1-tp,1,1,nil)
+			if ag:GetCount()>0 then
+        if Duel.SendtoHand(ag,nil,REASON_EFFECT)>0 then
+          g:RemoveCard(ag:GetFirst())
         end
 			end
 			if g:GetCount()>0 then
@@ -343,7 +341,7 @@ function BBTS.bohrokkaita_krana(baseC)
 	end
 	
 	local e=Effect.CreateEffect(baseC)
-  e:SetCategory(CATEGORY_SEARCH+CATEGORY_TOHAND+CATEGORY_TOGRAVE)
+  e:SetCategory(CATEGORY_SEARCH+CATEGORY_TOHAND)
   e:SetDescription(aux.Stringid(baseC:GetOriginalCode(),0))
 	e:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_F)
 	e:SetCode(EVENT_SPSUMMON_SUCCESS)
