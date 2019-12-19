@@ -396,7 +396,6 @@ function BBTS.bohrokvakaita_switch(baseC)
 		Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,g,1,0,0)
 	end
 	local function operation(e,tp,eg,ep,ev,re,r,rp)
-		local c=e:GetHandler()
 		local g=Duel.SelectMatchingCard(tp,filter,tp,LOCATION_EXTRA,0,1,1,nil,e,tp)
 		if g:GetCount() > 0 then
 			Duel.SpecialSummon(g,0,tp,tp,false,false,POS_FACEUP)

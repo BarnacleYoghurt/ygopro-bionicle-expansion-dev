@@ -29,7 +29,6 @@ function c10100230.operation3(e,tp,eg,ep,ev,re,r,rp)
     e1:SetProperty(EFFECT_FLAG_DELAY)
     e1:SetRange(LOCATION_GRAVE)
     e1:SetCode(EVENT_PHASE+PHASE_END)
-    e1:SetCondition(c10100230.condition3_1)
     e1:SetTarget(c10100230.target3_1)
     e1:SetOperation(c10100230.operation3_1)
     e1:SetCountLimit(1,10100230)
@@ -39,9 +38,6 @@ function c10100230.operation3(e,tp,eg,ep,ev,re,r,rp)
 end
 function c10100230.filter3_1(c)
 	return (c:IsSetCard(0x15c) or c:IsSetCard(0x15d)) and c:IsAbleToHand()
-end
-function c10100230.condition3_1(e,tp,eg,ep,ev,re,r,rp)
-	return e:GetHandler():IsPreviousLocation(LOCATION_ONFIELD)
 end
 function c10100230.target3_1(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingMatchingCard(c10100230.filter3_1,tp,LOCATION_DECK,0,1,nil) end

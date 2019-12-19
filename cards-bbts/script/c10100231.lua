@@ -29,10 +29,9 @@ function c10100231.operation3(e,tp,eg,ep,ev,re,r,rp)
     e1:SetProperty(EFFECT_FLAG_DELAY)
     e1:SetRange(LOCATION_GRAVE)
     e1:SetCode(EVENT_PHASE+PHASE_END)
-    e1:SetCondition(c10100231.condition3_1)
     e1:SetTarget(c10100231.target3_1)
     e1:SetOperation(c10100231.operation3_1)
-    e1:SetCountLimit(1,10100230)
+    e1:SetCountLimit(1,10100231)
     e1:SetReset(RESET_EVENT+0x1fe0000+RESET_PHASE+PHASE_END)
     c:RegisterEffect(e1)
   end
@@ -40,17 +39,13 @@ end
 function c10100231.filter3_1(c,e,tp)
 	return c:IsSetCard(0x15c) and not c:IsCode(10100231) and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
 end
-function c10100231.condition3_1(e,tp,eg,ep,ev,re,r,rp)
-	return e:GetHandler():IsPreviousLocation(LOCATION_ONFIELD)
-end
 function c10100231.target3_1(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.GetLocationCount(tp,LOCATION_MZONE)>0
-		and Duel.IsExistingMatchingCard(c10100231.filter3_1,tp,LOCATION_GRAVE,0,1,nil,e,tp) end
+	if chk==0 then return Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and Duel.IsExistingMatchingCard(c10100231.filter3_1,tp,LOCATION_GRAVE,0,1,nil,e,tp) end
 	local g=Duel.GetMatchingGroup(c10100231.filter3,tp,LOCATION_GRAVE,0,nil,e,tp)
 	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,g,1,0,0)
 end
 function c10100231.operation3_1(e,tp,eg,ep,ev,re,r,rp)
-	local c=e:GetHandler()
+  if Duel.GetLocationCount(tp,LOCATION_MZONE)<=0 then return end
 	local g=Duel.SelectMatchingCard(tp,c10100231.filter3_1,tp,LOCATION_GRAVE,0,1,1,nil,e,tp)
 	if g:GetCount() > 0 then
 		Duel.SpecialSummon(g,0,tp,tp,false,false,POS_FACEDOWN_DEFENSE)
