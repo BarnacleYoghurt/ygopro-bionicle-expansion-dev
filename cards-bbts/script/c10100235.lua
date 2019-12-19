@@ -37,12 +37,14 @@ function c10100235.initial_effect(c)
 end
 function c10100235.target1(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingTarget(Card.IsFaceup,tp,LOCATION_MZONE,0,1,nil) end
+  Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_FACEUP)
 	local g = Duel.SelectTarget(tp,Card.IsFaceup,tp,LOCATION_MZONE,0,1,1,nil)
 end
 function c10100235.operation1(e,tp,eg,ep,ev,re,r,rp)
+  local c=e:GetHandler()
 	local tc=Duel.GetFirstTarget()
-	if tc and tc:IsRelateToEffect(e) then
-		local e1 = Effect.CreateEffect(e:GetHandler())
+	if c:IsRelateToEffect(e) and tc:IsRelateToEffect(e) then
+		local e1 = Effect.CreateEffect(c)
 		e1:SetCategory(CATEGORY_DESTROY)
 		e1:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_CONTINUOUS)
 		e1:SetCode(EVENT_BATTLE_START)
@@ -70,7 +72,7 @@ function c10100235.operation1_1(e,tp,eg,ep,ev,re,r,rp)
 	if tc==c then tc=Duel.GetAttackTarget() end
 	local g = Group.FromCards(c,tc)
 	local dg=g:Filter(c10100235.filter1_1,nil):Filter(Card.IsRelateToBattle,nil)
-	if g:GetCount()>0 then 
+	if dg:GetCount()>0 then 
 		Duel.Destroy(dg,REASON_EFFECT) 
 	end
 end
@@ -91,8 +93,8 @@ function c10100235.operation2(e,tp,eg,ep,ev,re,r,rp)
 	end
 end
 function c10100235.cost3(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.IsExistingMatchingCard(Card.IsAbleToRemoveAsCost,tp,LOCATION_DECK,0,1,nil) end
 	local g=Duel.GetDecktopGroup(tp,1)
+	if chk==0 then return g:IsExists(Card.IsAbleToRemoveAsCost,1,nil) end
 	if g:GetCount()>0 then
 		Duel.DisableShuffleCheck()
 		Duel.Remove(g,POS_FACEUP,REASON_COST)

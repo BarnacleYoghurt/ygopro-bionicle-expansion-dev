@@ -7,7 +7,7 @@ function c10100238.initial_effect(c)
 	e1:SetDescription(aux.Stringid(10100238,0))
 	e1:SetType(EFFECT_TYPE_IGNITION)
 	e1:SetRange(LOCATION_PZONE)
-	e1:SetCost(c10100238.condition1)
+	e1:SetCondition(c10100238.condition1)
 	e1:SetTarget(c10100238.target1)
 	e1:SetOperation(c10100238.operation1)
 	c:RegisterEffect(e1)
@@ -30,7 +30,7 @@ function c10100238.initial_effect(c)
 	e3:SetOperation(c10100238.operation3)
 	c:RegisterEffect(e3)
 end
-function c10100238.condition1(e,tp,eg,ep,ev,re,r,rp,chk)
+function c10100238.condition1(e,tp,eg,ep,ev,re,r,rp)
 	return Duel.GetFieldGroupCount(tp,LOCATION_MZONE,0)==0
 end
 function c10100238.target1(e,tp,eg,ep,ev,re,r,rp,chk)
@@ -51,8 +51,10 @@ function c10100238.target2(e,tp,eg,ep,ev,re,r,rp,chk)
 	Duel.SetOperationInfo(0,CATEGORY_TOHAND,g,1,tp,LOCATION_DECK+LOCATION_GRAVE)
 end
 function c10100238.operation2(e,tp,eg,ep,ev,re,r,rp)
+  if not e:GetHandler():IsRelateToEffect(e) then return end
+  Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_ATOHAND)
 	local g=Duel.SelectMatchingCard(tp,c10100238.filter2,tp,LOCATION_DECK+LOCATION_GRAVE,0,1,1,nil,e,tp)
-	if g:GetCount()>0 and Duel.SendtoHand(g,nil,REASON_EFFECT) then
+	if g:GetCount()>0 and Duel.SendtoHand(g,nil,REASON_EFFECT)>0 then
 		Duel.ConfirmCards(1-tp,g)
 		Duel.Damage(tp,g:GetFirst():GetBaseAttack(),REASON_EFFECT)
 	end
@@ -93,7 +95,7 @@ function c10100238.target3_1(e,tp,eg,ep,ev,re,r,rp,chk)
 	Duel.SetOperationInfo(0,CATEGORY_DAMAGE,nil,0,1-tp,ev)
 end
 function c10100238.operation3_1(e,tp,eg,ep,ev,re,r,rp)
-	if Duel.Recover(tp,ev,REASON_EFFECT) then
+	if Duel.Recover(tp,ev,REASON_EFFECT)==ev then
 		Duel.Damage(1-tp,ev,REASON_EFFECT)
 	end
 end

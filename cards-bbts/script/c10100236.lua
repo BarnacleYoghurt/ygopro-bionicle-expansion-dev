@@ -16,7 +16,7 @@ function c10100236.filter1a(c)
 	return c:IsType(TYPE_MONSTER) and c:IsSetCard(0x15a) and c:IsAbleToRemoveAsCost()
 end
 function c10100236.filter1b(c)
-	return c:IsFaceup() and c:IsSetCard(0x15a)
+	return c:IsFaceup() and c:IsType(TYPE_MONSTER) and c:IsSetCard(0x15a)
 end
 function c10100236.cost1(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return e:GetHandler():IsAbleToRemoveAsCost() and Duel.IsExistingMatchingCard(c10100236.filter1a,tp,LOCATION_GRAVE,0,1,nil) end
@@ -30,16 +30,15 @@ function c10100236.target1(e,tp,eg,ep,ev,re,r,rp,chk)
 end
 function c10100236.operation1(e,tp,eg,ep,ev,re,r,rp)
 	local val=Duel.GetMatchingGroupCount(c10100236.filter1b,tp,LOCATION_REMOVED,0,nil)*500
-	local e1=Effect.CreateEffect(e:GetHandler())
-	e1:SetType(EFFECT_TYPE_SINGLE)
-	e1:SetCode(EFFECT_UPDATE_ATTACK)
-	e1:SetValue(-val)
-	e1:SetReset(RESET_PHASE+PHASE_END+RESET_EVENT+0x1fe0000)
-	
 	local tg=Duel.GetMatchingGroup(Card.IsFaceup,tp,0,LOCATION_MZONE,nil)
 	local tc=tg:GetFirst()
 	while tc do
-		tc:RegisterEffect(e1:Clone())
+    local e1=Effect.CreateEffect(e:GetHandler())
+    e1:SetType(EFFECT_TYPE_SINGLE)
+    e1:SetCode(EFFECT_UPDATE_ATTACK)
+    e1:SetValue(-val)
+    e1:SetReset(RESET_PHASE+PHASE_END+RESET_EVENT+0x1fe0000)
+		tc:RegisterEffect(e1)
 		tc = tg:GetNext()
 	end
 end
