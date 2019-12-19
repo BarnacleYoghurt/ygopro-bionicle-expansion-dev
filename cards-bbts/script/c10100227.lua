@@ -33,7 +33,7 @@ end
 function c10100227.target1(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then
 		local chkf=Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and PLAYER_NONE or tp
-		local mg1=Duel.GetFusionMaterial(tp)
+    local mg1=Duel.GetFusionMaterial(tp)
 		local res=Duel.IsExistingMatchingCard(c10100227.filter1b,tp,LOCATION_EXTRA,0,1,nil,e,tp,mg1,nil,chkf)
 		if not res then
 			local ce=Duel.GetChainMaterial(tp)
@@ -100,7 +100,7 @@ function c10100227.target2(e,tp,eg,ep,ev,re,r,rp,chk)
 end
 function c10100227.operation2(e,tp,eg,ep,ev,re,r,rp)
   local sg=eg:Filter(c10100227.filter2,nil,tp):Filter(Card.IsAbleToDeck,nil)
-  if sg:GetCount()>0 and Duel.SendtoDeck(sg,nil,2,REASON_EFFECT) then
+  if sg:GetCount()>0 and Duel.SendtoDeck(sg,nil,2,REASON_EFFECT)==eg:GetCount() then
     if sg:IsExists(Card.IsLocation,1,nil,LOCATION_DECK) then Duel.ShuffleDeck(tp) end
     Duel.BreakEffect()
     Duel.Draw(tp,1,REASON_EFFECT)
