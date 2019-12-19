@@ -46,6 +46,7 @@ function c10100231.target3_1(e,tp,eg,ep,ev,re,r,rp,chk)
 end
 function c10100231.operation3_1(e,tp,eg,ep,ev,re,r,rp)
   if Duel.GetLocationCount(tp,LOCATION_MZONE)<=0 then return end
+  Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
 	local g=Duel.SelectMatchingCard(tp,c10100231.filter3_1,tp,LOCATION_GRAVE,0,1,1,nil,e,tp)
 	if g:GetCount() > 0 then
 		Duel.SpecialSummon(g,0,tp,tp,false,false,POS_FACEDOWN_DEFENSE)

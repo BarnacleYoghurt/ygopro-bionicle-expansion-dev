@@ -12,7 +12,6 @@ function c10100233.initial_effect(c)
   e1:SetCategory(CATEGORY_POSITION)
   e1:SetDescription(aux.Stringid(10100233,0))
 	e1:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O)
-  e1:SetProperty(EFFECT_FLAG_DELAY)
 	e1:SetRange(LOCATION_PZONE)
 	e1:SetCode(EVENT_SUMMON_SUCCESS)
 	e1:SetCondition(c10100233.condition1)
@@ -59,36 +58,42 @@ function c10100233.condition1(e,tp,eg,ep,ev,re,r,rp)
 	return eg:IsExists(c10100233.filter1,1,nil)
 end
 function c10100233.operation1(e,tp,eg,ep,ev,re,r,rp)
-	local g=eg:FilterSelect(tp,c10100233.filter1,1,1,nil)
-  local tc=g:GetFirst()
-	if Duel.ChangePosition(tc,POS_FACEDOWN_DEFENSE) then 
-    local rc=1
-    if Duel.GetTurnPlayer()==tp then
-      rc=2
+  local g=eg
+  if g:GetCount()>1 then
+    Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_POSCHANGE)
+    g=g:FilterSelect(tp,c10100233.filter1,1,1,nil)
+  end
+  if g:GetCount()>0 then
+    local tc=g:GetFirst()
+    if Duel.ChangePosition(tc,POS_FACEDOWN_DEFENSE)>0 then 
+      local rc=1
+      if Duel.GetTurnPlayer()==tp then
+        rc=2
+      end
+      local e1=Effect.CreateEffect(e:GetHandler())
+      e1:SetType(EFFECT_TYPE_SINGLE)
+      e1:SetCode(EFFECT_INDESTRUCTABLE_BATTLE)
+      e1:SetCondition(c10100233.condition1_1)
+      e1:SetValue(1)
+      e1:SetReset(RESET_EVENT+0x1fc0000+RESET_PHASE+PHASE_STANDBY,rc)
+      tc:RegisterEffect(e1)
+      local e2=Effect.CreateEffect(e:GetHandler())
+      e2:SetType(EFFECT_TYPE_SINGLE)
+      e2:SetCode(EFFECT_INDESTRUCTABLE_EFFECT)
+      e2:SetCondition(c10100233.condition1_2)
+      e2:SetValue(1)
+      e2:SetReset(RESET_EVENT+0x1fc0000+RESET_PHASE+PHASE_STANDBY,rc)
+      tc:RegisterEffect(e2)
+      --Check if face-down at start of Damage Step
+      local e3=Effect.CreateEffect(e:GetHandler())
+      e3:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_CONTINUOUS)
+      e3:SetCode(EVENT_BATTLE_START)
+      e3:SetCondition(c10100233.condition1_3)
+      e3:SetOperation(c10100233.operation1_3)
+      e3:SetReset(RESET_EVENT+0x1fc0000+RESET_PHASE+PHASE_STANDBY,rc)
+      tc:RegisterEffect(e3)
     end
-		local e1=Effect.CreateEffect(e:GetHandler())
-		e1:SetType(EFFECT_TYPE_SINGLE)
-		e1:SetCode(EFFECT_INDESTRUCTABLE_BATTLE)
-		e1:SetCondition(c10100233.condition1_1)
-		e1:SetValue(1)
-		e1:SetReset(RESET_EVENT+0x1fc0000+RESET_PHASE+PHASE_STANDBY,rc)
-		tc:RegisterEffect(e1)
-		local e2=Effect.CreateEffect(e:GetHandler())
-		e2:SetType(EFFECT_TYPE_SINGLE)
-		e2:SetCode(EFFECT_INDESTRUCTABLE_EFFECT)
-		e2:SetCondition(c10100233.condition1_2)
-		e2:SetValue(1)
-		e2:SetReset(RESET_EVENT+0x1fc0000+RESET_PHASE+PHASE_STANDBY,rc)
-		tc:RegisterEffect(e2)
-		--Check if face-down at start of Damage Step
-		local e3=Effect.CreateEffect(e:GetHandler())
-		e3:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_CONTINUOUS)
-		e3:SetCode(EVENT_BATTLE_START)
-		e3:SetCondition(c10100233.condition1_3)
-		e3:SetOperation(c10100233.operation1_3)
-		e3:SetReset(RESET_EVENT+0x1fc0000+RESET_PHASE+PHASE_STANDBY,rc)
-		tc:RegisterEffect(e3)
-	end
+  end
 end
 function c10100233.condition1_1(e)
 	return e:GetHandler():GetFlagEffect(10100233)~=0
@@ -118,7 +123,9 @@ function c10100233.target2(e,tp,eg,ep,ev,re,r,rp,chk)
 	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,g,1,0,0)
 end
 function c10100233.operation2(e,tp,eg,ep,ev,re,r,rp)
+  if Duel.GetLocationCount(tp,LOCATION_MZONE)<=0 then return end
 	local c=e:GetHandler()
+  Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
 	local g=Duel.SelectMatchingCard(tp,c10100233.filter2,tp,LOCATION_GRAVE,0,1,1,nil,e,tp)
 	if g:GetCount() > 0 then
 		Duel.SpecialSummon(g,0,tp,tp,false,false,POS_FACEUP)

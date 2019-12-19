@@ -17,7 +17,7 @@ function c10100232.initial_effect(c)
 	e1:SetCondition(c10100232.condition1)
 	e1:SetTarget(c10100232.target1)
 	e1:SetOperation(c10100232.operation1)
-	e1:SetCountLimit(1)
+	e1:SetCountLimit(1,10100232)
 	c:RegisterEffect(e1)
 	--Special Summon
 	local e2=Effect.CreateEffect(c)
@@ -44,8 +44,8 @@ function c10100232.initial_effect(c)
 	local e4=bbts.bahrag_pendset(c)
 	c:RegisterEffect(e4)
 end
-function c10100232.filter1(c)
-	return c:IsSetCard(0x15c) and c:IsControler(tp) and c:IsType(TYPE_MONSTER) and c:IsPreviousLocation(LOCATION_ONFIELD)
+function c10100232.filter1(c,tp)
+	return c:IsSetCard(0x15c) and c:IsControler(tp) and c:IsType(TYPE_MONSTER) and c:IsPreviousLocation(LOCATION_ONFIELD) and c:IsAbleToHand()
 end
 function c10100232.condition1(e,tp,eg,ep,ev,re,r,rp)
 	return eg:IsExists(c10100232.filter1,1,nil,tp)
@@ -79,7 +79,9 @@ function c10100232.target2(e,tp,eg,ep,ev,re,r,rp,chk)
 	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,g,1,0,0)
 end
 function c10100232.operation2(e,tp,eg,ep,ev,re,r,rp)
+  if Duel.GetLocationCount(tp,LOCATION_MZONE)<=0 then return end
 	local c=e:GetHandler()
+  Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
 	local g=Duel.SelectMatchingCard(tp,c10100232.filter2,tp,LOCATION_GRAVE,0,1,1,nil,e,tp)
 	if g:GetCount() > 0 then
 		Duel.SpecialSummon(g,0,tp,tp,false,false,POS_FACEUP)
