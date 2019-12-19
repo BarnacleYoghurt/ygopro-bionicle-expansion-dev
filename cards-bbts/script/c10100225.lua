@@ -31,10 +31,10 @@ function c10100225.initial_effect(c)
 	c:RegisterEffect(e2)
 end
 function c10100225.filter1a(c,tp)
-	return c:IsControler(tp) and c:IsFacedown()
+	return c:IsControler(tp) and c:IsPosition(POS_FACEDOWN_DEFENSE)
 end
 function c10100225.filter1b(c,e,tp)
-	return c:IsSetCard(0x15c) and c:GetLevel()==4 and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
+	return c:IsSetCard(0x15c) and c:GetLevel()==4 and c:IsCanBeSpecialSummoned(e,0,tp,false,false,POS_FACEDOWN_DEFENSE)
 end
 function c10100225.condition1(e,tp,eg,ep,ev,re,r,rp)
 	return eg:IsExists(c10100225.filter1a,1,nil,tp)
@@ -45,11 +45,11 @@ function c10100225.target1(e,tp,eg,ep,ev,re,r,rp,chk)
 	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,g,1,0,0)
 end
 function c10100225.operation1(e,tp,eg,ep,ev,re,r,rp)
-	if Duel.GetLocationCount(tp,LOCATION_MZONE) > 0 then
+	if e:GetHandler():IsRelateToEffect(e) and Duel.GetLocationCount(tp,LOCATION_MZONE) > 0 then
 		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
 		local g=Duel.SelectMatchingCard(tp,c10100225.filter1b,tp,LOCATION_DECK,0,1,1,nil,e,tp)
 		if g:GetCount() > 0 then
-			if Duel.SpecialSummon(g,0,tp,tp,false,false,POS_FACEDOWN_DEFENSE) then
+			if Duel.SpecialSummon(g,0,tp,tp,false,false,POS_FACEDOWN_DEFENSE)>0 then
         Duel.ConfirmCards(1-tp,g)
         local c=e:GetHandler()
         local fid=c:GetFieldID()
@@ -83,10 +83,10 @@ function c10100225.condition2(e,tp,eg,ep,ev,re,r,rp)
   return c:IsPreviousLocation(LOCATION_ONFIELD) and c:IsPreviousPosition(POS_FACEUP)
 end
 function c10100225.target2(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.IsExistingMatchingCard(c10100225.filter2,tp,LOCATION_DECK,0,1,nil) end
+	if chk==0 then return Duel.GetLocationCount(tp,LOCATION_SZONE)>0 and Duel.IsExistingMatchingCard(c10100225.filter2,tp,LOCATION_DECK,0,1,nil) end
 end
 function c10100225.operation2(e,tp,eg,ep,ev,re,r,rp)
-	if Duel.GetLocationCount(tp,LOCATION_SZONE) > 0 then
+	if Duel.GetLocationCount(tp,LOCATION_SZONE)>0 then
 		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SET)
 		local g=Duel.SelectMatchingCard(tp,c10100225.filter2,tp,LOCATION_DECK,0,1,1,nil)
 		if g:GetCount()>0 then
