@@ -21,7 +21,7 @@ function c10100245.initial_effect(c)
   local e2b=e2:Clone()
   e2b:SetCode(EFFECT_SET_DEFENSE_FINAL)
   c:RegisterEffect(e2b)
-  --Easter Egg
+  --Easter Egg (client hint doesn't work directly on e2 :( )
   local e3=Effect.CreateEffect(c)
   e3:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_CONTINUOUS)
   e3:SetCode(EVENT_SUMMON_SUCCESS)
@@ -45,18 +45,15 @@ end
 function c10100245.operation1(e,tp,eg,ep,ev,re,r,rp,c)
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_RELEASE)
 	local g1=Duel.SelectMatchingCard(tp,c10100245.filter1a,tp,0,LOCATION_MZONE,1,1,nil)
-	Duel.Release(g1,REASON_COST)
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TOGRAVE)
 	local g2=Duel.SelectMatchingCard(tp,c10100245.filter1b,tp,LOCATION_DECK,0,1,1,nil)
+	Duel.Release(g1,REASON_COST)
 	Duel.SendtoGrave(g2,REASON_COST)
 end
 function c10100245.condition2(e)
   local ph=Duel.GetCurrentPhase()
 	local bc=e:GetHandler():GetBattleTarget()
 	return (ph==PHASE_DAMAGE or ph==PHASE_DAMAGE_CAL) and bc and bc:IsSetCard(0x15c)
-end
-function c10100245.target3(e,tp,eg,ep,ev,re,r,rp,chk)
-  if chk==0 then return true end
 end
 function c10100245.operation3(e,tp,eg,ep,ev,re,r,rp)
   e:GetHandler():RegisterFlagEffect(10100245,RESET_EVENT+0x6c0000,EFFECT_FLAG_CLIENT_HINT,1,0,aux.Stringid(10100245,0))

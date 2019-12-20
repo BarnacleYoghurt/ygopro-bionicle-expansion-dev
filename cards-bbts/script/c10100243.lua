@@ -25,7 +25,7 @@ end
 function c10100243.condition1(e,tp,eg,ep,ev,re,r,rp)
 	if eg:GetCount()==0 then return false end
   local fc=eg:GetFirst()
-  return fc:IsType(TYPE_XYZ) and rp==tp
+  return fc:IsType(TYPE_XYZ) and fc:IsControler(tp)
 end
 function c10100243.operation1(e,tp,eg,ep,ev,re,r,rp)
   if eg:GetCount()>0 then
@@ -44,6 +44,7 @@ function c10100243.filter2b(c)
 end
 function c10100243.cost2(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingMatchingCard(c10100243.filter2a,tp,LOCATION_DECK,0,1,nil) end
+  Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TOGRAVE)
 	local g=Duel.SelectMatchingCard(tp,c10100243.filter2a,tp,LOCATION_DECK,0,1,1,nil)
   Duel.SendtoGrave(g, REASON_COST)
 end

@@ -327,7 +327,7 @@ function BBTS.bohrokkaita_krana(baseC)
 		local g=Duel.SelectMatchingCard(tp,filter,tp,LOCATION_DECK,0,1,3,nil)
 		if g:GetCount()>0 then
 			Duel.ConfirmCards(1-tp,g)
-			Duel.Hint(HINT_SELECTMSG,1-tp,HINTMSG_EQUIP)
+			Duel.Hint(HINT_SELECTMSG,1-tp,HINTMSG_ATOHAND)
 			local ag=g:Select(1-tp,1,1,nil)
 			if ag:GetCount()>0 then
         if Duel.SendtoHand(ag,nil,REASON_EFFECT)>0 then
