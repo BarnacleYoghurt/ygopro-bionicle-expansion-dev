@@ -39,6 +39,7 @@ function c10100253.target1(e,tp,eg,ep,ev,re,r,rp,chk)
   Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,g,1,0,0)
 end
 function c10100253.operation1(e,tp,eg,ep,ev,re,r,rp)
+  Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
   local g=Duel.SelectMatchingCard(tp,c10100253.filter1,tp,LOCATION_HAND+LOCATION_GRAVE,0,1,1,nil,e,tp)
   if g:GetCount()>0 then
     Duel.SpecialSummon(g,SUMMON_TYPE_SPECIAL,tp,tp,false,false,POS_FACEUP)

@@ -4,6 +4,7 @@ function c10100254.initial_effect(c)
   local e1=Effect.CreateEffect(c)
   e1:SetCategory(CATEGORY_REMOVE)
   e1:SetType(EFFECT_TYPE_ACTIVATE)
+  e1:SetProperty(EFFECT_FLAG_CARD_TARGET)
   e1:SetCode(EVENT_FREE_CHAIN)
   e1:SetTarget(c10100254.target1)
   e1:SetOperation(c10100254.operation1)
@@ -11,19 +12,20 @@ function c10100254.initial_effect(c)
   c:RegisterEffect(e1)
 end
 function c10100254.filter1a(c,e)
-  return c:IsType(TYPE_MONSTER) and c:IsSetCard(0x155) and c:IsAbleToRemove() and c:IsCanBeEffectTarget(e)
+  return c:IsType(TYPE_MONSTER) and c:IsSetCard(0x155) and c:IsCanBeEffectTarget(e)
 end
 function c10100254.filter1b(c)
   return c:IsLocation(LOCATION_MZONE) and c:IsSummonType(SUMMON_TYPE_NORMAL)
 end
 function c10100254.target1(e,tp,eg,ep,ev,re,r,rp,chk)
-  if chk==0 then
-    return Duel.GetMatchingGroup(c10100254.filter1a,tp,LOCATION_MZONE+LOCATION_GRAVE+LOCATION_HAND,0,nil,e):GetClassCount(Card.GetCode)>=6 
-      and Duel.IsExistingMatchingCard(c10100254.filter1a,tp,LOCATION_MZONE,0,1,nil,e)
-      and Duel.IsExistingMatchingCard(Card.IsAbleToRemove,tp,LOCATION_ONFIELD,LOCATION_ONFIELD,1,nil)
-  end
   local g1=Duel.GetMatchingGroup(c10100254.filter1a,tp,LOCATION_MZONE,0,nil,e)
-  local g2=Duel.GetMatchingGroup(c10100254.filter1a,tp,LOCATION_MZONE+LOCATION_GRAVE+LOCATION_HAND,0,nil,e)
+  local g2=Duel.GetMatchingGroup(c10100254.filter1a,tp,LOCATION_MZONE+LOCATION_GRAVE+LOCATION_HAND,0,nil,e):Filter(Card.IsAbleToRemove,nil)
+  if chk==0 then
+    return g2:GetClassCount(Card.GetCode)>=6 
+      and g1:GetCount()>0
+      and (Duel.IsExistingMatchingCard(Card.IsAbleToRemove,tp,0,LOCATION_ONFIELD+LOCATION_GRAVE,1,nil)
+        or (g1:IsExists(c10100254.filter1b,1,nil) and Duel.IsExistingMatchingCard(Card.IsAbleToRemove,tp,0,LOCATION_HAND,1,nil)))
+  end
   local tg=Group.CreateGroup()
 	for i=1,6 do
 		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_REMOVE)
@@ -38,52 +40,52 @@ function c10100254.target1(e,tp,eg,ep,ev,re,r,rp,chk)
 		tg:Merge(tgi)
 	end
   Duel.SetTargetCard(tg)
-  Duel.SetOperationInfo(0,CATEGORY_REMOVE,tg,tg:GetCount(),0,0)
+  Duel.SetOperationInfo(0,CATEGORY_REMOVE,tg,tg:FilterCount(Card.IsLocation,nil,LOCATION_HAND+LOCATION_GRAVE),0,0)
   
-  local g0=Duel.GetMatchingGroup(Card.IsAbleToRemove,tp,LOCATION_ONFIELD,LOCATION_ONFIELD,nil)
-  Duel.SetOperationInfo(0,CATEGORY_REMOVE,g0,g0:GetCount(),0,0)
-  if tg:IsExists(Card.IsLocation,1,nil,LOCATION_GRAVE) then
-    local g1=Duel.GetMatchingGroup(Card.IsAbleToRemove,tp,0,LOCATION_GRAVE,nil)
-    Duel.SetOperationInfo(0,CATEGORY_REMOVE,g1,g1:GetCount(),0,0)
-  end
-  if tg:IsExists(Card.IsLocation,1,nil,LOCATION_HAND) then
-    local g2=Duel.GetMatchingGroup(Card.IsAbleToRemove,tp,0,LOCATION_HAND,nil)
-    Duel.SetOperationInfo(0,CATEGORY_REMOVE,g2,g2:GetCount(),0,0)
-  end
+  local g=Duel.GetMatchingGroup(Card.IsAbleToRemove,tp,0,LOCATION_ONFIELD+LOCATION_GRAVE+LOCATION_HAND,nil)
+  Duel.SetOperationInfo(0,CATEGORY_REMOVE,g,6,0,0)
 end
 function c10100254.operation1(e,tp,eg,ep,ev,re,r,rp)
   local tg=Duel.GetChainInfo(0,CHAININFO_TARGET_CARDS)
   local bg=tg:Filter(Card.IsLocation,nil,LOCATION_HAND+LOCATION_GRAVE)
   local fgc=tg:FilterCount(c10100254.filter1b,nil,LOCATION_MZONE)
   
-  if bg:GetCount()==0 or Duel.Remove(bg,POS_FACEUP,REASON_EFFECT) then
+  if Duel.Remove(bg,POS_FACEUP,REASON_EFFECT)==bg:GetCount() then
     local handc=Duel.GetFieldGroupCount(tp,0,LOCATION_HAND)
     local handgc=0
-    if math.min(fgc,handc)>0 and Duel.SelectYesNo(tp,aux.Stringid(10100254,0)) then
-      if math.min(fgc,handc)==1 then
-        handgc=1
-      elseif math.min(fgc,handc)==2 then
-        handgc=Duel.AnnounceNumber(tp,1,2)
-      elseif math.min(fgc,handc)==3 then
-        handgc=Duel.AnnounceNumber(tp,1,2,3)
-      elseif math.min(fgc,handc)==4 then
-        handgc=Duel.AnnounceNumber(tp,1,2,3,4)
-      elseif math.min(fgc,handc)==5 then
-        handgc=Duel.AnnounceNumber(tp,1,2,3,4,5)
-      elseif math.min(fgc,handc)==6 then
-        handgc=Duel.AnnounceNumber(tp,1,2,3,4,5,6)
+    if math.min(fgc,handc)>0 then
+      local sel=((not Duel.IsExistingMatchingCard(Card.IsAbleToRemove,tp,0,LOCATION_ONFIELD+LOCATION_GRAVE,1,nil)) or Duel.SelectYesNo(tp,aux.Stringid(10100254,0)))
+      if sel then
+        Duel.Hint(HINT_SELECTMSG,tp,aux.Stringid(10100254,1))
+        if math.min(fgc,handc)==1 then
+          handgc=1
+        elseif math.min(fgc,handc)==2 then
+          handgc=Duel.AnnounceNumber(tp,1,2)
+        elseif math.min(fgc,handc)==3 then
+          handgc=Duel.AnnounceNumber(tp,1,2,3)
+        elseif math.min(fgc,handc)==4 then
+          handgc=Duel.AnnounceNumber(tp,1,2,3,4)
+        elseif math.min(fgc,handc)==5 then
+          handgc=Duel.AnnounceNumber(tp,1,2,3,4,5)
+        elseif math.min(fgc,handc)==6 then
+          handgc=Duel.AnnounceNumber(tp,1,2,3,4,5,6)
+        end
       end
     end
     local g=Group.CreateGroup()
-    if handgc < 6 and Duel.SelectYesNo(tp,aux.Stringid(10100254,1)) then
-      g=Duel.SelectMatchingCard(tp,Card.IsAbleToRemove,tp,0,LOCATION_ONFIELD+LOCATION_GRAVE,1,6-handgc,nil)
+    if handgc < 6 and Duel.IsExistingMatchingCard(Card.IsAbleToRemove,tp,0,LOCATION_ONFIELD+LOCATION_GRAVE,1,nil) then
+      local sel=(math.min(fgc,handc)==0 or Duel.SelectYesNo(tp,aux.Stringid(10100254,2)))
+      if sel then
+        Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_REMOVE)
+        g=Duel.SelectMatchingCard(tp,Card.IsAbleToRemove,tp,0,LOCATION_ONFIELD+LOCATION_GRAVE,1,6-handgc,nil)
+      end
     end
     if handgc>0 then
       g:Merge(Duel.GetFieldGroup(tp,0,LOCATION_HAND):RandomSelect(tp,handgc))
     end
     
     if g:GetCount()>0 then
-      return Duel.Remove(g,POS_FACEUP,REASON_EFFECT)
+      Duel.Remove(g,POS_FACEUP,REASON_EFFECT)
     end
   end
 end

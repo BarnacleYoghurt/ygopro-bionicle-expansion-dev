@@ -31,16 +31,15 @@ function c10100255.filter1(c)
   return c:IsFaceup() and c:IsLevelAbove(8) and c:IsAbleToRemove()
 end
 function c10100255.target1(e,tp,eg,ep,ev,re,r,rp,chk)
-  if chk==0 then
-    return Duel.IsExistingMatchingCard(c10100255.filter1,tp,LOCATION_MZONE,0,1,nil)
-  end
-  local tc=Duel.SelectTarget(tp,c10100255.filter1,tp,LOCATION_MZONE,0,1,1,nil)
-  Duel.SetOperationInfo(0,CATEGORY_REMOVE,tc,1,0,0)
+  if chk==0 then return Duel.IsExistingTarget(c10100255.filter1,tp,LOCATION_MZONE,0,1,nil) end
+  Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_REMOVE)
+  local g=Duel.SelectTarget(tp,c10100255.filter1,tp,LOCATION_MZONE,0,1,1,nil)
+  Duel.SetOperationInfo(0,CATEGORY_REMOVE,g,1,0,0)
 end
 function c10100255.operation1(e,tp,eg,ep,ev,re,r,rp)
   local tc=Duel.GetFirstTarget()
-  if tc:IsRelateToEffect(e) then
-    if Duel.Remove(tc,POS_FACEUP,REASON_EFFECT+REASON_TEMPORARY) then
+  if tc:IsRelateToEffect(e) and c10100255.filter1(tc) then
+    if Duel.Remove(tc,POS_FACEUP,REASON_EFFECT+REASON_TEMPORARY)>0 then
       local e1=Effect.CreateEffect(e:GetHandler())
       e1:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
       e1:SetCode(EVENT_PHASE+PHASE_END)
@@ -55,13 +54,14 @@ function c10100255.operation1(e,tp,eg,ep,ev,re,r,rp)
   end
 end
 function c10100255.filter1_1(c)
-  return bit.band(c:GetType(),TYPE_SPELL+TYPE_CONTINUOUS)==TYPE_SPELL+TYPE_CONTINUOUS and c:IsAbleToHand()
+  return c:IsType(TYPE_SPELL) and c:IsType(TYPE_CONTINUOUS) and c:IsAbleToHand()
 end
 function c10100255.condition1_1(e,tp,eg,ep,ev,re,r,rp)
 	return Duel.GetTurnCount()==e:GetLabel()
 end
 function c10100255.operation1_1(e,tp,eg,ep,ev,re,r,rp)
 	if Duel.ReturnToField(e:GetLabelObject()) and Duel.SelectYesNo(tp,aux.Stringid(10100255,2)) then
+    Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_ATOHAND)
     local g=Duel.SelectMatchingCard(tp,c10100255.filter1_1,tp,LOCATION_GRAVE,0,1,1,nil)
     if g:GetCount()>0 then
       Duel.SendtoHand(g,nil,REASON_EFFECT)
@@ -81,9 +81,10 @@ function c10100255.target2(e,tp,eg,ep,ev,re,r,rp,chk)
 end
 function c10100255.operation2(e,tp,eg,ep,ev,re,r,rp)
   local max=Duel.GetMatchingGroupCount(c10100255.filter2,tp,LOCATION_MZONE,0,nil)
+  Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_POSCHANGE)
   local g=Duel.SelectMatchingCard(tp,Card.IsFaceup,tp,0,LOCATION_MZONE,1,max,nil)
   if g:GetCount()>0 then
-    if Duel.ChangePosition(g,POS_FACEDOWN_DEFENSE) then
+    if Duel.ChangePosition(g,POS_FACEDOWN_DEFENSE)>0 then
       local og=Duel.GetOperatedGroup()
       local tc=og:GetFirst()
       while tc do
@@ -113,7 +114,7 @@ function c10100255.condition2_2(e,tp,eg,ep,ev,re,r,rp)
 end
 function c10100255.operation2_2(e,tp,eg,ep,ev,re,r,rp)
   local tc=e:GetLabelObject()
-  if Duel.SendtoGrave(tc,REASON_EFFECT) then
+  if Duel.SendtoGrave(tc,REASON_EFFECT)>0 then
     Duel.BreakEffect()
     Duel.Damage(1-tp,1000,REASON_EFFECT)
     e:Reset()

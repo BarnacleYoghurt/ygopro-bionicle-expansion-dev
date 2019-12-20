@@ -13,17 +13,19 @@ function c10100252.filter1a(c,e,tp)
   return c:IsSetCard(0x15e) and c:IsFacedown() and c:IsType(TYPE_PENDULUM) and Duel.GetMatchingGroup(c10100252.filter1b,tp,LOCATION_HAND+LOCATION_MZONE+LOCATION_GRAVE,0,nil):CheckWithSumEqual(Card.GetLevel,c:GetLevel(),1,c:GetLevel())
 end
 function c10100252.filter1b(c)
-  return c:IsType(TYPE_MONSTER) and c:IsSetCard(0x15c) and c:IsFaceup() and c:IsAbleToDeckOrExtraAsCost()
+  return c:IsType(TYPE_MONSTER) and c:IsSetCard(0x15c) and (c:IsFaceup() or c:IsLocation(LOCATION_HAND)) and c:IsAbleToDeckOrExtraAsCost()
 end
 function c10100252.condition1(e,tp,eg,ep,ev,re,r,rp)
   return Duel.GetFieldGroupCount(tp,LOCATION_PZONE,0)==0
 end
 function c10100252.cost1(e,tp,eg,ep,ev,re,r,rp,chk)
   if chk==0 then return Duel.IsExistingMatchingCard(c10100252.filter1a,tp,LOCATION_EXTRA,0,1,nil,e,tp) end
+    Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_CONFIRM)
   local g=Duel.SelectMatchingCard(tp,c10100252.filter1a,tp,LOCATION_EXTRA,0,1,1,nil,e,tp)
   if g:GetCount()>0 then
     local tc=g:GetFirst()
     Duel.ConfirmCards(1-tp,tc)
+    Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TODECK)
     local sg=Duel.GetMatchingGroup(c10100252.filter1b,tp,LOCATION_HAND+LOCATION_MZONE+LOCATION_GRAVE,0,nil):SelectWithSumEqual(tp,Card.GetLevel,tc:GetLevel(),1,tc:GetLevel())
     Duel.SendtoDeck(sg,nil,2,REASON_COST)
     e:SetLabelObject(tc)
@@ -49,27 +51,28 @@ function c10100252.operation1(e,tp,eg,ep,ev,re,r,rp)
   e2:SetReset(RESET_PHASE+PHASE_END)
   Duel.RegisterEffect(e2,tp)
   
-  Duel.MoveToField(tc,tp,tp,LOCATION_SZONE,POS_FACEUP,true)
-  
-  local fid=tc:GetFieldID()
-  if tp==Duel.GetTurnPlayer() then
-    tc:RegisterFlagEffect(10100252,RESET_EVENT+0x1fe0000+RESET_PHASE+PHASE_END,0,1,fid)
-  else
-    tc:RegisterFlagEffect(10100252,RESET_EVENT+0x1fe0000+RESET_PHASE+PHASE_END,0,2,fid)
+  if Duel.MoveToField(tc,tp,tp,LOCATION_SZONE,POS_FACEUP,true) then
+    local fid=tc:GetFieldID()
+    if tp==Duel.GetTurnPlayer() then
+      tc:RegisterFlagEffect(10100252,RESET_EVENT+0x1fe0000+RESET_PHASE+PHASE_END,0,1,fid)
+    else
+      tc:RegisterFlagEffect(10100252,RESET_EVENT+0x1fe0000+RESET_PHASE+PHASE_END,0,2,fid)
+    end
+    local e3=Effect.CreateEffect(c)
+    e3:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
+    e3:SetCode(EVENT_PHASE+PHASE_END)
+    e3:SetCondition(c10100252.condition1_3)
+    e3:SetOperation(c10100252.operation1_3)
+    e3:SetLabel(fid)
+    e3:SetLabelObject(tc)
+    e3:SetCountLimit(1)
+    if tp==Duel.GetTurnPlayer() then
+      e3:SetReset(RESET_PHASE+PHASE_END)
+    else
+      e3:SetReset(RESET_PHASE+PHASE_END,2)
+    end
+    Duel.RegisterEffect(e3,tp)
   end
-  local e3=Effect.CreateEffect(c)
-  e3:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
-  e3:SetCode(EVENT_PHASE+PHASE_END)
-  e3:SetCondition(c10100252.condition1_3)
-  e3:SetOperation(c10100252.operation1_3)
-  e3:SetLabel(fid)
-  e3:SetLabelObject(tc)
-  if tp==Duel.GetTurnPlayer() then
-    e3:SetReset(RESET_PHASE+PHASE_END)
-  else
-    e3:SetReset(RESET_PHASE+PHASE_END,2)
-  end
-  Duel.RegisterEffect(e3,tp)
 end
 function c10100252.condition1_3(e,tp,eg,ep,ev,re,r,rp)
   local tc=e:GetLabelObject()
