@@ -63,13 +63,16 @@ function c10100251.target1(e,tp,eg,ep,ev,re,r,rp,chk)
   Duel.SetOperationInfo(0,CATEGORY_EQUIP,g2,1,0,0)
 end
 function c10100251.operation1(e,tp,eg,ep,ev,re,r,rp)
-  if Duel.GetLocationCount(tp,LOCATION_MZONE)<=0 and Duel.GetLocationCount(tp,LOCATION_SZONE)<=0 then return end
-  local g1=Duel.SelectMatchingCard(tp,c10100251.filter1a,tp,LOCATION_HAND,0,1,1,nil,e,tp)
-  if g1:GetCount()>0 and Duel.SpecialSummon(g1,SUMMON_TYPE_SPECIAL,tp,tp,false,false,POS_FACEUP) then
-    local g2=Duel.SelectMatchingCard(tp,c10100251.filter1b,tp,LOCATION_DECK+LOCATION_GRAVE,0,1,1,nil)
-    if g2:GetCount()>0 then
-      Duel.BreakEffect()
-      Duel.Equip(tp,g2:GetFirst(),g1:GetFirst())
+  if Duel.GetLocationCount(tp,LOCATION_MZONE)>0 then
+    Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
+    local g1=Duel.SelectMatchingCard(tp,c10100251.filter1a,tp,LOCATION_HAND,0,1,1,nil,e,tp)
+    if g1:GetCount()>0 and Duel.SpecialSummon(g1,SUMMON_TYPE_SPECIAL,tp,tp,false,false,POS_FACEUP)>0 and Duel.GetLocationCount(tp,LOCATION_SZONE)>0 then
+      Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_EQUIP)
+      local g2=Duel.SelectMatchingCard(tp,c10100251.filter1b,tp,LOCATION_DECK+LOCATION_GRAVE,0,1,1,nil)
+      if g2:GetCount()>0 then
+        Duel.BreakEffect()
+        Duel.Equip(tp,g2:GetFirst(),g1:GetFirst())
+      end
     end
   end
   local e1=Effect.CreateEffect(e:GetHandler())
@@ -95,11 +98,10 @@ function c10100251.operation2(e,tp,eg,ep,ev,re,r,rp)
   local e1=Effect.CreateEffect(e:GetHandler())
   e1:SetType(EFFECT_TYPE_FIELD)
   e1:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
-  e1:SetRange(LOCATION_MZONE)
   e1:SetTargetRange(0,1)
   e1:SetCode(EFFECT_CANNOT_ACTIVATE)
   e1:SetCondition(c10100251.condition2_1)
-  e1:SetValue(c10100251.value2_1)
+  e1:SetValue(1)
   e1:SetReset(RESET_PHASE+PHASE_END)
   Duel.RegisterEffect(e1,tp)
 end
@@ -108,9 +110,6 @@ function c10100251.condition2_1(e)
   local t=Duel.GetAttackTarget()
   local tp=e:GetHandler()
 	return (a and a:IsCode(10100250) and a:IsControler(tp)) or (t and t:IsCode(10100250) and t:IsControler(tp))
-end
-function c10100251.value2_1(e,re,tp)
-	return not re:GetHandler():IsImmuneToEffect(e)
 end
 function c10100251.operation3(e,tp,eg,ep,ev,re,r,rp)
   local e1=Effect.CreateEffect(e:GetHandler())
@@ -137,11 +136,16 @@ function c10100251.filter4b(c,seq,tp)
 end
 function c10100251.target4(e,tp,eg,ep,ev,re,r,rp,chk)
   if chk==0 then return Duel.IsExistingTarget(c10100251.filter4a,tp,LOCATION_ONFIELD,LOCATION_ONFIELD,1,nil,tp) end
-  local g=Duel.SelectTarget(tp,c10100251.filter4a,tp,LOCATION_ONFIELD,LOCATION_ONFIELD,1,1,nil,tp)
+  Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TARGET)
+  local tg=Duel.SelectTarget(tp,c10100251.filter4a,tp,LOCATION_ONFIELD,LOCATION_ONFIELD,1,1,nil,tp)
+  local tc=tg:GetFirst()
+  local g=Duel.GetMatchingGroup(c10100251.filter4b,tp,LOCATION_ONFIELD,LOCATION_ONFIELD,tc,tc:GetSequence(),tp)
+  Duel.SetOperationInfo(0,CATEGORY_DESTROY,g,1,0,0)
 end
 function c10100251.operation4(e,tp,eg,ep,ev,re,r,rp)
   local tc=Duel.GetFirstTarget()
   if tc:IsRelateToEffect(e) then
+    Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_DESTROY)
     local g=Duel.SelectMatchingCard(tp,c10100251.filter4b,tp,LOCATION_ONFIELD,LOCATION_ONFIELD,1,1,tc,tc:GetSequence(),tp)
     if g:GetCount()>0 then
       Duel.Destroy(g,REASON_EFFECT)

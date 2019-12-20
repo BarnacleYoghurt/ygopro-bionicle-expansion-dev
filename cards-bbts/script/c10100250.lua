@@ -124,7 +124,7 @@ function c10100250.condition4(e,c)
 	return Duel.GetLocationCount(c:GetControler(),LOCATION_MZONE)>0 and mc>0 and Duel.IsExistingMatchingCard(c10100250.filter4,c:GetControler(),LOCATION_MZONE,0,mc,nil)
 end
 function c10100250.value8(e,c)
-	return (c:IsSetCard(0x155)) or e:GetHandler():GetEquipTarget()==c
+	return c:IsSetCard(0x155) or e:GetHandler():GetEquipTarget()==c
 end
 function c10100250.filter9(c)
   return c:IsCode(10100251) and c:IsAbleToHand()
@@ -133,11 +133,7 @@ function c10100250.condition9(e,tp,eg,ep,ev,re,r,rp)
 	return e:GetHandler():GetTurnID()==Duel.GetTurnCount()
 end
 function c10100250.target9(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then
-    return Duel.IsExistingMatchingCard(c10100250.filter9,tp,LOCATION_DECK,0,1,nil)
-  end
-  local tc=Duel.GetFirstMatchingCard(c10100250.filter9,tp,LOCATION_DECK,0,nil)
-  Duel.SetOperationInfo(0,CATEGORY_TOHAND,tc,1,0,0)
+	if chk==0 then return Duel.IsExistingMatchingCard(c10100250.filter9,tp,LOCATION_DECK,0,1,nil) end
 end
 function c10100250.operation9(e,tp,eg,ep,ev,re,r,rp)
 	local tc=Duel.GetFirstMatchingCard(c10100250.filter9,tp,LOCATION_DECK,0,nil)
