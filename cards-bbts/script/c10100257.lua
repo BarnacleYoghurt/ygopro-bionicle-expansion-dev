@@ -4,6 +4,7 @@ function c10100257.initial_effect(c)
   local e1=Effect.CreateEffect(c)
   e1:SetCategory(CATEGORY_POSITION)
   e1:SetType(EFFECT_TYPE_ACTIVATE)
+  e1:SetProperty(EFFECT_FLAG_CARD_TARGET)
   e1:SetCode(EVENT_FREE_CHAIN)
   e1:SetTarget(c10100257.target1)
   e1:SetOperation(c10100257.operation1)
@@ -27,9 +28,8 @@ function c10100257.initial_effect(c)
   c:RegisterEffect(e3)
 end
 function c10100257.target1(e,tp,eg,ep,ev,re,r,rp,chk)
-  if chk==0 then
-    return Duel.IsExistingTarget(Card.IsPosition,tp,LOCATION_MZONE,0,1,nil,POS_FACEDOWN_DEFENSE)
-  end
+  if chk==0 then return Duel.IsExistingTarget(Card.IsPosition,tp,LOCATION_MZONE,0,1,nil,POS_FACEDOWN_DEFENSE) end
+  Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_POSCHANGE)
   local g=Duel.SelectTarget(tp,Card.IsPosition,tp,LOCATION_MZONE,0,1,1,nil,POS_FACEDOWN_DEFENSE)
   Duel.SetOperationInfo(0,CATEGORY_POSITION,g,1,0,0)
 end
@@ -44,13 +44,13 @@ function c10100257.condition2(e)
 end
 function c10100257.target3(e,tp,eg,ep,ev,re,r,rp,chk)
   if chk==0 then 
-    return Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and Duel.IsPlayerCanSpecialSummonMonster(tp,10100257,0x15c,0x11,1400,1400,4,RACE_MACHINE,ATTRIBUTE_DARK) 
+    return Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and Duel.IsPlayerCanSpecialSummonMonster(tp,10100257,0x15c,TYPE_MONSTER+TYPE_EFFECT,1400,1400,4,RACE_MACHINE,ATTRIBUTE_DARK) 
   end
 	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,e:GetHandler(),1,0,0)
 end
 function c10100257.operation3(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
-	if c:IsRelateToEffect(e) and Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and Duel.IsPlayerCanSpecialSummonMonster(tp,10100257,0x15c,0x11,1400,1400,4,RACE_MACHINE,ATTRIBUTE_DARK) then
+	if c:IsRelateToEffect(e) and Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and Duel.IsPlayerCanSpecialSummonMonster(tp,10100257,0x15c,TYPE_MONSTER+TYPE_EFFECT,1400,1400,4,RACE_MACHINE,ATTRIBUTE_DARK) then
 		c:AddMonsterAttribute(TYPE_EFFECT)
 		Duel.SpecialSummonStep(c,0,tp,tp,true,false,POS_FACEUP)
 		c:AddMonsterAttributeComplete()

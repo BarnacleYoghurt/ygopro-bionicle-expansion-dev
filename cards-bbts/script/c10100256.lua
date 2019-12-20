@@ -56,13 +56,14 @@ function c10100256.value1(e,c)
 	return c==e:GetLabelObject()
 end
 function c10100256.operation1(e,tp,eg,ep,ev,re,r,rp)
+  Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_REMOVE)
 	local g=Duel.SelectMatchingCard(tp,c10100256.filter1b,tp,LOCATION_GRAVE,LOCATION_GRAVE,1,1,nil)
   if g:GetCount()>0 then
     Duel.Remove(g,POS_FACEUP,REASON_EFFECT+REASON_REPLACE)
   end
 end
 function c10100256.filter2a(c)
-  return c:IsFaceup() and c:IsSetCard(0x15d)
+  return c:IsFaceup() and c:IsSetCard(0x15d) and c:IsType(TYPE_MONSTER)
 end
 function c10100256.filter2b(c)
   return c:IsFaceup() and c:IsType(TYPE_MONSTER) and c:IsAbleToHand()
@@ -72,9 +73,7 @@ function c10100256.condition2(e,tp,eg,ep,ev,re,r,rp)
 end
 function c10100256.cost2(e,tp,eg,ep,ev,re,r,rp,chk)
   local c=e:GetHandler()
-  if chk==0 then
-    return c:IsAbleToGraveAsCost()
-  end
+  if chk==0 then return c:IsAbleToGraveAsCost() end
   Duel.SendtoGrave(c,REASON_COST)
 end
 function c10100256.target2(e,tp,eg,ep,ev,re,r,rp,chk)
@@ -85,6 +84,7 @@ function c10100256.target2(e,tp,eg,ep,ev,re,r,rp,chk)
   Duel.SetOperationInfo(0,CATEGORY_TOHAND,g,1,0,0)
 end
 function c10100256.operation2(e,tp,eg,ep,ev,re,r,rp)
+  Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_ATOHAND)
   local g=Duel.SelectMatchingCard(tp,c10100256.filter2b,tp,LOCATION_REMOVED,0,1,1,nil)
   if g:GetCount()>0 then
     Duel.SendtoHand(g,nil,RESON_EFFECT)
