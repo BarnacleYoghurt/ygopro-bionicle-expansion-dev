@@ -98,7 +98,7 @@ function c10100249.condition5(e)
 	return Duel.GetAttacker()==e:GetHandler():GetEquipTarget()
 end
 function c10100249.value5(e,re,tp)
-	return not re:GetHandler():IsImmuneToEffect(e) and re:IsActiveType(TYPE_MONSTER)
+	return re:IsActiveType(TYPE_MONSTER)
 end
 function c10100249.value6(e,c)
 	return (c:IsRace(RACE_WARRIOR) and c:GetLevel()==2) or e:GetHandler():GetEquipTarget()==c

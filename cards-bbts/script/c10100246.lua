@@ -34,22 +34,21 @@ function c10100246.target1(e,c)
   return not Duel.IsExistingMatchingCard(c10100246.filter1,tp,0,LOCATION_MZONE,1,nil,c:GetBaseAttack())
 end
 function c10100246.filter2(c)
-  return Duel.IsPlayerCanDraw(c:GetOwner(),1)
+  return Duel.IsPlayerCanDraw(c:GetOwner(),1) and c:IsAbleToHand()
 end
 function c10100246.target2(e,tp,eg,ep,ev,re,r,rp,chk)
   if chk==0 then
     return Duel.IsExistingTarget(c10100246.filter2,tp,LOCATION_MZONE,LOCATION_MZONE,1,nil)
   end
-  local tc=Duel.SelectTarget(tp,c10100246.filter2,tp,LOCATION_MZONE,LOCATION_MZONE,1,1,nil)
-  Duel.SetOperationInfo(0,CATEGORY_DRAW,nil,1,tc:GetFirst():GetOwner(),1)
-  if tc:IsExists(Card.IsAbleToHand,1,nil) then
-    Duel.SetOperationInfo(0,CATEGORY_TOHAND,tc,1,0,nil)
-  end
+  Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_RTOHAND)
+  local g=Duel.SelectTarget(tp,c10100246.filter2,tp,LOCATION_MZONE,LOCATION_MZONE,1,1,nil)
+  Duel.SetOperationInfo(0,CATEGORY_DRAW,nil,1,g:GetFirst():GetOwner(),1)
+  Duel.SetOperationInfo(0,CATEGORY_TOHAND,g,1,0,nil)
 end
 function c10100246.operation2(e,tp,eg,ep,ev,re,r,rp)
   local tc=Duel.GetFirstTarget()
-  if e:GetHandler():IsRelateToEffect(e) and tc:IsRelateToEffect(e) then
-    if Duel.Draw(tc:GetOwner(),1,REASON_EFFECT) then
+  if tc:IsRelateToEffect(e) then
+    if Duel.Draw(tc:GetOwner(),1,REASON_EFFECT)>0 then
       Duel.SendtoHand(tc,nil,REASON_EFFECT)
     end
   end

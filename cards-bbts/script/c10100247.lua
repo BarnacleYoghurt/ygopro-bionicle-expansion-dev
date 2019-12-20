@@ -28,7 +28,7 @@ function c10100247.filter1a(c,tp)
   return c:IsRace(RACE_MACHINE) and c:IsAbleToRemoveAsCost() and Duel.IsExistingMatchingCard(c10100247.filter1c,tp,LOCATION_HAND,0,1,nil,c)
 end
 function c10100247.filter1b(c,e,tp,rc)
-  return c:IsRace(RACE_MACHINE) and c:IsCanBeSpecialSummoned(e,SUMMON_TYPE_SPECIAL,tp,false,false) 
+  return c:IsRace(RACE_MACHINE) and c:IsCanBeSpecialSummoned(e,SUMMON_TYPE_SPECIAL,tp,false,false,POS_FACEUP_DEFENSE) 
     and 
     (
       (not rc and Duel.IsExistingMatchingCard(c10100247.filter1c,tp,LOCATION_GRAVE,LOCATION_GRAVE,1,nil,c)) --If no GY card selected yet, check if grave has any applicable
@@ -43,6 +43,7 @@ function c10100247.cost1(e,tp,eg,ep,ev,re,r,rp,chk)
   if chk==0 then
     return Duel.IsExistingMatchingCard(c10100247.filter1a, tp, LOCATION_GRAVE, LOCATION_GRAVE, 1, nil,tp)
   end
+  Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_REMOVE)
   local g=Duel.SelectMatchingCard(tp,c10100247.filter1a, tp, LOCATION_GRAVE, LOCATION_GRAVE, 1, 1, nil,tp)
   e:SetLabelObject(g:GetFirst())
   Duel.Remove(g, POS_FACEUP, REASON_COST)
@@ -55,6 +56,8 @@ function c10100247.target1(e,tp,eg,ep,ev,re,r,rp,chk)
   Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON, g, 1, 0, 0)
 end
 function c10100247.operation1(e,tp,eg,ep,ev,re,r,rp)
+  if Duel.GetLocationCount(tp,LOCATION_MZONE)<=0 then return end
+  Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
   local g = Duel.SelectMatchingCard(tp, c10100247.filter1b, tp, LOCATION_HAND, 0, 1, 1, nil, e, tp, e:GetLabelObject())
   if g:GetCount() > 0 then
     Duel.SpecialSummon(g,SUMMON_TYPE_SPECIAL,tp,tp,false,false,POS_FACEUP_DEFENSE)
@@ -81,7 +84,6 @@ function c10100247.cost2(e,tp,eg,ep,ev,re,r,rp,chk)
 	e:GetHandler():RegisterEffect(e1)
 end
 function c10100247.operation2(e,tp,eg,ep,ev,re,r,rp)
-	if not e:GetHandler():IsRelateToEffect(e) then return end
 	local tc=e:GetLabelObject()
 	if tc:IsFaceup() and tc:IsControler(tp) and tc:IsRelateToBattle() then
 		Duel.ChainAttack()
