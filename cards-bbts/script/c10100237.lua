@@ -16,7 +16,6 @@ function c10100237.initial_effect(c)
 	local e2=Effect.CreateEffect(c)
 	e2:SetDescription(aux.Stringid(10100237,1))
 	e2:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O)
-  e2:SetProperty(EFFECT_FLAG_DELAY)
 	e2:SetRange(LOCATION_PZONE)
 	e2:SetCode(EVENT_CHANGE_POS)
 	e2:SetCondition(c10100237.condition2)
@@ -54,7 +53,7 @@ function c10100237.operation2(e,tp,eg,ep,ev,re,r,rp)
   local c=e:GetHandler()
   if not c:IsRelateToEffect(e) then return end
   local g=eg:Filter(c10100237.filter2,nil,tp)
-	if g:GetCount()==1 then
+	if g:GetCount()>0 then
     local tc=g:GetFirst()
     while tc do
       if tc:IsPosition(POS_FACEUP_DEFENSE) then
@@ -109,24 +108,23 @@ function c10100237.operation3(e,tp,eg,ep,ev,re,r,rp)
 	end
 end
 function c10100237.filter3_1(c,pos)
-  return c:IsFaceup() and not c:IsPosition(pos)
+  return c:IsFaceup() and c:IsPosition(pos)
 end
 function c10100237.target3_1(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return true end
-	Duel.SetOperationInfo(0,CATEGORY_POSITION,e:GetHandler(),1,0,0)
+	if chk==0 then return Duel.IsExistingMatchingCard(Card.IsFaceup,tp,LOCATION_MZONE,LOCATION_MZONE,1,nil) end
+  local g=Duel.GetMatchingGroup(Card.IsFaceup,tp,LOCATION_MZONE,LOCATION_MZONE,nil)
+	Duel.SetOperationInfo(0,CATEGORY_POSITION,g,1,0,0)
 end
 function c10100237.operation3_1(e,tp,eg,ep,ev,re,r,rp)
-	local c=e:GetHandler()
-	if c:IsRelateToEffect(e) then
-		if Duel.ChangePosition(c,POS_FACEUP_DEFENSE,POS_FACEUP_ATTACK,POS_FACEUP_ATTACK,POS_FACEUP_ATTACK)>0 then
-      if Duel.IsExistingMatchingCard(c10100237.filter3_1,tp,LOCATION_MZONE,LOCATION_MZONE,1,c,c:GetPosition()) and Duel.SelectYesNo(tp,aux.Stringid(10100237,3)) then
-        Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_POSCHANGE)
-        local g=Duel.SelectMatchingCard(tp,c10100237.filter3_1,tp,LOCATION_MZONE,LOCATION_MZONE,1,1,c,c:GetPosition())
-        if g:GetCount()>0 then
-          Duel.BreakEffect()
-          Duel.ChangePosition(g,POS_FACEUP_DEFENSE,POS_FACEUP_ATTACK,POS_FACEUP_ATTACK,POS_FACEUP_ATTACK)
-        end
-      end
+  Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_POSCHANGE)
+  local g=Duel.SelectMatchingCard(tp,Card.IsFaceup,tp,LOCATION_MZONE,LOCATION_MZONE,1,1,nil)
+  if g:GetCount()>0 then
+    local tc=g:GetFirst()
+    if Duel.IsExistingMatchingCard(c10100237.filter3_1,tp,LOCATION_MZONE,LOCATION_MZONE,1,tc,tc:GetPosition()) and Duel.SelectYesNo(tp,aux.Stringid(10100237,3)) then
+      Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_POSCHANGE)
+      g2 = Duel.SelectMatchingCard(tp,c10100237.filter3_1,tp,LOCATION_MZONE,LOCATION_MZONE,0,1,tc,tc:GetPosition())
+      g:Merge(g2)
     end
-	end
+    Duel.ChangePosition(g,POS_FACEUP_DEFENSE,POS_FACEUP_ATTACK,POS_FACEUP_ATTACK,POS_FACEUP_ATTACK)
+  end
 end
