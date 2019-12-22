@@ -127,7 +127,7 @@ function c10100250.value8(e,c)
 	return c:IsSetCard(0x155) or e:GetHandler():GetEquipTarget()==c
 end
 function c10100250.filter9(c)
-  return c:IsCode(10100251) and c:IsAbleToHand()
+  return c:IsCode(10100251) and c:IsSSetable()
 end
 function c10100250.condition9(e,tp,eg,ep,ev,re,r,rp)
 	return e:GetHandler():GetTurnID()==Duel.GetTurnCount()
