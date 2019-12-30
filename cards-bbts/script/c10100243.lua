@@ -82,6 +82,7 @@ function c10100243.operation2(e,tp,eg,ep,ev,re,r,rp)
     local e3=Effect.CreateEffect(c)
     e3:SetType(EFFECT_TYPE_SINGLE)
     e3:SetCode(EFFECT_CANNOT_TRIGGER)
+    e3:SetReset(RESET_EVENT+0x1fe0000)
     tc:RegisterEffect(e3)
   end
 end
