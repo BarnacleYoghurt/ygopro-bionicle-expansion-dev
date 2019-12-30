@@ -68,8 +68,7 @@ function c10100247.condition2(e,tp,eg,ep,ev,re,r,rp)
   local a=Duel.GetAttacker()
 	local d=Duel.GetAttackTarget()
 	if not d then return false end
-	if a:IsStatus(STATUS_OPPO_BATTLE) and d:IsControler(tp) then a,d=d,a end
-	if a:IsSetCard(0x157) and a:IsChainAttackable() then
+	if a:IsControler(tp) and d:IsControler(1-tp) and a:IsSetCard(0x157) and a:IsChainAttackable() then
 		e:SetLabelObject(a)
 		return true
 	else return false end
