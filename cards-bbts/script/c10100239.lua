@@ -79,7 +79,7 @@ function c10100239.operation3(e,tp,eg,ep,ev,re,r,rp,c)
 	c:RegisterEffect(e1,true)
 end
 function c10100239.filter4(c)
-	return c:IsFaceup() and c:IsSetCard(0x15a) and not c:IsCode(10100239) and c:IsAbleToGrave()
+	return c:IsFaceup() and c:IsSetCard(0x15a) and c:IsType(TYPE_MONSTER) and not c:IsCode(10100239) and c:IsAbleToGrave()
 end
 function c10100239.target4(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 	if chk==0 then return Duel.IsExistingMatchingCard(c10100239.filter4,tp,LOCATION_REMOVED,0,1,nil) end
