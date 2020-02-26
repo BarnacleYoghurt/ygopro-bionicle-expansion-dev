@@ -16,6 +16,7 @@ function s.initial_effect(c)
 	e2:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_CONTINUOUS)
 	e2:SetCode(EVENT_TO_GRAVE)
 	e2:SetOperation(s.operation2)
+  e2:SetCountLimit(1,id)
 	c:RegisterEffect(e2)
   if not s.global_check then
 		s.global_check=true
