@@ -4,6 +4,8 @@
 !.gitignore
 # Look into directories
 !*/
+#ygofab config files
+!cards-*/config.toml
 # BCOT
 !cards-bcot/**/*.lua
 # BCOR
