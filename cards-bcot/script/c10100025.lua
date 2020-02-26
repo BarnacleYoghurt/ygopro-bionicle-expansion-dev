@@ -1,82 +1,81 @@
 --Ta-Koro, Village of Fire
-function c10100025.initial_effect(c)
+local s,id=GetID()
+function s.initial_effect(c)
 	--Activate
 	local e0=Effect.CreateEffect(c)
-	e0:SetCategory(CATEGORY_TOHAND+CATEGORY_SEARCH)
 	e0:SetType(EFFECT_TYPE_ACTIVATE)
 	e0:SetCode(EVENT_FREE_CHAIN)
-	e0:SetOperation(c10100025.operation0)
 	c:RegisterEffect(e0)
-	--1 less tribute for FIRE
-	local e1=Effect.CreateEffect(c)
-	e1:SetType(EFFECT_TYPE_FIELD)
-	e1:SetCode(EFFECT_DECREASE_TRIBUTE)
-	e1:SetRange(LOCATION_SZONE)
-	e1:SetTargetRange(LOCATION_HAND,LOCATION_HAND)
-	e1:SetTarget(aux.TargetBoolFunction(Card.IsAttribute,ATTRIBUTE_FIRE))
-	e1:SetValue(1)
-	c:RegisterEffect(e1)
+	--Protection
+	local e1a=Effect.CreateEffect(c)
+	e1a:SetType(EFFECT_TYPE_FIELD)
+	e1a:SetCode(EFFECT_CANNOT_BE_EFFECT_TARGET)
+	e1a:SetRange(LOCATION_SZONE)
+	e1a:SetTargetRange(LOCATION_MZONE,0)
+  e1a:SetCondition(s.condition1)
+	e1a:SetValue(aux.tgoval)
+	c:RegisterEffect(e1a)
+  local e1b=e1a:Clone()
+  e1b:SetCode(EFFECT_INDESTRUCTABLE_EFFECT)
+  c:RegisterEffect(e1b)
 	--ATK up
 	local e2=Effect.CreateEffect(c)
-	e2:SetDescription(aux.Stringid(10100025,0))
-	e2:SetType(EFFECT_TYPE_QUICK_O)
+	e2:SetDescription(aux.Stringid(id,0))
 	e2:SetCategory(CATEGORY_ATKCHANGE)
-	e2:SetCode(EVENT_FREE_CHAIN)
+	e2:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O)
+	e2:SetCode(EVENT_BATTLE_CONFIRM)
 	e2:SetHintTiming(TIMING_DAMAGE_STEP)
 	e2:SetRange(LOCATION_SZONE)
 	e2:SetProperty(EFFECT_FLAG_DAMAGE_STEP)
-	e2:SetCondition(c10100025.condition2)
-	e2:SetCost(c10100025.cost2)
-	e2:SetOperation(c10100025.operation2)
-	e2:SetCountLimit(1)
+	e2:SetCondition(s.condition2)
+	e2:SetCost(s.cost2)
+	e2:SetOperation(s.operation2)
+	e2:SetCountLimit(1,id)
 	c:RegisterEffect(e2)
 end
---e0 - Activate
-function c10100025.filter0a(c)
-	return c:IsFaceup() and c:IsAttribute(ATTRIBUTE_FIRE)
+function s.filter1(c)
+  return c:IsFaceup() and c:IsAttribute(ATTRIBUTE_FIRE)
 end
-function c10100025.filter0b(c)
-	return c:IsCode(10100001) and c:IsAbleToHand()
+function s.condition1(e)
+  local tp=e:GetHandlerPlayer()
+  return Duel.GetFieldGroupCount(tp,LOCATION_MZONE,0)==Duel.GetMatchingGroupCount(Card.IsAttribute,tp,LOCATION_MZONE,0,nil,ATTRIBUTE_FIRE)
 end
-function c10100025.operation0(e,tp,eg,ep,ev,re,r,rp,chk)
-	local tc=Duel.GetFirstMatchingCard(c10100025.filter0b,tp,LOCATION_DECK,0,nil)
-	if Duel.IsExistingMatchingCard(c10100025.filter0a,tp,LOCATION_MZONE,0,1,nil) and tc then
-		Duel.SendtoHand(tc,nil,REASON_EFFECT)
-		Duel.ConfirmCards(1-tp,tc)
-	end
-end
---e2 - ATK up
-function c10100025.filter2(c)
-	return c:IsType(TYPE_EQUIP) and c:IsSetCard(0x158) and c:IsAbleToRemoveAsCost()
-end
-function c10100025.condition2(e,tp,eg,ep,ev,re,r,rp)
+function s.condition2(e,tp,eg,ep,ev,re,r,rp)
 	local phase=Duel.GetCurrentPhase()
 	if phase~=PHASE_DAMAGE or Duel.IsDamageCalculated() then return false end
 	local a=Duel.GetAttacker()
 	local d=Duel.GetAttackTarget()
-	return (d~=nil and a:GetControler()==tp and a:IsAttribute(ATTRIBUTE_FIRE) and a:IsRelateToBattle() and a:GetAttack()<d:GetAttack())
-		or (d~=nil and d:GetControler()==tp and d:IsFaceup() and d:IsAttribute(ATTRIBUTE_FIRE) and d:IsRelateToBattle() and d:GetAttack()<a:GetAttack())
+  if a:GetControler()~=tp then
+    local s=a
+    a=d
+    d=s
+  end
+  
+	return a and d 
+    and a:GetControler()==tp and d:GetControler()~=tp 
+    and a:IsFaceup() and d:IsFaceup()
+    and a:IsAttribute(ATTRIBUTE_FIRE) and a:IsRelateToBattle() and a:GetBaseAttack()<d:GetBaseAttack()
 end
 function c10100025.cost2(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.IsExistingMatchingCard(c10100025.filter2,tp,LOCATION_GRAVE,0,1,nil) end
-	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_REMOVE)
-	local g=Duel.SelectMatchingCard(tp,c10100025.filter2,tp,LOCATION_GRAVE,0,1,1,nil)
-	Duel.Remove(g,POS_FACEUP,REASON_COST)
+	if chk==0 then return Duel.IsExistingMatchingCard(Card.IsAbleToGraveAsCost,tp,LOCATION_HAND,0,1,nil) end
+	Duel.DiscardHand(tp,Card.IsAbleToGraveAsCost,1,1,REASON_COST,nil)
 end
 function c10100025.operation2(e,tp,eg,ep,ev,re,r,rp,chk)
 	local a=Duel.GetAttacker()
 	local d=Duel.GetAttackTarget()
+  if a:GetControler()~=tp then
+    local s=a
+    a=d
+    d=s
+  end
 	if not a:IsRelateToBattle() or not d:IsRelateToBattle() then return end
+  
+  local _,atk=Duel.GetMatchingGroup(Card.IsFaceup,tp,LOCATION_MZONE,LOCATION_MZONE,nil):GetMaxGroup(Card.GetBaseAttack)
+  
 	local e1=Effect.CreateEffect(e:GetHandler())
-	e1:SetOwnerPlayer(tp)
 	e1:SetType(EFFECT_TYPE_SINGLE)
-	e1:SetCode(EFFECT_SET_ATTACK_FINAL)
-	e1:SetReset(RESET_EVENT+0x1fe0000+RESET_PHASE+PHASE_END)
-	if a:GetControler()==tp then
-		e1:SetValue(a:GetBaseAttack()*2)
-		a:RegisterEffect(e1)
-	else
-		e1:SetValue(d:GetBaseAttack()*2)
-		d:RegisterEffect(e1)
-	end
+	e1:SetCode(EFFECT_UPDATE_ATTACK)
+	e1:SetReset(RESET_EVENT+RESETS_STANDARD+RESET_PHASE+PHASE_END)
+	e1:SetValue(atk)
+  a:RegisterEffect(e1)
 end
