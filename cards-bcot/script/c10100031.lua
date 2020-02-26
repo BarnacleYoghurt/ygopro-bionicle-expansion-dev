@@ -16,7 +16,6 @@ function s.initial_effect(c)
 	e2:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_CONTINUOUS)
 	e2:SetCode(EVENT_TO_GRAVE)
 	e2:SetOperation(s.operation2)
-  e2:SetCountLimit(1,id)
 	c:RegisterEffect(e2)
   if not s.global_check then
 		s.global_check=true
@@ -65,7 +64,7 @@ function s.operation2(e,tp,eg,ep,ev,re,r,rp)
     e1:SetCondition(s.condition2_1)
     e1:SetTarget(s.target2_1)
     e1:SetOperation(s.operation2_1)
-    e1:SetCountLimit(1)
+    e1:SetCountLimit(1,id)
     e1:SetReset(RESET_EVENT+RESETS_STANDARD+RESET_PHASE+PHASE_END)
     c:RegisterEffect(e1)
 end
