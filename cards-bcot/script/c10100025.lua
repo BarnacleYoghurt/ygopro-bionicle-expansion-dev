@@ -38,7 +38,7 @@ function s.filter1(c)
 end
 function s.condition1(e)
   local tp=e:GetHandlerPlayer()
-  return Duel.GetFieldGroupCount(tp,LOCATION_MZONE,0)==Duel.GetMatchingGroupCount(Card.IsAttribute,tp,LOCATION_MZONE,0,nil,ATTRIBUTE_FIRE)
+  return Duel.GetFieldGroupCount(tp,LOCATION_MZONE,0)>=2 and Duel.GetFieldGroupCount(tp,LOCATION_MZONE,0)==Duel.GetMatchingGroupCount(Card.IsAttribute,tp,LOCATION_MZONE,0,nil,ATTRIBUTE_FIRE)
 end
 function s.condition2(e,tp,eg,ep,ev,re,r,rp)
 	local phase=Duel.GetCurrentPhase()
