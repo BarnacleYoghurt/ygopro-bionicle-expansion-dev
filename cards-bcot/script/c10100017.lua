@@ -1,72 +1,92 @@
 --Turaga Vakama
-function c10100017.initial_effect(c)
-	--Equip
-	local e1=Effect.CreateEffect(c)
-	e1:SetDescription(aux.Stringid(10100017,0))
-	e1:SetCategory(CATEGORY_EQUIP)
-	e1:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_F)
-	e1:SetCode(EVENT_SUMMON_SUCCESS)
-	e1:SetTarget(c10100017.target1)
-	e1:SetOperation(c10100017.operation1)
-	c:RegisterEffect(e1)
-	local e1a=e1:Clone()
-	e1a:SetCode(EVENT_SPSUMMON_SUCCESS)
-	c:RegisterEffect(e1a)
-	local e1b=e1:Clone()
-	e1b:SetCode(EVENT_FLIP_SUMMON_SUCCESS)
-	c:RegisterEffect(e1b)
-	--Banish
-	local e2=Effect.CreateEffect(c)
-	e2:SetDescription(aux.Stringid(10100017,1))
-	e2:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_CONTINUOUS)
-	e2:SetCode(EVENT_TO_GRAVE)
-	e2:SetOperation(c10100017.operation2)
-	c:RegisterEffect(e2)
+local s,id=GetID()
+function s.initial_effect(c)
+	--Link Summon
+	aux.AddLinkProcedure(c,nil,2,2,s.check0)
+	c:EnableReviveLimit()
+  --Vision
+  local e1=Effect.CreateEffect(c)
+  e1:SetDescription(aux.Stringid(id,0))
+  e1:SetCategory(CATEGORY_SPECIAL_SUMMON)
+  e1:SetType(EFFECT_TYPE_IGNITION)
+  e1:SetRange(LOCATION_MZONE)
+  e1:SetTarget(s.target1)
+  e1:SetOperation(s.operation1)
+  e1:SetCountLimit(1,id)
+  c:RegisterEffect(e1)
+  --Draw
+  local e2=Effect.CreateEffect(c)
+  e2:SetDescription(aux.Stringid(id,1))
+  e2:SetCategory(CATEGORY_DRAW)
+  e2:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_F)
+  e2:SetCode(EVENT_BATTLE_DESTROYED)
+  e2:SetRange(LOCATION_MZONE)
+  e2:SetCondition(s.condition2)
+  e2:SetTarget(s.target2)
+  e2:SetOperation(s.operation2)
+  e2:SetCountLimit(1,id+1000000)
+  c:RegisterEffect(e2)
 end
---e1 - Equip
-function c10100017.filter1(c,ec)
-	return c:IsType(TYPE_EQUIP)	and c:IsCode(10100040) and c:CheckEquipTarget(ec)
+function s.filter0(c)
+  return c:IsAttribute(ATTRIBUTE_FIRE) and c:IsRace(RACE_WARRIOR)
 end
-function c10100017.target1(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.GetLocationCount(tp,LOCATION_SZONE)>0
-		and Duel.IsExistingMatchingCard(c10100017.filter1,tp,LOCATION_DECK+LOCATION_HAND+LOCATION_GRAVE,0,1,nil,e:GetHandler()) end
-	Duel.SetOperationInfo(0,CATEGORY_EQUIP,nil,1,tp,LOCATION_DECK)
+function s.check0(g,lc)
+  return g:IsExists(s.filter0,1,nil)
 end
-function c10100017.operation1(e,tp,eg,ep,ev,re,r,rp)
-	local c=e:GetHandler()
-	if Duel.GetLocationCount(tp,LOCATION_SZONE)<=0 or c:IsFacedown() or not c:IsRelateToEffect(e) then return end
-	Duel.Hint(HINT_SELECTMSG,tp,nil)
-	local g=Duel.SelectMatchingCard(tp,c10100017.filter1,tp,LOCATION_DECK+LOCATION_HAND+LOCATION_GRAVE,0,1,1,nil,c)
-	if g:GetCount()>0 and g:GetFirst():CheckEquipTarget(c) then
-		Duel.Equip(tp,g:GetFirst(),c)
-	end
+function s.filter1(c,e,tp)
+  return c:IsAttribute(ATTRIBUTE_FIRE) and c:IsRace(RACE_WARRIOR) and c:IsCanBeSpecialSummoned(e,tp,tp,false,false)
 end
---e2 - Banish
-function c10100017.operation2(e,tp,eg,ep,ev,re,r,rp)
-	local c=e:GetHandler()
-	local e1=Effect.CreateEffect(c)
-	e1:SetCategory(CATEGORY_REMOVE)
-	e1:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_F)
-	e1:SetCode(EVENT_PHASE+PHASE_END)
-	e1:SetProperty(EFFECT_FLAG_CARD_TARGET)
-	e1:SetRange(LOCATION_GRAVE)
-	e1:SetTarget(c10100017.target2_1)
-	e1:SetOperation(c10100017.operation2_1)
-	e1:SetCountLimit(1)
-	e1:SetReset(RESET_EVENT+0x1fe0000+RESET_PHASE+PHASE_END)
-	c:RegisterEffect(e1)
+function s.target1(e,tp,eg,ep,ev,re,r,rp,chk)
+  if chk==0 then return Duel.GetFieldGroupCount(tp,LOCATION_DECK,0)>0 and Duel.GetFieldGroupCount(tp,0,LOCATION_DECK)>0 end
 end
-function c10100017.filter2_1(c,e)
-	return c:IsFaceup() and c:GetAttack()==0 and c:IsAbleToRemove()
+function s.operation1(e,tp,eg,ep,ev,re,r,rp)
+  Duel.ConfirmDecktop(tp,1)
+  Duel.ConfirmDecktop(1-tp,1)
+	local sg=Duel.GetDecktopGroup(tp,1)
+	local og=Duel.GetDecktopGroup(1-tp,1)
+  
+  local function condsummon(g,tgp)
+    if g:IsExists(s.filter1,1,nil,e,tgp) then
+      Duel.SpecialSummonStep(g:GetFirst(),SUMMON_TYPE_SPECIAL,tgp,tgp,false,false,POS_FACEUP)
+    elseif Duel.IsPlayerCanSpecialSummonMonster(tgp,10110017,0,0x4011,1500,0,3,RACE_WARRIOR,ATTRIBUTE_FIRE) then
+      local token=Duel.CreateToken(tgp,10110017)
+      Duel.SpecialSummonStep(token,SUMMON_TYPE_SPECIAL,tgp,tgp,false,false,POS_FACEUP_ATTACK)
+      local e1=Effect.CreateEffect(e:GetHandler())
+      e1:SetType(EFFECT_TYPE_SINGLE)
+      e1:SetCode(EFFECT_UNRELEASABLE_SUM)
+      e1:SetProperty(EFFECT_FLAG_CANNOT_DISABLE)
+      e1:SetValue(1)
+      e1:SetReset(RESET_EVENT+RESETS_STANDARD)
+      token:RegisterEffect(e1,true)
+      local e2=e1:Clone()
+      e2:SetCode(EFFECT_CANNOT_BE_SYNCHRO_MATERIAL)
+      token:RegisterEffect(e2,true)
+      local e3=e1:Clone()
+      e3:SetCode(EFFECT_CANNOT_BE_LINK_MATERIAL)
+      token:RegisterEffect(e3,true)
+    end
+  end
+  
+  --Summon FIRE Warrior or Token (self)
+  condsummon(sg,tp)
+  --Summon FIRE Warrior or Token (opponent)
+  condsummon(og,1-tp)
+  
+  Duel.SpecialSummonComplete()
 end
-function c10100017.target2_1(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.IsExistingMatchingCard(c10100017.filter2_1,tp,0,LOCATION_MZONE,1,nil,e) end
-	local tc=Duel.SelectTarget(tp,c10100017.filter2_1,tp,LOCATION_MZONE,LOCATION_MZONE,1,1,nil,e)
-	Duel.SetOperationInfo(0,CATEGORY_REMOVE,tc,1,0,0)
+function s.filter2(c)
+  return c:IsAttribute(ATTRIBUTE_FIRE) and c:IsRace(RACE_WARRIOR)
 end
-function c10100017.operation2_1(e,tp,eg,ep,ev,re,r,rp)
-	local tc=Duel.GetFirstTarget()
-	if tc and c10100017.filter2_1(tc,e) and tc:IsRelateToEffect(e) then
-		Duel.Remove(tc,POS_FACEUP,REASON_EFFECT)
-	end
+function s.condition2(e,tp,eg,ep,ev,re,r,rp)
+  return eg:IsExists(s.filter2,1,nil) 
+end
+function s.target2(e,tp,eg,ep,ev,re,r,rp,chk)
+  if chk==0 then return Duel.IsPlayerCanDraw(tp,1) end
+  Duel.SetTargetPlayer(tp)
+  Duel.SetTargetParam(1)
+  Duel.SetOperationInfo(0,CATEGORY_DRAW,nil,0,tp,1)
+end
+function s.operation2(e,tp,eg,ep,ev,re,r,rp)
+	local p,d=Duel.GetChainInfo(0,CHAININFO_TARGET_PLAYER,CHAININFO_TARGET_PARAM)
+	Duel.Draw(p,d,REASON_EFFECT)
 end
