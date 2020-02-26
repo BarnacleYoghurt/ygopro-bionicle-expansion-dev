@@ -1,3 +1,6 @@
+if not bcot then
+	dofile "expansions/util-bcot.lua"
+end
 --Great Kanohi Hau
 local s,id=GetID()
 function s.initial_effect(c)
@@ -18,13 +21,7 @@ function s.initial_effect(c)
 	e2:SetValue(s.condition2)
 	c:RegisterEffect(e2)
   --Destroy if replaced
-  local e3=Effect.CreateEffect(c)
-  e3:SetCategory(CATEGORY_DESTROY)
-  e3:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_F)
-  e3:SetCode(EVENT_EQUIP)
-  e3:SetRange(LOCATION_SZONE)
-  e3:SetTarget(s.target3)
-  e3:SetOperation(s.operation3)
+  local e3=bcot.kanohi_selfdestruct(c)
   c:RegisterEffect(e3)
   --Indestructible by battle
 	local e4=Effect.CreateEffect(c)
@@ -69,20 +66,6 @@ function s.operation1(e,tp,eg,ep,ev,re,r,rp)
 end
 function s.condition2(e,c)
 	return c:IsLevelAbove(6)
-end
-function s.filter3(c,ec)
-  return c:GetEquipTarget()==ec and c:IsSetCard(0x158) and c:IsDestructable()
-end
-function s.target3(e,tp,eg,ep,ev,re,r,rp,chk)
-	local c=e:GetHandler()
-	if chk==0 then return eg:IsExists(s.filter3,1,c,c:GetEquipTarget()) end
-  Duel.SetOperationInfo(0,CATEGORY_DESTROY,c,1,0,0)
-end
-function s.operation3(e,tp,eg,ep,ev,re,r,rp)
-	local c=e:GetHandler()
-  if c:IsRelateToEffect(e) then
-    Duel.Destroy(c,REASON_EFFECT)
-  end
 end
 function s.filter6a(c)
   return c:IsType(TYPE_MONSTER) and c:IsAbleToRemoveAsCost()
