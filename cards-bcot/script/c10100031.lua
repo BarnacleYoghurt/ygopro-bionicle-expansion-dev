@@ -17,6 +17,7 @@ function s.initial_effect(c)
 	e2:SetCode(EVENT_PHASE+PHASE_BATTLE_START)
   e2:SetRange(LOCATION_GRAVE)
   e2:SetProperty(EFFECT_FLAG_CARD_TARGET)
+  e2:SetCondition(s.condition2)
   e2:SetCost(s.cost2)
   e2:SetTarget(s.target2)
 	e2:SetOperation(s.operation2)
@@ -31,8 +32,8 @@ function s.condition1(e)
   local a=Duel.GetAttacker()
 	return a and a:IsControler(e:GetHandlerPlayer()) and a:IsSetCard(0x1157)
 end
-function s.condition2_1(e,tp,eg,ep,ev,re,r,rp)
-	return s[tp]>0
+function s.condition2(e,tp,eg,ep,ev,re,r,rp)
+	return Duel.GetTurnPlayer()==tp
 end
 function s.filter2(c)
   return c:IsFaceup() and not c:IsStatus(STATUS_SUMMON_TURN+STATUS_SPSUMMON_TURN+STATUS_FLIP_SUMMON_TURN)
