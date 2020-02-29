@@ -21,7 +21,6 @@ function s.initial_effect(c)
   e2:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_F)
   e2:SetCode(EVENT_BATTLE_DESTROYED)
   e2:SetRange(LOCATION_MZONE)
-  e2:SetCondition(s.condition2)
   e2:SetTarget(s.target2)
   e2:SetOperation(s.operation2)
   e2:SetCountLimit(1,id+1000000)
@@ -76,12 +75,6 @@ function s.operation1(e,tp,eg,ep,ev,re,r,rp)
   condsummon(og,1-tp)
   
   Duel.SpecialSummonComplete()
-end
-function s.filter2(c)
-  return c:IsAttribute(ATTRIBUTE_FIRE) and c:IsRace(RACE_WARRIOR)
-end
-function s.condition2(e,tp,eg,ep,ev,re,r,rp)
-  return eg:IsExists(s.filter2,1,nil) 
 end
 function s.target2(e,tp,eg,ep,ev,re,r,rp,chk)
   if chk==0 then return Duel.IsPlayerCanDraw(tp,1) end
