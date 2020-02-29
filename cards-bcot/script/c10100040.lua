@@ -37,8 +37,9 @@ function s.cost3(e,tp,eg,ep,ev,re,r,rp,chk)
   local g=Duel.SelectReleaseGroup(tp,nil,1,1,nil)
   Duel.Release(g,REASON_COST)
 end
-function s.target3(e,tp,eg,ep,ev,re,r,rp,chk)
+function s.target3(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
   local c=e:GetHandler()
+  if chkc then return s.filter3(chkc) and chkc:IsLocation(LOCATION_GRAVE) and chkc:IsControler(tp) end
   if chk==0 then return Duel.IsExistingTarget(s.filter3,tp,LOCATION_GRAVE,0,1,nil,e,tp,c) end
   Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
   local g=Duel.SelectTarget(tp,s.filter3,tp,LOCATION_GRAVE,0,1,1,nil,e,tp,c)

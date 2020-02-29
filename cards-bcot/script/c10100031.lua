@@ -44,7 +44,8 @@ function s.cost2(e,tp,eg,ep,ev,re,r,rp,chk)
     if chk==0 then return c:IsAbleToRemoveAsCost() end
     Duel.Remove(c,POS_FACEUP,REASON_COST)
 end
-function s.target2(e,tp,eg,ep,ev,re,r,rp,chk)
+function s.target2(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
+  if chkc then return s.filter2(chkc) and chkc:IsLocation(LOCATION_MZONE) and chkc:IsControler(tp) end
 	if chk==0 then return Duel.IsExistingTarget(s.filter2,tp,LOCATION_MZONE,0,1,nil) end
   Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_FACEUP)
   local g=Duel.SelectTarget(tp,s.filter2,tp,LOCATION_MZONE,0,1,1,nil)
