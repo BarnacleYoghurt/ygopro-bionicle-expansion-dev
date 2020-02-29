@@ -24,9 +24,11 @@ function s.initial_effect(c)
   e3:SetCost(s.cost3)
   e3:SetTarget(s.target3)
   e3:SetOperation(s.operation3)
+  e3:SetCountLimit(1,id)
   c:RegisterEffect(e3)
 end
 function s.condition2(e)
+  local tp=e:GetHandlerPlayer()
 	return Duel.GetFieldGroupCount(tp,LOCATION_MZONE,0)>1
 end
 function s.filter3(c,e,tp,ec)
