@@ -2,7 +2,7 @@
 local s,id=GetID()
 function s.initial_effect(c)
 	--Link Summon
-	aux.AddLinkProcedure(c,nil,2,2,s.check0)
+	Link.AddProcedure(c,nil,2,2,s.check0)
 	c:EnableReviveLimit()
   --Vision
   local e1=Effect.CreateEffect(c)
