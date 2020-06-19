@@ -1,0 +1,219 @@
+BCOT={}
+bcot=BCOT
+--Toa Mata
+function BCOT.toa_mata_tribute(baseC)
+  --Based on True Draco
+  --I have literally no idea what half of these functions are for
+  local function val_multitribute(c,sc,ma)
+    local eff3={c:GetCardEffect(EFFECT_TRIPLE_TRIBUTE)}
+    if ma>=3 then
+      for _,te in ipairs(eff3) do
+        if te:GetValue()(te,sc) then return 0x30001 end
+      end
+    end
+    local eff2={c:GetCardEffect(EFFECT_DOUBLE_TRIBUTE)}
+    for _,te in ipairs(eff2) do
+      if te:GetValue()(te,sc) then return 0x20001 end
+    end
+    return 1
+  end
+  local function filterA(c)
+    return c:IsType(TYPE_MONSTER) and (c:IsSetCard(0x1155) or c:IsAttribute(baseC:GetOriginalAttribute())) and not c:IsCode(baseC:GetOriginalCode()) and c:IsReleasable()
+  end
+  local function filterB(c,g,sc)
+    if not c:IsReleasable() or g:IsContains(c) or c:IsHasEffect(EFFECT_EXTRA_RELEASE) then return false end
+    local rele=c:GetCardEffect(EFFECT_EXTRA_RELEASE_SUM)
+    if rele then
+      local remct,ct,flag=rele:GetCountLimit()
+      if remct<=0 then return false end
+    else return false end
+    local sume={c:GetCardEffect(EFFECT_UNRELEASABLE_SUM)}
+    for _,te in ipairs(sume) do
+      if type(te:GetValue())=='function' then
+        if te:GetValue()(te,sc) then return false end
+      else return false end
+    end
+    return true
+  end
+  local function filterC(c)
+    return c:IsType(TYPE_MONSTER) and (c:IsSetCard(0x1155) or c:IsAttribute(baseC:GetOriginalAttribute())) and not c:IsCode(baseC:GetOriginalCode()) and c:IsLocation(LOCATION_HAND)
+  end
+  local function filterD(c,tp)
+    return c:IsControler(1-tp) and not c:IsHasEffect(EFFECT_EXTRA_RELEASE) and c:IsHasEffect(EFFECT_EXTRA_RELEASE_SUM)
+  end
+  local function filterE(sg,e,tp,mg)
+    local c=e:GetHandler()
+    local mi,ma=c:GetTributeRequirement()
+    if mi<1 then mi=ma end
+    if not sg:IsExists(filterC,1,nil) or not aux.ChkfMMZ(1)(sg,e,tp,mg) 
+      or sg:FilterCount(filterD,nil,tp)>1 then return false end
+    local ct=sg:GetCount()
+    return sg:CheckWithSumEqual(val_multitribute,mi,ct,ct,c,ma) or sg:CheckWithSumEqual(val_multitribute,ma,ct,ct,c,ma)
+  end
+  local function condition(e,c,minc)
+    if c==nil then return true end
+    local tp=c:GetControler()
+    local g=Duel.GetTributeGroup(c)
+    local exg=Duel.GetMatchingGroup(filterA,tp,LOCATION_HAND,0,nil)
+    g:Merge(exg)
+    local opg=Duel.GetMatchingGroup(filterB,tp,0,LOCATION_MZONE,nil,g,c)
+    g:Merge(opg)
+    local mi,ma=c:GetTributeRequirement()
+    if mi<minc then mi=minc end
+    if ma<mi then return false end
+    return ma>0 and Duel.GetLocationCount(tp,LOCATION_MZONE)>-ma and aux.SelectUnselectGroup(g,e,tp,1,ma,filterE,0)
+  end
+  local function operation(e,tp,eg,ep,ev,re,r,rp,c)
+    local g=Duel.GetTributeGroup(c)
+    local exg=Duel.GetMatchingGroup(filterA,tp,LOCATION_HAND,0,nil)
+    g:Merge(exg)
+    local opg=Duel.GetMatchingGroup(filterB,tp,0,LOCATION_MZONE,nil,g,c)
+    g:Merge(opg)
+    local mi,ma=c:GetTributeRequirement()
+    if mi<1 then mi=1 end
+    local sg=aux.SelectUnselectGroup(g,e,tp,mi,ma,filterE,1,tp,HINTMSG_RELEASE)
+    local remc=sg:Filter(filterD,nil,tp):GetFirst()
+    if remc then
+      local rele=remc:GetCardEffect(EFFECT_EXTRA_RELEASE_SUM)
+      rele:Reset()
+    end
+    c:SetMaterial(sg)
+    Duel.Release(sg,REASON_SUMMON+REASON_MATERIAL)
+  end
+  local e=Effect.CreateEffect(baseC)
+	e:SetType(EFFECT_TYPE_SINGLE)
+	e:SetProperty(EFFECT_FLAG_CANNOT_DISABLE+EFFECT_FLAG_UNCOPYABLE)
+	e:SetCode(EFFECT_SUMMON_PROC)
+	e:SetCondition(condition)
+	e:SetOperation(operation)
+	e:SetValue(SUMMON_TYPE_ADVANCE)
+	return e
+end
+function BCOT.toa_mata_swapkanohi(baseC)
+  local id=baseC:GetOriginalCode()
+  local function filter(c,ec)
+    return c:IsSetCard(0x158) and c:CheckEquipTarget(ec) 
+      and not (c:IsLocation(LOCATION_GRAVE) and c:IsReason(REASON_DESTROY) and c:IsPreviousLocation(LOCATION_ONFIELD) and c:IsPreviousPosition(POS_FACEUP) and c:GetTurnID()==Duel.GetTurnCount())
+  end
+  local function target(e,tp,eg,ep,ev,re,r,rp,chk)
+    local c=e:GetHandler()
+    if chk==0 then return Duel.IsExistingMatchingCard(filter,tp,LOCATION_GRAVE+LOCATION_HAND,0,1,nil,c) and c:GetFlagEffect(id)==0 end
+    c:RegisterFlagEffect(id,RESET_CHAIN,0,1)
+    local eqg=Duel.GetMatchingGroup(filter,tp,LOCATION_GRAVE+LOCATION_HAND,0,nil,c)
+    Duel.SetOperationInfo(0,CATEGORY_EQUIP,eqg,1,0,0)
+  end
+  local function operation(e,tp,eg,ep,ev,re,r,rp)
+    local c=e:GetHandler()
+    Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_EQUIP)
+    local g=Duel.SelectMatchingCard(tp,filter,tp,LOCATION_GRAVE+LOCATION_HAND,0,1,1,nil,c)
+    if g:GetCount()>0 then
+      Duel.Equip(tp,g:GetFirst(),c)
+    end
+  end
+  local e=Effect.CreateEffect(baseC)
+	e:SetCategory(CATEGORY_EQUIP)
+	e:SetType(EFFECT_TYPE_QUICK_O)
+	e:SetRange(LOCATION_MZONE)
+	e:SetCode(EVENT_FREE_CHAIN)
+	e:SetTarget(target)
+	e:SetOperation(operation)
+	return e
+end
+--Kanohi
+function BCOT.kanohi_equip_great(baseC)
+  local function filter1(c)
+    return c:IsFaceup() and c:IsLevelAbove(6)
+  end
+  local function target1(e,tp,eg,ep,ev,re,r,rp,chk)
+    if chk==0 then return Duel.IsExistingTarget(filter1,tp,LOCATION_MZONE,LOCATION_MZONE,1,nil) end
+    Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_EQUIP)
+    Duel.SelectTarget(tp,filter1,tp,LOCATION_MZONE,LOCATION_MZONE,1,1,nil)
+    Duel.SetOperationInfo(0,CATEGORY_EQUIP,e:GetHandler(),1,0,0)
+  end
+  local function operation1(e,tp,eg,ep,ev,re,r,rp)
+    local c=e:GetHandler()
+    local tc=Duel.GetFirstTarget()
+    if c:IsRelateToEffect(e) and tc:IsRelateToEffect(e) then
+      Duel.Equip(tp,c,tc)
+    end
+  end
+  local function condition2(e,c)
+    return c:IsLevelAbove(6)
+  end
+
+	--Activate
+	local e1=Effect.CreateEffect(baseC)
+	e1:SetCategory(CATEGORY_EQUIP)
+	e1:SetType(EFFECT_TYPE_ACTIVATE)
+	e1:SetCode(EVENT_FREE_CHAIN)
+	e1:SetProperty(EFFECT_FLAG_CARD_TARGET)
+	e1:SetTarget(target1)
+	e1:SetOperation(operation1)
+	--Equip limit
+	local e2=Effect.CreateEffect(baseC)
+	e2:SetType(EFFECT_TYPE_SINGLE)
+	e2:SetCode(EFFECT_EQUIP_LIMIT)
+	e2:SetProperty(EFFECT_FLAG_CANNOT_DISABLE)
+	e2:SetValue(condition2)
+  return e1, e2
+end
+function BCOT.kanohi_selfdestruct(baseC)
+  local function filter(c,ec)
+    return c:GetEquipTarget()==ec and c:IsSetCard(0x158) and c:IsDestructable()
+  end
+  local function target(e,tp,eg,ep,ev,re,r,rp,chk)
+    local c=e:GetHandler()
+    if chk==0 then return eg:IsExists(filter,1,c,c:GetEquipTarget()) end
+    Duel.SetOperationInfo(0,CATEGORY_DESTROY,c,1,0,0)
+  end
+  local function operation(e,tp,eg,ep,ev,re,r,rp)
+    local c=e:GetHandler()
+    if c:IsRelateToEffect(e) then
+      Duel.Destroy(c,REASON_EFFECT)
+    end
+  end
+  local e=Effect.CreateEffect(baseC)
+  e:SetCategory(CATEGORY_DESTROY)
+  e:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_F)
+  e:SetCode(EVENT_EQUIP)
+  e:SetRange(LOCATION_SZONE)
+  e:SetTarget(target)
+  e:SetOperation(operation)
+  return e
+end
+function BCOT.kanohi_search(baseC, targetCode)
+  local function filterA(c)
+    return c:IsType(TYPE_MONSTER) and c:IsAbleToRemoveAsCost()
+  end
+  local function filterB(c)
+    return c:IsCode(targetCode) and c:IsAbleToHand()
+  end
+  local function cost(e,tp,eg,ep,ev,re,r,rp,chk)
+    if chk==0 then return Duel.IsExistingMatchingCard(filterA,tp,LOCATION_GRAVE,0,1,nil) end
+    Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_REMOVE)
+    local g=Duel.SelectMatchingCard(tp,filterA,tp,LOCATION_GRAVE,0,1,1,nil)
+    Duel.Remove(g,POS_FACEUP,REASON_COST)
+  end
+  local function target(e,tp,eg,ep,ev,re,r,rp,chk)
+    if chk==0 then return Duel.IsExistingMatchingCard(filterB,tp,LOCATION_DECK,0,1,nil) end
+    local tc=Duel.GetFirstMatchingCard(filterB,tp,LOCATION_DECK,0,nil)
+    Duel.SetOperationInfo(0,CATEGORY_SEARCH+CATEGORY_TOHAND,tc,1,0,0)
+  end
+  local function operation(e,tp,eg,ep,ev,re,r,rp)
+    local tc=Duel.GetFirstMatchingCard(filterB,tp,LOCATION_DECK,0,nil)
+    if tc then
+      Duel.SendtoHand(tc,tp,REASON_EFFECT)
+      Duel.ConfirmCards(1-tp,tc)
+    end
+  end
+  
+	local e=Effect.CreateEffect(baseC)
+  e:SetCategory(CATEGORY_SEARCH+CATEGORY_TOHAND)
+  e:SetProperty(EFFECT_FLAG_DELAY+EFFECT_FLAG_DAMAGE_STEP)
+	e:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
+	e:SetCode(EVENT_TO_GRAVE)
+	e:SetCost(cost)
+  e:SetTarget(target)
+  e:SetOperation(operation)
+  return e
+end
