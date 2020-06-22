@@ -217,3 +217,40 @@ function BCOT.kanohi_search(baseC, targetCode)
   e:SetOperation(operation)
   return e
 end
+function BCOT.kanohi_revive(baseC, targetCode)
+  local function filter(c,e,tp,ec)
+    return c:IsCode(targetCode) and c:IsCanBeSpecialSummoned(e,SUMMON_TYPE_SPECIAL,tp,false,false) and ec:CheckEquipTarget(c)
+  end
+  local function cost(e,tp,eg,ep,ev,re,r,rp,chk)
+    if chk==0 then return Duel.CheckReleaseGroup(tp,nil,1,nil) end
+    local g=Duel.SelectReleaseGroup(tp,nil,1,1,nil)
+    Duel.Release(g,REASON_COST)
+  end
+  local function target(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
+    local c=e:GetHandler()
+    if chkc then return filter(chkc) and chkc:IsLocation(LOCATION_GRAVE) and chkc:IsControler(tp) end
+    if chk==0 then return Duel.IsExistingTarget(filter,tp,LOCATION_GRAVE,0,1,nil,e,tp,c) end
+    Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
+    local g=Duel.SelectTarget(tp,filter,tp,LOCATION_GRAVE,0,1,1,nil,e,tp,c)
+    Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,g,1,0,0)
+    Duel.SetOperationInfo(0,CATEGORY_EQUIP,c,1,0,0)
+  end
+  local function operation(e,tp,eg,ep,ev,re,r,rp)
+    local c=e:GetHandler()
+    local tc=Duel.GetFirstTarget()
+    if c:IsRelateToEffect(e) and tc:IsRelateToEffect(e) then
+      if Duel.SpecialSummon(tc,SUMMON_TYPE_SPECIAL,tp,tp,false,false,POS_FACEUP) then
+        Duel.Equip(tp,c,tc)
+      end
+    end
+  end
+  
+  local e=Effect.CreateEffect(baseC)
+  e:SetCategory(CATEGORY_SPECIAL_SUMMON+CATEGORY_EQUIP)
+  e:SetType(EFFECT_TYPE_IGNITION)
+  e:SetRange(LOCATION_GRAVE)
+  e:SetCost(cost)
+  e:SetTarget(target)
+  e:SetOperation(operation)
+  return e
+end
