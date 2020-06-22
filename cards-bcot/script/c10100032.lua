@@ -1,6 +1,6 @@
 --C.C. Matoran Maku
 local s,id=GetID()
-function c10100032.initial_effect(c)
+function s.initial_effect(c)
 	--Make unaffected
 	local e1=Effect.CreateEffect(c)
 	e1:SetRange(LOCATION_HAND)
@@ -12,6 +12,17 @@ function c10100032.initial_effect(c)
 	e1:SetOperation(s.operation1)
 	e1:SetCountLimit(1,id)
 	c:RegisterEffect(e1)
+  --Special Summon
+  local e2=Effect.CreateEffect(c)
+  e2:SetCategory(CATEGORY_SPECIAL_SUMMON)
+  e2:SetType(EFFECT_TYPE_QUICK_O)
+  e2:SetCode(EVENT_CHAINING)
+  e2:SetRange(LOCATION_GRAVE)
+  e2:SetCost(s.condition2)
+  e2:SetTarget(s.target2)
+  e2:SetOperation(s.operation2)
+  e2:SetCountLimit(1,id+1000000)
+  c:RegisterEffect(e2)
 end
 function s.filter1(c)
 	return c:IsFaceup() and c:IsType(TYPE_MONSTER) and c:IsSetCard(0x157)
@@ -35,10 +46,35 @@ function s.operation1(e,tp,eg,ep,ev,re,r,rp)
 		e1:SetType(EFFECT_TYPE_SINGLE)
 		e1:SetCode(EFFECT_IMMUNE_EFFECT)
 		e1:SetReset(RESETS_STANDARD+reset)
-		e1:SetValue(s.value2_1)
+		e1:SetValue(s.value1_1)
 		tc:RegisterEffect(e1)
   end
 end
-function s.value2_1(e,te)
+function s.value1_1(e,te)
 	return te:GetHandler()~=e:GetHandler()
+end
+function s.condition2(e,tp,eg,ep,ev,re,r,rp)
+	local rc=re:GetHandler()
+	return rc:IsControler(1-tp) and rc:IsLocation(LOCATION_ONFIELD) and rc:GetSequence()<=4
+end
+function s.target2(e,tp,eg,ep,ev,re,r,rp,chk)
+  local c=e:GetHandler()
+  local rc=re:GetHandler()
+  local zone=bit.replace(0,0x1,4-rc:GetSequence())
+	if chk==0 then return c:IsCanBeSpecialSummoned(e,SUMMON_TYPE_SPECIAL,tp,false,false,POS_FACEUP,tp,zone) end
+	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,c,1,0,0)
+end
+function s.operation2(e,tp,eg,ep,ev,re,r,rp)
+  local c=e:GetHandler()
+  local rc=re:GetHandler()
+  local zone=bit.replace(0,0x1,4-rc:GetSequence())
+  if c:IsRelateToEffect(e) and Duel.SpecialSummon(c,SUMMON_TYPE_SPECIAL,tp,tp,false,false,POS_FACEUP,zone)>0 then
+    local e1=Effect.CreateEffect(c)
+		e1:SetType(EFFECT_TYPE_SINGLE)
+		e1:SetProperty(EFFECT_FLAG_CANNOT_DISABLE)
+		e1:SetCode(EFFECT_LEAVE_FIELD_REDIRECT)
+		e1:SetValue(LOCATION_DECK)
+		e1:SetReset(RESET_EVENT+RESETS_REDIRECT)
+		c:RegisterEffect(e1,true)
+  end
 end
