@@ -62,7 +62,7 @@ function s.cost2(e,tp,eg,ep,ev,re,r,rp,chk)
   e:SetLabel(ct)
   
   Duel.Remove(g,POS_FACEUP,REASON_COST)
-  Duel.DiscardHand(tp,aux.TRUE,1,1,REASON_EFFECT)
+  Duel.DiscardHand(tp,aux.TRUE,1,1,REASON_DISCARD+REASON_COST)
 end
 function s.operation2(e,tp,eg,ep,ev,re,r,rp)
   local c=e:GetHandler()
