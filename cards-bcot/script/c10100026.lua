@@ -63,13 +63,13 @@ function s.cost3(e,tp,eg,ep,ev,re,r,rp,chk)
   Duel.Remove(g,POS_FACEUP,REASON_COST)
 end
 function s.target3(e,tp,eg,ep,ev,re,r,rp,chk)
-  if chk==0 then return Duel.IsExistingMatchingCard(s.filter3b,tp,LOCATION_HAND,0,1,nil,e,tp) end
+  if chk==0 then return Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and Duel.IsExistingMatchingCard(s.filter3b,tp,LOCATION_HAND,0,1,nil,e,tp) end
   local g=Duel.GetMatchingGroup(s.filter3a,tp,LOCATION_HAND,0,nil)
   Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,g,1,0,0)
 end
 function s.operation3(e,tp,eg,ep,ev,re,r,rp)
   local c=e:GetHandler()
-  if c:IsRelateToEffect(e) then
+  if c:IsRelateToEffect(e) and Duel.GetLocationCount(tp,LOCATION_MZONE)>0 then
     Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_REMOVE)
     local g=Duel.SelectMatchingCard(tp,s.filter3b,tp,LOCATION_HAND,0,1,1,nil,e,tp)
     if g:GetCount() > 0 then
