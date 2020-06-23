@@ -56,7 +56,11 @@ function s.cost2(e,tp,eg,ep,ev,re,r,rp,chk)
   if chk==0 then return Duel.IsExistingMatchingCard(Card.IsAbleToRemove,tp,LOCATION_GRAVE,0,1,nil) and Duel.IsExistingMatchingCard(Card.IsDiscardable,tp,LOCATION_HAND,0,1,nil) end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_REMOVE)
   local g=Duel.SelectMatchingCard(tp,Card.IsAbleToRemove,tp,LOCATION_GRAVE,0,1,1,nil)
-  e:SetLabel(g:GetFirst():GetType())
+  
+  local ct=g:GetFirst():GetType()
+  ct=bit.band(ct,TYPE_MONSTER)+bit.band(ct,TYPE_SPELL)+bit.band(ct,TYPE_TRAP)
+  e:SetLabel(ct)
+  
   Duel.Remove(g,POS_FACEUP,REASON_COST)
   Duel.DiscardHand(tp,aux.TRUE,1,1,REASON_EFFECT)
 end
