@@ -55,19 +55,22 @@ function s.value1_1(e,te)
 end
 function s.condition2(e,tp,eg,ep,ev,re,r,rp)
 	local rc=re:GetHandler()
-	return rc:IsControler(1-tp) and rc:IsLocation(LOCATION_ONFIELD) and rc:GetSequence()<=4
+	return rc:IsControler(1-tp) and rc:IsLocation(LOCATION_ONFIELD) and not rc:IsLocation(LOCATION_FZONE)
 end
 function s.target2(e,tp,eg,ep,ev,re,r,rp,chk)
   local c=e:GetHandler()
   local rc=re:GetHandler()
-  local zone=bit.replace(0,0x1,4-rc:GetSequence())
+  local seq=rc:GetSequence()
+  if seq==5 then seq=1 end
+  if seq==6 then seq=3 end
+  local zone=bit.replace(0,0x1,4-seq)
 	if chk==0 then return c:IsCanBeSpecialSummoned(e,SUMMON_TYPE_SPECIAL,tp,false,false,POS_FACEUP,tp,zone) end
+  e:SetLabel(zone)
 	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,c,1,0,0)
 end
 function s.operation2(e,tp,eg,ep,ev,re,r,rp)
   local c=e:GetHandler()
-  local rc=re:GetHandler()
-  local zone=bit.replace(0,0x1,4-rc:GetSequence())
+  local zone=e:GetLabel()
   if c:IsRelateToEffect(e) and Duel.SpecialSummon(c,SUMMON_TYPE_SPECIAL,tp,tp,false,false,POS_FACEUP,zone)>0 then
     local g=Duel.GetMatchingGroup(Card.IsFaceup,tp,0,LOCATION_MZONE,nil)
     local tc=g:GetFirst()
