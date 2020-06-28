@@ -33,7 +33,8 @@ function s.initial_effect(c)
 end
 function s.condition2a(e,tp,eg,ep,ev,re,r,rp)
   local ec=e:GetHandler():GetEquipTarget()
-	return re:IsActivated() and re:IsHasProperty(EFFECT_FLAG_CARD_TARGET) and Duel.GetChainInfo(ev,CHAININFO_TARGET_CARDS):IsContains(ec)
+  local tg=Duel.GetChainInfo(ev,CHAININFO_TARGET_CARDS)
+	return re:IsActivated() and re:IsHasProperty(EFFECT_FLAG_CARD_TARGET) and tg and tg:IsContains(ec)
 end
 function s.operation2a(e,tp,eg,ep,ev,re,r,rp)
 	re:GetHandler():RegisterFlagEffect(id,RESET_CHAIN,0,1)
