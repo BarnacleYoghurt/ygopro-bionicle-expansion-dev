@@ -60,13 +60,14 @@ function s.operation2(e,tp,eg,ep,ev,re,r,rp)
   
   local e0=Effect.CreateEffect(c)
   e0:SetType(EFFECT_TYPE_FIELD)
-  e0:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
+  e0:SetProperty(EFFECT_FLAG_PLAYER_TARGET+EFFECT_FLAG_OATH)
   e0:SetCode(EFFECT_CANNOT_SPECIAL_SUMMON)
   e0:SetRange(LOCATION_FZONE)
   e0:SetTargetRange(1,0)
   e0:SetTarget(s.target2_1)
   e0:SetReset(RESET_PHASE+PHASE_END)
   Duel.RegisterEffect(e0,tp)
+	aux.RegisterClientHint(c,nil,tp,1,0,aux.Stringid(id,1),nil)
   
   if c:IsRelateToEffect(e) and Duel.GetLocationCount(tp,LOCATION_MZONE)>0 then
     Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_REMOVE)
