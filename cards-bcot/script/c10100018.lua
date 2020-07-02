@@ -76,7 +76,7 @@ function s.target2_1(e,c)
   return e:GetHandler()==c or e:GetHandler():GetLinkedGroup():IsContains(c)
 end
 function s.value2_1(e,te)
-  return bit.band(te:GetActiveType(), e:GetLabel())==0
+  return bit.band(te:GetActiveType(), e:GetLabel())==0 and te:GetHandler()~=e:GetHandler()
 end
 function s.filter3a(c,g)
   return c:IsFaceup() and g:IsContains(c)
