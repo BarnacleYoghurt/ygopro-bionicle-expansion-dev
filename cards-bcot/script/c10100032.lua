@@ -53,6 +53,9 @@ end
 function s.value1_1(e,te)
 	return te:GetHandler()~=e:GetHandler()
 end
+function s.filter2(c)
+  return c:IsPosition(POS_FACEUP_ATTACK) and c:IsCanChangePosition()
+end
 function s.condition2(e,tp,eg,ep,ev,re,r,rp)
 	local rc=re:GetHandler()
 	return rc:IsControler(1-tp) and rc:IsLocation(LOCATION_ONFIELD) and not rc:IsLocation(LOCATION_FZONE)
@@ -64,7 +67,7 @@ function s.target2(e,tp,eg,ep,ev,re,r,rp,chk)
   if seq==5 then seq=1 end
   if seq==6 then seq=3 end
   local zone=bit.replace(0,0x1,4-seq)
-	if chk==0 then return c:IsCanBeSpecialSummoned(e,SUMMON_TYPE_SPECIAL,tp,false,false,POS_FACEUP,tp,zone) end
+	if chk==0 then return c:IsCanBeSpecialSummoned(e,SUMMON_TYPE_SPECIAL,tp,false,false,POS_FACEUP,tp,zone) and Duel.IsExistingMatchingCard(s.filter2,tp,LOCATION_MZONE,LOCATION_MZONE,1,nil) end
   e:SetLabel(zone)
 	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,c,1,0,0)
 end
@@ -72,16 +75,8 @@ function s.operation2(e,tp,eg,ep,ev,re,r,rp)
   local c=e:GetHandler()
   local zone=e:GetLabel()
   if c:IsRelateToEffect(e) and Duel.SpecialSummon(c,SUMMON_TYPE_SPECIAL,tp,tp,false,false,POS_FACEUP,zone)>0 then
-    local g=Duel.GetMatchingGroup(Card.IsFaceup,tp,0,LOCATION_MZONE,nil)
-    local tc=g:GetFirst()
-    while tc do
-      local e1=Effect.CreateEffect(c)
-      e1:SetType(EFFECT_TYPE_SINGLE)
-      e1:SetCode(EFFECT_UPDATE_ATTACK)
-      e1:SetValue(-500)
-      e1:SetReset(RESET_EVENT+RESETS_STANDARD+RESET_PHASE+PHASE_END)
-      tc:RegisterEffect(e1)
-      tc=g:GetNext()
-    end
+    Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_POSCHANGE)
+    local g=Duel.SelectMatchingCard(tp,s.filter2,tp,LOCATION_MZONE,LOCATION_MZONE,1,1,c)
+    Duel.ChangePosition(g,POS_FACEUP_DEFENSE)
   end
 end
