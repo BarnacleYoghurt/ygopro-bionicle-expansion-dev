@@ -8,7 +8,7 @@ function s.initial_effect(c)
   local e1=bcot.toa_mata_tribute(c)
 	e1:SetDescription(aux.Stringid(id,0))
 	c:RegisterEffect(e1)
-  --ATK to 0 + double damage
+  --ATK to 0 + bonus damage
 	local e2=Effect.CreateEffect(c)
 	e2:SetDescription(aux.Stringid(id,1))
 	e2:SetCategory(CATEGORY_ATKCHANGE)
@@ -32,6 +32,7 @@ function s.target2(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 	Duel.SelectTarget(tp,Card.IsFaceup,tp,0,LOCATION_MZONE,1,1,nil)
 end
 function s.operation2(e,tp,eg,ep,ev,re,r,rp)
+  local c=e:GetHandler()
 	local tc=Duel.GetFirstTarget()
 	if tc:IsRelateToEffect(e) then
 		local e1=Effect.CreateEffect(e:GetHandler())
@@ -40,14 +41,31 @@ function s.operation2(e,tp,eg,ep,ev,re,r,rp)
 		e1:SetValue(0)
 		e1:SetReset(RESET_EVENT+RESETS_STANDARD)
 		tc:RegisterEffect(e1)
+    local fid=c:GetFieldID()
+    tc:RegisterFlagEffect(id,RESET_EVENT+RESET_TURN_SET+RESET_OVERLAY+RESET_MSCHANGE+RESET_TOFIELD+RESET_PHASE+PHASE_END,EFFECT_FLAG_CLIENT_HINT,1,fid,aux.Stringid(id,3))
+    --TODO: See https://github.com/Fluorohydride/ygopro-scripts/blob/b820812a1ffb14eeb0022b2336c0c8c93d856d5c/c52038441.lua#
+    --Basically we need to track when the card loses its identity other than through battle destruction and silently reset the effect in that case
+    --Normal Resets unfortunately don't work here because they turn the effect off before it is applied
     local e2=Effect.CreateEffect(e:GetHandler())
     e2:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_CONTINUOUS)
-    e2:SetCode(EVENT_PRE_BATTLE_DAMAGE)
-		e2:SetReset(RESET_EVENT+RESETS_STANDARD+RESET_PHASE+PHASE_END)
+    e2:SetCode(EVENT_BATTLE_DESTROYED)
+		e2:SetReset(RESET_PHASE+PHASE_END)
+    e2:SetLabel(fid)
+    e2:SetLabelObject(tc)
     e2:SetOperation(s.operation2_2)
-    tc:RegisterEffect(e2)
+    Duel.RegisterEffect(e2,tp)
 	end
 end
 function s.operation2_2(e,tp,eg,ep,ev,re,r,rp)
-  Duel.ChangeBattleDamage(ep,ev*2)
+  local tc=e:GetLabelObject()
+  if eg:IsContains(tc) then
+    if tc:GetFlagEffectLabel(id)==e:GetLabel() then
+      Duel.Hint(HINT_CARD,0,id)
+      Duel.Damage(1-tp,tc:GetBaseAttack(),REASON_EFFECT)
+      tc:ResetFlagEffect(id)
+      e:Reset()
+    else
+      e:Reset()
+    end
+  end
 end
