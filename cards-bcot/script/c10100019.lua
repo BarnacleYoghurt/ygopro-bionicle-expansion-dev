@@ -1,72 +1,81 @@
 --Turaga Whenua
-function c10100019.initial_effect(c)
-	--Equip
-	local e1=Effect.CreateEffect(c)
-	e1:SetDescription(aux.Stringid(10100019,0))
-	e1:SetCategory(CATEGORY_EQUIP)
-	e1:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_F)
-	e1:SetCode(EVENT_SUMMON_SUCCESS)
-	e1:SetTarget(c10100019.target1)
-	e1:SetOperation(c10100019.operation1)
-	c:RegisterEffect(e1)
-	local e1a=e1:Clone()
-	e1a:SetCode(EVENT_SPSUMMON_SUCCESS)
-	c:RegisterEffect(e1a)
-	local e1b=e1:Clone()
-	e1b:SetCode(EVENT_FLIP_SUMMON_SUCCESS)
-	c:RegisterEffect(e1b)
-	--Banish
-	local e2=Effect.CreateEffect(c)
-	e2:SetDescription(aux.Stringid(10100019,1))
-	e2:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_CONTINUOUS)
-	e2:SetCode(EVENT_TO_GRAVE)
-	e2:SetOperation(c10100019.operation2)
-	c:RegisterEffect(e2)
+local s,id=GetID()
+function s.initial_effect(c)
+	--Link Summon
+	Link.AddProcedure(c,nil,2,2,s.check0)
+	c:EnableReviveLimit()
+	--LP gain
+  local e1=Effect.CreateEffect(c)
+  e1:SetCategory(CATEGORY_RECOVER)
+  e1:SetRange(LOCATION_MZONE)
+  e1:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
+  e1:SetCode(EVENT_TO_GRAVE)
+  e1:SetCondition(s.condition1)
+  e1:SetTarget(s.target1)
+  e1:SetOperation(s.operation1)
+  c:RegisterEffect(e1)
+  --Search
+  local e2=Effect.CreateEffect(c)
+  e2:SetCategory(CATEGORY_SEARCH+CATEGORY_TOHAND)
+  e2:SetRange(LOCATION_MZONE)
+  e2:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_F)
+  e2:SetCode(EVENT_DESTROYED)
+  e2:SetCondition(s.condition2)
+  e2:SetTarget(s.target2)
+  e2:SetOperation(s.operation2)
+  c:RegisterEffect(e2)
 end
---e1 - Equip
-function c10100019.filter1(c,ec)
-	return c:IsType(TYPE_EQUIP)	and c:IsCode(10100042) and c:CheckEquipTarget(ec)
+function s.filter0(c)
+  return c:IsAttribute(ATTRIBUTE_EARTH) and c:IsRace(RACE_WARRIOR)
 end
-function c10100019.target1(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.GetLocationCount(tp,LOCATION_SZONE)>0
-		and Duel.IsExistingMatchingCard(c10100019.filter1,tp,LOCATION_DECK+LOCATION_HAND+LOCATION_GRAVE,0,1,nil,e:GetHandler()) end
-	Duel.SetOperationInfo(0,CATEGORY_EQUIP,nil,1,tp,LOCATION_DECK)
+function s.check0(g,lc)
+  return g:IsExists(s.filter0,1,nil)
 end
-function c10100019.operation1(e,tp,eg,ep,ev,re,r,rp)
-	local c=e:GetHandler()
-	if Duel.GetLocationCount(tp,LOCATION_SZONE)<=0 or c:IsFacedown() or not c:IsRelateToEffect(e) then return end
-	Duel.Hint(HINT_SELECTMSG,tp,nil)
-	local g=Duel.SelectMatchingCard(tp,c10100019.filter1,tp,LOCATION_DECK+LOCATION_HAND+LOCATION_GRAVE,0,1,1,nil,c)
-	if g:GetCount()>0 and g:GetFirst():CheckEquipTarget(c) then
-		Duel.Equip(tp,g:GetFirst(),c)
-	end
+function s.filter1(c)
+  return c:IsType(TYPE_MONSTER) and c:IsAttribute(ATTRIBUTE_EARTH) and c:IsPreviousLocation(LOCATION_HAND+LOCATION_ONFIELD)
 end
---e2 - Banish
-function c10100019.operation2(e,tp,eg,ep,ev,re,r,rp)
-	local c=e:GetHandler()
-	local e1=Effect.CreateEffect(c)
-	e1:SetCategory(CATEGORY_REMOVE)
-	e1:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_F)
-	e1:SetProperty(EFFECT_FLAG_CARD_TARGET)
-	e1:SetCode(EVENT_PHASE+PHASE_END)
-	e1:SetRange(LOCATION_GRAVE)
-	e1:SetTarget(c10100019.target2_1)
-	e1:SetOperation(c10100019.operation2_1)
-	e1:SetCountLimit(1)	
-	e1:SetReset(RESET_PHASE+PHASE_END)
-	c:RegisterEffect(e1)
+function s.condition1(e,tp,eg,ep,ev,re,r,rp)
+  return eg:IsExists(s.filter1,1,nil)
 end
-function c10100019.filter2_1(c,e)
-	return c:IsFaceup() and c:IsDisabled() and c:IsAbleToRemove()
+function s.target1(e,tp,eg,ep,ev,re,r,rp,chk)
+  if chk==0 then return true end
+  Duel.SetTargetPlayer(tp)
+  Duel.SetTargetParam(400)
+  Duel.SetOperationInfo(0,CATEGORY_RECOVER,nil,0,tp,400)
 end
-function c10100019.target2_1(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.IsExistingMatchingCard(c10100019.filter2_1,tp,LOCATION_MZONE,LOCATION_MZONE,1,nil,e) end
-	local sg=Duel.SelectTarget(tp,c10100019.filter2_1,tp,LOCATION_MZONE,LOCATION_MZONE,1,1,nil,e)
-	Duel.SetOperationInfo(0,CATEGORY_REMOVE,sg,sg:GetCount(),0,0)
+function s.operation1(e,tp,eg,ep,ev,re,r,rp)
+  local p,d=Duel.GetChainInfo(0,CHAININFO_TARGET_PLAYER,CHAININFO_TARGET_PARAM)
+  Duel.Recover(p,d,REASON_EFFECT)
 end
-function c10100019.operation2_1(e,tp,eg,ep,ev,re,r,rp)
-	local tc=Duel.GetFirstTarget()
-	if tc and c10100019.filter2_1(tc,e) and tc:IsRelateToEffect(e) then
-		Duel.Remove(tc,POS_FACEUP,REASON_EFFECT)
-	end
+function s.filter2a(c,e)
+  return c:IsCanBeEffectTarget(e) and c:IsAbleToDeck()
+end
+function s.filter2b(c,xg)
+  return c:IsAbleToHand() and xg:FilterCount(Card.IsCode,nil,c:GetCode())==0
+end
+function s.condition2(e,tp,eg,ep,ev,re,r,rp)
+  local c=e:GetHandler()
+	return c:IsReason(REASON_BATTLE) or (rp==1-tp and c:IsReason(REASON_EFFECT) and c:GetPreviousControler()==tp)
+end
+function s.target2(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
+  if chkc then return false end
+  local g=Duel.GetMatchingGroup(s.filter2a,tp,LOCATION_GRAVE,0,nil,e)
+  if chk==0 then return g:GetClassCount(Card.GetCode)>=3 end
+	local tg=aux.SelectUnselectGroup(g,e,tp,3,3,aux.dpcheck(Card.GetCode),1,tp,HINTMSG_TODECK) --TODO: Disallow selections that would not leave any options to search
+	Duel.SetTargetCard(tg)
+  local sg=Duel.GetMatchingGroup(s.filter2b,tp,LOCATION_DECK,0,nil,tg)
+  
+  Duel.SetOperationInfo(0,CATEGORY_TOHAND,sg,1,tp,LOCATION_DECK)
+	Duel.SetOperationInfo(0,CATEGORY_TODECK,tg,3,0,0)
+end
+function s.operation2(e,tp,eg,ep,ev,re,r,rp)
+	local tg=Duel.GetChainInfo(0,CHAININFO_TARGET_CARDS):Filter(Card.IsRelateToEffect,nil,e)
+  Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TOHAND)
+  local g=Duel.SelectMatchingCard(tp,s.filter2b,tp,LOCATION_DECK,0,1,1,nil,tg)
+  if g:GetCount()>0 then
+    Duel.SendtoHand(g,tp,REASON_EFFECT)
+    Duel.ConfirmCards(1-tp, g)
+    Duel.BreakEffect()
+    Duel.SendtoDeck(tg,tp,2,REASON_EFFECT)
+  end
 end
