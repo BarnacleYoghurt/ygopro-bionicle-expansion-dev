@@ -47,11 +47,14 @@ function s.operation1(e,tp,eg,ep,ev,re,r,rp)
   local p,d=Duel.GetChainInfo(0,CHAININFO_TARGET_PLAYER,CHAININFO_TARGET_PARAM)
   Duel.Recover(p,d,REASON_EFFECT)
 end
-function s.filter2a(c,e)
-  return c:IsCanBeEffectTarget(e) and c:IsAbleToDeck()
+function s.filter2a(sg,e,tp,mg)
+  return sg:FilterCount(s.filter2b,nil,e)==sg:GetCount() and aux.dncheck(sg,e,tp,mg) and Duel.IsExistingMatchingCard(s.filter2c,tp,LOCATION_DECK,0,1,nil,sg)
 end
-function s.filter2b(c,xg)
-  return c:IsAbleToHand() and xg:FilterCount(Card.IsCode,nil,c:GetCode())==0
+function s.filter2b(c,e)
+  return c:IsType(TYPE_MONSTER) and c:IsCanBeEffectTarget(e) and c:IsAbleToDeck()
+end
+function s.filter2c(c,xg)
+   return c:IsAbleToHand() and xg:FilterCount(Card.IsCode,nil,c:GetCode())==0
 end
 function s.condition2(e,tp,eg,ep,ev,re,r,rp)
   local c=e:GetHandler()
@@ -59,11 +62,12 @@ function s.condition2(e,tp,eg,ep,ev,re,r,rp)
 end
 function s.target2(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
   if chkc then return false end
-  local g=Duel.GetMatchingGroup(s.filter2a,tp,LOCATION_GRAVE,0,nil,e)
-  if chk==0 then return g:GetClassCount(Card.GetCode)>=3 end
-	local tg=aux.SelectUnselectGroup(g,e,tp,3,3,aux.dpcheck(Card.GetCode),1,tp,HINTMSG_TODECK) --TODO: Disallow selections that would not leave any options to search
-	Duel.SetTargetCard(tg)
-  local sg=Duel.GetMatchingGroup(s.filter2b,tp,LOCATION_DECK,0,nil,tg)
+  local g=Duel.GetMatchingGroup(s.filter2f,tp,LOCATION_GRAVE,0,nil,e)
+  if chk==0 then return g:GetClassCount(Card.GetCode)>=3 and aux.SelectUnselectGroup(g,e,tp,3,3,s.filter2a,0,tp,HINTMSG_TODECK) end
+
+  local tg=aux.SelectUnselectGroup(g,e,tp,3,3,s.filter2a,1,tp,HINTMSG_TODECK)
+  Duel.SetTargetCard(tg)
+  local sg=Duel.GetMatchingGroup(s.filter2c,tp,LOCATION_DECK,0,nil,tg)
   
   Duel.SetOperationInfo(0,CATEGORY_TOHAND,sg,1,tp,LOCATION_DECK)
 	Duel.SetOperationInfo(0,CATEGORY_TODECK,tg,3,0,0)
@@ -71,7 +75,7 @@ end
 function s.operation2(e,tp,eg,ep,ev,re,r,rp)
 	local tg=Duel.GetChainInfo(0,CHAININFO_TARGET_CARDS):Filter(Card.IsRelateToEffect,nil,e)
   Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TOHAND)
-  local g=Duel.SelectMatchingCard(tp,s.filter2b,tp,LOCATION_DECK,0,1,1,nil,tg)
+  local g=Duel.SelectMatchingCard(tp,s.filter2c,tp,LOCATION_DECK,0,1,1,nil,tg)
   if g:GetCount()>0 then
     Duel.SendtoHand(g,tp,REASON_EFFECT)
     Duel.ConfirmCards(1-tp, g)
