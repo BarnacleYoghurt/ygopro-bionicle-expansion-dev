@@ -74,7 +74,7 @@ function s.cost2(e,tp,eg,ep,ev,re,r,rp,chk)
 	Duel.RegisterEffect(e2,tp)
 end
 function s.target2(e,tp,eg,ep,ev,re,r,rp,chk)
-  local dc=math.floor((Duel.GetLP(tp) - Duel.GetLP(1-tp))/1000)
+  local dc=math.min(math.floor((Duel.GetLP(tp) - Duel.GetLP(1-tp))/1000), 3)
   if chk==0 then return Duel.IsPlayerCanDraw(tp,dc) end
   Duel.SetTargetPlayer(tp)
   Duel.SetTargetParam(dc)
