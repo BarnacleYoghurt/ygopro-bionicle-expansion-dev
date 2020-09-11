@@ -54,7 +54,7 @@ function s.filter2b(c,e)
   return c:IsType(TYPE_MONSTER) and c:IsCanBeEffectTarget(e) and c:IsAbleToDeck()
 end
 function s.filter2c(c,xg)
-   return c:IsAbleToHand() and xg:FilterCount(Card.IsCode,nil,c:GetCode())==0
+   return c:IsType(TYPE_MONSTER) and c:IsAbleToHand() and xg:FilterCount(Card.IsCode,nil,c:GetCode())==0
 end
 function s.condition2(e,tp,eg,ep,ev,re,r,rp)
   local c=e:GetHandler()
