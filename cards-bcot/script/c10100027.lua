@@ -8,6 +8,7 @@ function s.initial_effect(c)
 	c:RegisterEffect(e0)
 	--Gain LP
   local e1=Effect.CreateEffect(c)
+  e1:SetDescription(aux.Stringid(id,0))
   e1:SetCategory(CATEGORY_TODECK+CATEGORY_RECOVER)
   e1:SetType(EFFECT_TYPE_IGNITION)
   e1:SetRange(LOCATION_FZONE)
@@ -17,6 +18,7 @@ function s.initial_effect(c)
   c:RegisterEffect(e1)
   --Draw
   local e2=Effect.CreateEffect(c)
+  e2:SetDescription(aux.Stringid(id,1))
   e2:SetCategory(CATEGORY_DRAW)
   e2:SetType(EFFECT_TYPE_IGNITION)
   e2:SetRange(LOCATION_FZONE)
@@ -53,13 +55,25 @@ function s.condition2(e,tp,eg,ep,ev,re,r,rp)
   return Duel.GetLP(tp) > Duel.GetLP(1-tp)
 end
 function s.cost2(e,tp,eg,ep,ev,re,r,rp,chk)
-  if chk==0 then 
+  if chk==0 then
+    e:SetLabel(1) --If cost chk returns true, target chk will run next and thanks to this check if we can draw at least 1 card
     return Duel.GetCustomActivityCount(id,tp,ACTIVITY_SUMMON)+Duel.GetCustomActivityCount(id,tp,ACTIVITY_SPSUMMON)==0 
       and Duel.IsExistingMatchingCard(s.filter2,tp,LOCATION_HAND+LOCATION_MZONE,0,1,nil)
+      and Duel.CheckLPCost(tp, 1000)
   end
   Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TOGRAVE)
   local g=Duel.SelectMatchingCard(tp,s.filter2,tp,LOCATION_HAND+LOCATION_MZONE,0,1,1,nil)
   Duel.SendtoGrave(g,REASON_COST)
+  
+  local options={}
+  for dc=1,3 do
+    if Duel.CheckLPCost(tp, dc*1000) and Duel.IsPlayerCanDraw(tp,dc) then
+      table.insert(options, dc*1000)
+    end
+  end
+  local pay=Duel.AnnounceNumber(tp,table.unpack(options))
+  Duel.PayLPCost(tp,pay)
+  e:SetLabel(pay/1000)
   
   local e1=Effect.CreateEffect(e:GetHandler())
 	e1:SetType(EFFECT_TYPE_FIELD)
@@ -74,7 +88,7 @@ function s.cost2(e,tp,eg,ep,ev,re,r,rp,chk)
 	Duel.RegisterEffect(e2,tp)
 end
 function s.target2(e,tp,eg,ep,ev,re,r,rp,chk)
-  local dc=math.min(math.floor((Duel.GetLP(tp) - Duel.GetLP(1-tp))/1000), 3)
+  local dc=e:GetLabel()
   if chk==0 then return Duel.IsPlayerCanDraw(tp,dc) end
   Duel.SetTargetPlayer(tp)
   Duel.SetTargetParam(dc)
@@ -83,7 +97,6 @@ end
 function s.operation2(e,tp,eg,ep,ev,re,r,rp)
 	local p,d=Duel.GetChainInfo(0,CHAININFO_TARGET_PLAYER,CHAININFO_TARGET_PARAM)
 	Duel.Draw(p,d,REASON_EFFECT)
-  Duel.SetLP(tp,Duel.GetLP(1-tp))
 end
 function s.target2_1(e,c)
   return not c:IsAttribute(ATTRIBUTE_EARTH)
