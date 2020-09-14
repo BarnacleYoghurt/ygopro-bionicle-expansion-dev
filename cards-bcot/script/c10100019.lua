@@ -33,15 +33,15 @@ end
 function s.check0(g,lc)
   return g:IsExists(s.filter0,1,nil)
 end
-function s.filter1(c)
-  return c:IsType(TYPE_MONSTER) and c:IsAttribute(ATTRIBUTE_EARTH) and c:IsPreviousLocation(LOCATION_HAND+LOCATION_ONFIELD)
+function s.filter1(c,tp)
+  return c:IsType(TYPE_MONSTER) and c:IsAttribute(ATTRIBUTE_EARTH) and c:IsPreviousLocation(LOCATION_HAND+LOCATION_ONFIELD) and c:GetPreviousControler()==tp
 end
 function s.condition1(e,tp,eg,ep,ev,re,r,rp)
-  return eg:IsExists(s.filter1,1,nil)
+  return eg:IsExists(s.filter1,1,nil,tp)
 end
 function s.target1(e,tp,eg,ep,ev,re,r,rp,chk)
   if chk==0 then return true end
-  local val=400*eg:FilterCount(s.filter1,nil)
+  local val=400*eg:FilterCount(s.filter1,nil,tp)
   Duel.SetTargetPlayer(tp)
   Duel.SetTargetParam(val)
   Duel.SetOperationInfo(0,CATEGORY_RECOVER,nil,0,tp,val)
