@@ -15,25 +15,29 @@ function s.initial_effect(c)
   e2:SetRange(LOCATION_SZONE)
   e2:SetTarget(s.target2)
 	e2:SetOperation(s.operation2)
-	e2:SetCountLimit(1)
+	e2:SetCountLimit(1,id)
 	c:RegisterEffect(e2)
   --Recycle
   local e3=bcot.kanohi_revive(c,10100019)
   e3:SetDescription(aux.Stringid(id,0))
-  e3:SetCountLimit(1,id)
+  e3:SetCountLimit(1,id+1000000)
   c:RegisterEffect(e3)
 end
-function s.target2(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.IsExistingMatchingCard(Card.IsFacedown,tp,0,LOCATION_ONFIELD,1,nil) end
+function s.target2(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
+  if chkc then return chkc:IsCanBeEffectTarget(e) and chkc:IsFacedown() and chkc:IsLocation(LOCATION_ONFIELD) and chkc:IsControler(1-tp) end 
+	if chk==0 then return Duel.IsExistingTarget(Card.IsFacedown,tp,0,LOCATION_ONFIELD,1,nil) end
+	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_FACEDOWN)
+  local g=Duel.SelectTarget(tp,Card.IsFacedown,tp,0,LOCATION_ONFIELD,1,1,nil)
 end
 function s.operation2(e,tp,eg,ep,ev,re,r,rp)
-	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_FACEDOWN)
-	local g=Duel.SelectMatchingCard(tp,Card.IsFacedown,tp,0,LOCATION_ONFIELD,1,1,nil)
-	if g:GetCount()>0 then
-    Duel.ConfirmCards(tp,g)
-    local tc=g:GetFirst()
-    if tc:GetAttack() < e:GetHandler():GetEquipTarget():GetAttack() then
-      Duel.Damage(1-tp,math.floor(tc:GetAttack()/2), REASON_EFFECT)
+	local tc=Duel.GetFirstTarget()
+  local ec=e:GetHandler():GetEquipTarget()
+	if tc:IsRelateToEffect(e) then
+    Duel.ConfirmCards(tp,tc)
+    if tc:IsType(TYPE_SPELL+TYPE_TRAP) then
+      Duel.Damage(1-tp,500,REASON_EFFECT)
+    elseif tc:GetAttack() < ec:GetAttack() then
+      Duel.Damage(1-tp,ec:GetAttack()-tc:GetAttack(), REASON_EFFECT)
     end
   end
 end
