@@ -19,9 +19,14 @@ function s.initial_effect(c)
 	e4:SetCode(EFFECT_UPDATE_ATTACK)
 	e4:SetValue(1000)
 	c:RegisterEffect(e4)
+  --Piercing
+  local e5=Effect.CreateEffect(c)
+  e5:SetType(EFFECT_TYPE_EQUIP)
+  e5:SetCode(EFFECT_PIERCE)
+  c:RegisterEffect(e5)
 	--Search
-  local e5=bcot.kanohi_search(c,10100003)
-  e5:SetDescription(id,0)
-  e5:SetCountLimit(1,id)
-	c:RegisterEffect(e5)
+  local e6=bcot.kanohi_search(c,10100003)
+  e6:SetDescription(id,0)
+  e6:SetCountLimit(1,id)
+	c:RegisterEffect(e6)
 end
