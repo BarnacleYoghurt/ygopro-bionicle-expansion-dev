@@ -50,7 +50,7 @@ function s.operation1(e,tp,eg,ep,ev,re,r,rp)
   local p,d=Duel.GetChainInfo(0,CHAININFO_TARGET_PLAYER,CHAININFO_TARGET_PARAM)
   Duel.Recover(p,d,REASON_EFFECT)
 end
-function s.filter2(c)
+function s.filter2(c,tp)
   return c:IsType(TYPE_MONSTER) and c:IsLevelBelow(4) and c:IsRace(RACE_WARRIOR) and c:IsAttribute(ATTRIBUTE_EARTH) and c:IsAbleToHand() 
     and not Duel.IsExistingMatchingCard(Card.IsCode,tp,LOCATION_GRAVE,0,1,nil,c:GetCode())
 end
@@ -58,13 +58,13 @@ function s.condition2(e,tp,eg,ep,ev,re,r,rp)
   return e:GetHandler():IsSummonType(SUMMON_TYPE_LINK)
 end
 function s.target2(e,tp,eg,ep,ev,re,r,rp,chk)
-  if chk==0 then return Duel.IsExistingMatchingCard(s.filter2,tp,LOCATION_DECK,0,1,nil) end
-  local g=Duel.GetMatchingGroup(s.filter2,tp,LOCATION_DECK,0,nil)
+  if chk==0 then return Duel.IsExistingMatchingCard(s.filter2,tp,LOCATION_DECK,0,1,nil,tp) end
+  local g=Duel.GetMatchingGroup(s.filter2,tp,LOCATION_DECK,0,nil,tp)
   Duel.SetOperationInfo(0,CATEGORY_TOHAND,g,1,tp,LOCATION_DECK)
 end
 function s.operation2(e,tp,eg,ep,ev,re,r,rp)
   Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TOHAND)
-  local g=Duel.SelectMatchingCard(tp,s.filter2,tp,LOCATION_DECK,0,1,1,nil)
+  local g=Duel.SelectMatchingCard(tp,s.filter2,tp,LOCATION_DECK,0,1,1,nil,tp)
   if g:GetCount()>0 then
     Duel.SendtoHand(g,tp,REASON_EFFECT)
     Duel.ConfirmCards(1-tp,g)
