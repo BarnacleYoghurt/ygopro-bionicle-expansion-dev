@@ -51,7 +51,8 @@ function s.operation1(e,tp,eg,ep,ev,re,r,rp)
   Duel.Recover(p,d,REASON_EFFECT)
 end
 function s.filter2(c)
-  return c:IsType(TYPE_MONSTER) and c:IsRace(RACE_WARRIOR) and c:IsAttribute(ATTRIBUTE_EARTH) and c:IsAbleToHand() and not Duel.IsExistingMatchingCard(Card.IsCode,tp,LOCATION_GRAVE,0,1,nil,c:GetCode())
+  return c:IsType(TYPE_MONSTER) and c:IsLevelBelow(4) and c:IsRace(RACE_WARRIOR) and c:IsAttribute(ATTRIBUTE_EARTH) and c:IsAbleToHand() 
+    and not Duel.IsExistingMatchingCard(Card.IsCode,tp,LOCATION_GRAVE,0,1,nil,c:GetCode())
 end
 function s.condition2(e,tp,eg,ep,ev,re,r,rp)
   return e:GetHandler():IsSummonType(SUMMON_TYPE_LINK)
