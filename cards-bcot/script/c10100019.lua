@@ -22,6 +22,7 @@ function s.initial_effect(c)
 	e2:SetProperty(EFFECT_FLAG_DELAY)
 	e2:SetCode(EVENT_SPSUMMON_SUCCESS)
   e2:SetCondition(s.condition2)
+  e2:SetCost(s.cost2)
   e2:SetTarget(s.target2)
   e2:SetOperation(s.operation2)
   e2:SetCountLimit(1,id)
@@ -56,6 +57,10 @@ function s.filter2(c,tp)
 end
 function s.condition2(e,tp,eg,ep,ev,re,r,rp)
   return e:GetHandler():IsSummonType(SUMMON_TYPE_LINK)
+end
+function s.cost2(e,tp,eg,ep,ev,re,r,rp,chk)
+  if chk==0 then return Duel.CheckLPCost(tp,1000) end
+  Duel.PayLPCost(tp,1000)
 end
 function s.target2(e,tp,eg,ep,ev,re,r,rp,chk)
   if chk==0 then return Duel.IsExistingMatchingCard(s.filter2,tp,LOCATION_DECK,0,1,nil,tp) end
