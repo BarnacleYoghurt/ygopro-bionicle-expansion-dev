@@ -11,11 +11,11 @@ function s.initial_effect(c)
   --Recycle
   local e2=Effect.CreateEffect(c)
   e2:SetDescription(aux.Stringid(id,1))
-  e2:SetCategory(CATEGORY_TOHAND)
+  e2:SetCategory(CATEGORY_TODECK+CATEGORY_RECOVER)
   e2:SetRange(LOCATION_MZONE)
 	e2:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O)
-	e2:SetCode(EVENT_DAMAGE)
-	e2:SetProperty(EFFECT_FLAG_CARD_TARGET+EFFECT_FLAG_DAMAGE_STEP) --TODO: Would it be correct that only battle damage can trigger in damage step?
+	e2:SetCode(EVENT_TO_GRAVE)
+	e2:SetProperty(EFFECT_FLAG_CARD_TARGET+EFFECT_FLAG_DELAY)
   e2:SetCondition(s.condition2)
   e2:SetTarget(s.target2)
   e2:SetOperation(s.operation2)
@@ -26,36 +26,37 @@ function s.initial_effect(c)
 	e3:SetDescription(aux.Stringid(id,2))
 	c:RegisterEffect(e3)
 end
-function s.filter2(c,dmg)
-  return c:IsType(TYPE_MONSTER) and c:IsAttackBelow(dmg) and c:IsAbleToHand()
+function s.filter2(c)
+  return c:IsType(TYPE_MONSTER) and c:IsPreviousLocation(LOCATION_HAND+LOCATION_DECK)
 end
 function s.condition2(e,tp,eg,ep,ev,re,r,rp)
-  return ep==1-tp
+  return eg:IsExists(s.filter2,1,nil)
 end
 function s.target2(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
-  if chkc then return s.filter2(chkc,ev) and chkc:IsLocation(LOCATION_GRAVE) end
+  if chkc then return chckc:IsCanBeEffectTarget(e) and chckc:IsAbleToDeck() and chkc:IsLocation(LOCATION_GRAVE) end
   if chk==0 then
-    return Duel.IsExistingTarget(s.filter2,tp,LOCATION_GRAVE,0,1,nil,ev)
+    return Duel.IsExistingTarget(Card.IsAbleToDeck,tp,LOCATION_GRAVE,LOCATION_GRAVE,1,nil)
   end
-  local tc=Duel.SelectTarget(tp,s.filter2,tp,LOCATION_GRAVE,0,1,1,nil,ev)
-  Duel.SetOperationInfo(0,CATEGORY_TOHAND,tc,1,0,0)
+  local tg=Duel.SelectTarget(tp,Card.IsAbleToDeck,tp,LOCATION_GRAVE,LOCATION_GRAVE,1,1,nil)
+  Duel.SetOperationInfo(0,CATEGORY_TODECK,tg,1,0,0)
 end
 function s.operation2(e,tp,eg,ep,ev,re,r,rp)
   local tc=Duel.GetFirstTarget()
   if tc:IsRelateToEffect(e) then
-    Duel.SendtoHand(tc,tp,REASON_EFFECT)
-    
-    local e1=Effect.CreateEffect(e:GetHandler())
-		e1:SetType(EFFECT_TYPE_FIELD)
-		e1:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
-		e1:SetCode(EFFECT_CANNOT_ACTIVATE)
-		e1:SetTargetRange(1,0)
-		e1:SetValue(s.value2_1)
-		e1:SetLabel(tc:GetCode())
-		e1:SetReset(RESET_PHASE+PHASE_END)
-		Duel.RegisterEffect(e1,tp)
+    --Calculate LP gain while target is still in GY
+    local lpg=0
+    if tc:IsType(TYPE_MONSTER) then
+      lpg=e:GetHandler():GetAttack()-tc:GetBaseAttack()
+    end
+    --Return to Deck
+    if tc:IsType(TYPE_FUSION+TYPE_SYNCHRO+TYPE_XYZ+TYPE_LINK) or Duel.SelectOption(tp,aux.Stringid(id,2),aux.Stringid(id,3))==0 then
+			Duel.SendtoDeck(tc,nil,0,REASON_EFFECT)
+		else
+			Duel.SendtoDeck(tc,nil,1,REASON_EFFECT)
+		end
+    --Apply LP gain
+    if lpg>0 then
+      Duel.Recover(tp,lpg,REASON_EFFECT)
+    end
   end
-end
-function s.value2_1(e,re,tp)
-	return re:GetHandler():IsCode(e:GetLabel())
 end
