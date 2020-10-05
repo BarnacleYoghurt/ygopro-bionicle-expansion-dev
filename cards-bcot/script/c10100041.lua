@@ -48,27 +48,37 @@ function s.operation2b(e,tp,eg,ep,ev,re,r,rp)
 	Duel.ChangeChainOperation(ev,s.operation2b_1)
 end
 function s.filter2b_1(c)
-  return c:GetSequence()<5
+  return c:GetSequence()<5 and Duel.GetLocationCount(c:GetControler(),LOCATION_MZONE,PLAYER_NONE,0)>0
 end
 function s.operation2b_1(e,tp,eg,ep,ev,re,r,rp)
 	Duel.Hint(HINT_CARD,0,id)
-  local function selectMove(mp)
-    if not Duel.IsExistingMatchingCard(s.filter2b_1,mp,LOCATION_MZONE,0,1,nil) or Duel.GetLocationCount(mp,LOCATION_MZONE,PLAYER_NONE,0)<=0 then return end
-    local g=Duel.SelectMatchingCard(mp,s.filter2b_1,mp,LOCATION_MZONE,0,1,1,nil)
+  local function selectMove(mp)    
+    if not Duel.IsExistingMatchingCard(s.filter2b_1,mp,LOCATION_MZONE,LOCATION_MZONE,1,nil) then return end
+    if not Duel.SelectYesNo(mp,aux.Stringid(id,1)) then return end
+    local g=Duel.SelectMatchingCard(mp,s.filter2b_1,mp,LOCATION_MZONE,LOCATION_MZONE,1,1,nil)
     if g:GetCount()>0 then
+      local tc=g:GetFirst()
       Duel.Hint(HINT_SELECTMSG,mp,HINTMSG_TOZONE)
-      local s=Duel.SelectDisableField(mp,1,LOCATION_MZONE,0,0)
-      local nseq=math.log(s,2)
-      return g:GetFirst(), nseq 
+      local s, nseq
+      if tc:IsControler(mp) then
+        s=Duel.SelectDisableField(mp,1,LOCATION_MZONE,0,0)
+        nseq=math.log(s,2)
+      else
+        s=Duel.SelectDisableField(mp,1,0,LOCATION_MZONE,0)
+        nseq=math.log(s,2)-16
+      end
+      return tc, nseq 
     end
   end
   
   local tc1,seq1=selectMove(tp)
-  local tc2,seq2=selectMove(1-tp)
   if tc1 and seq1 then
     Duel.MoveSequence(tc1,seq1)
   end
+  
+  local tc2,seq2=selectMove(1-tp)
   if tc2 and seq2 then
+    Duel.BreakEffect()
     Duel.MoveSequence(tc2,seq2)
   end
 end
