@@ -26,7 +26,7 @@ function s.initial_effect(c)
   c:RegisterEffect(e5)
 	--Search
   local e6=bcot.kanohi_search(c,10100003)
-  e6:SetDescription(id,0)
+  e6:SetDescription(aux.Stringid(id,0))
   e6:SetCountLimit(1,id)
 	c:RegisterEffect(e6)
 end

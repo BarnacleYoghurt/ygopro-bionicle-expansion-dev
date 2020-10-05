@@ -11,6 +11,7 @@ function s.initial_effect(c)
 	--Confirm
 	local e2=Effect.CreateEffect(c)
   e2:SetCategory(CATEGORY_DAMAGE)
+  e1:SetDescription(aux.Stringid(id,0))
 	e2:SetType(EFFECT_TYPE_IGNITION)
   e2:SetRange(LOCATION_SZONE)
   e2:SetTarget(s.target2)
@@ -19,7 +20,7 @@ function s.initial_effect(c)
 	c:RegisterEffect(e2)
   --Recycle
   local e3=bcot.kanohi_revive(c,10100019)
-  e3:SetDescription(aux.Stringid(id,0))
+  e3:SetDescription(aux.Stringid(id,1))
   e3:SetCountLimit(1,id+1000000)
   c:RegisterEffect(e3)
 end

@@ -71,6 +71,7 @@ function s.cost2(e,tp,eg,ep,ev,re,r,rp,chk)
       table.insert(options, dc*1000)
     end
   end
+  Duel.Hint(HINT_SELECTMSG,tp,aux.Stringid(id,2))
   local pay=Duel.AnnounceNumber(tp,table.unpack(options))
   Duel.PayLPCost(tp,pay)
   e:SetLabel(pay/1000)
@@ -86,6 +87,7 @@ function s.cost2(e,tp,eg,ep,ev,re,r,rp,chk)
 	local e2=e1:Clone()
 	e2:SetCode(EFFECT_CANNOT_SUMMON)
 	Duel.RegisterEffect(e2,tp)
+	aux.RegisterClientHint(e:GetHandler(),nil,tp,1,0,aux.Stringid(id,3),nil)
 end
 function s.target2(e,tp,eg,ep,ev,re,r,rp,chk)
   local dc=e:GetLabel()

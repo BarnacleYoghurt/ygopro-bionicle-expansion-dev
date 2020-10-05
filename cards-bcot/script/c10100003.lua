@@ -49,7 +49,7 @@ function s.operation2(e,tp,eg,ep,ev,re,r,rp)
       lpg=e:GetHandler():GetAttack()-tc:GetBaseAttack()
     end
     --Return to Deck
-    if tc:IsType(TYPE_FUSION+TYPE_SYNCHRO+TYPE_XYZ+TYPE_LINK) or Duel.SelectOption(tp,aux.Stringid(id,2),aux.Stringid(id,3))==0 then
+    if tc:IsType(TYPE_FUSION+TYPE_SYNCHRO+TYPE_XYZ+TYPE_LINK) or Duel.SelectOption(tp,aux.Stringid(id,3),aux.Stringid(id,4))==0 then
 			Duel.SendtoDeck(tc,nil,0,REASON_EFFECT)
 		else
 			Duel.SendtoDeck(tc,nil,1,REASON_EFFECT)
