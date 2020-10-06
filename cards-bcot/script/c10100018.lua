@@ -27,8 +27,8 @@ function s.initial_effect(c)
   local e3=Effect.CreateEffect(c)
   e3:SetDescription(aux.Stringid(id,1))
   e3:SetCategory(CATEGORY_TOHAND)
-  e3:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_F)
-  e3:SetCode(EVENT_PHASE+PHASE_END)
+  e3:SetType(EFFECT_TYPE_QUICK_O)
+  e3:SetCode(EVENT_FREE_CHAIN)
 	e3:SetRange(LOCATION_MZONE)
   e3:SetCondition(s.condition3)
   e3:SetTarget(s.target3)
@@ -83,7 +83,7 @@ function s.filter3b(c)
   return c:IsAttribute(ATTRIBUTE_WATER) and c:IsAbleToHand()
 end
 function s.condition3(e,tp,eg,ep,ev,re,r,rp)
-	return Duel.GetTurnPlayer()==1-tp and e:GetHandler():GetLinkedGroupCount() > 0
+	return Duel.GetTurnPlayer()==1-tp and Duel.GetCurrentPhase()==PHASE_END and e:GetHandler():GetLinkedGroupCount() > 0
 end
 function s.target3(e,tp,eg,ep,ev,re,r,rp,chk)
   if chk==0 then return Duel.IsExistingTarget(s.filter3b,tp,LOCATION_GRAVE+LOCATION_REMOVED,0,1,nil) end
