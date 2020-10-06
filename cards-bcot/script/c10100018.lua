@@ -85,7 +85,8 @@ end
 function s.condition3(e,tp,eg,ep,ev,re,r,rp)
 	return Duel.GetTurnPlayer()==1-tp and Duel.GetCurrentPhase()==PHASE_END and e:GetHandler():GetLinkedGroupCount() > 0
 end
-function s.target3(e,tp,eg,ep,ev,re,r,rp,chk)
+function s.target3(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
+  if chkc then return chkc:IsCanBeEffectTarget(e) and s.filter3b(chkc) and chkc:IsLocation(LOCATION_GRAVE+LOCATION_REMOVED) and chkc:IsControler(tp) end
   if chk==0 then return Duel.IsExistingTarget(s.filter3b,tp,LOCATION_GRAVE+LOCATION_REMOVED,0,1,nil) end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_ATOHAND)
   local g=Duel.SelectTarget(tp,s.filter3b,tp,LOCATION_GRAVE+LOCATION_REMOVED,0,1,1,nil)
