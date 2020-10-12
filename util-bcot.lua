@@ -18,7 +18,7 @@ function BCOT.toa_mata_tribute(baseC)
     return 1
   end
   local function filterA(c)
-    return c:IsType(TYPE_MONSTER) and (c:IsSetCard(0x1155) or c:IsAttribute(baseC:GetOriginalAttribute())) and not c:IsCode(baseC:GetOriginalCode()) and c:IsReleasable()
+    return c:IsType(TYPE_MONSTER) and (c:IsSetCard(0x1b02) or c:IsAttribute(baseC:GetOriginalAttribute())) and not c:IsCode(baseC:GetOriginalCode()) and c:IsReleasable()
   end
   local function filterB(c,g,sc)
     if not c:IsReleasable() or g:IsContains(c) or c:IsHasEffect(EFFECT_EXTRA_RELEASE) then return false end
@@ -36,7 +36,7 @@ function BCOT.toa_mata_tribute(baseC)
     return true
   end
   local function filterC(c)
-    return c:IsType(TYPE_MONSTER) and (c:IsSetCard(0x1155) or c:IsAttribute(baseC:GetOriginalAttribute())) and not c:IsCode(baseC:GetOriginalCode()) and c:IsLocation(LOCATION_HAND)
+    return c:IsType(TYPE_MONSTER) and (c:IsSetCard(0x1b02) or c:IsAttribute(baseC:GetOriginalAttribute())) and not c:IsCode(baseC:GetOriginalCode()) and c:IsLocation(LOCATION_HAND)
   end
   local function filterD(c,tp)
     return c:IsControler(1-tp) and not c:IsHasEffect(EFFECT_EXTRA_RELEASE) and c:IsHasEffect(EFFECT_EXTRA_RELEASE_SUM)
@@ -92,7 +92,7 @@ end
 function BCOT.toa_mata_swapkanohi(baseC)
   local id=baseC:GetOriginalCode()
   local function filter(c,ec)
-    return c:IsSetCard(0x158) and c:CheckEquipTarget(ec) 
+    return c:IsSetCard(0xb04) and c:CheckEquipTarget(ec) 
       and not (c:IsLocation(LOCATION_GRAVE) and c:IsReason(REASON_DESTROY) and c:IsPreviousLocation(LOCATION_ONFIELD) and c:IsPreviousPosition(POS_FACEUP) and c:GetTurnID()==Duel.GetTurnCount())
   end
   local function target(e,tp,eg,ep,ev,re,r,rp,chk)
@@ -159,7 +159,7 @@ function BCOT.kanohi_equip_great(baseC)
 end
 function BCOT.kanohi_selfdestruct(baseC)
   local function filter(c,ec)
-    return c:GetEquipTarget()==ec and c:IsSetCard(0x158) and c:IsDestructable()
+    return c:GetEquipTarget()==ec and c:IsSetCard(0xb04) and c:IsDestructable()
   end
   local function target(e,tp,eg,ep,ev,re,r,rp,chk)
     local c=e:GetHandler()

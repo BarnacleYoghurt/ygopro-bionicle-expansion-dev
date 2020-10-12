@@ -31,7 +31,7 @@ function s.value1(e,re,tp)
 end
 function s.condition1(e)
   local a=Duel.GetAttacker()
-	return a and a:IsControler(e:GetHandlerPlayer()) and a:IsSetCard(0x1157)
+	return a and a:IsControler(e:GetHandlerPlayer()) and a:IsSetCard(0x1b01)
 end
 function s.condition2(e,tp,eg,ep,ev,re,r,rp)
 	return Duel.GetTurnPlayer()==tp

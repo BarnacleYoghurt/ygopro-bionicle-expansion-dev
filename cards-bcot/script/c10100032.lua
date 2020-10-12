@@ -27,7 +27,7 @@ function s.initial_effect(c)
   c:RegisterEffect(e2)
 end
 function s.filter1(c)
-	return c:IsFaceup() and c:IsType(TYPE_MONSTER) and c:IsSetCard(0x157)
+	return c:IsFaceup() and c:IsType(TYPE_MONSTER) and c:IsSetCard(0xb01)
 end
 function s.cost1(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return e:GetHandler():IsAbleToGraveAsCost() end

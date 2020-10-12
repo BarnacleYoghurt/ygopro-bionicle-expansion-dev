@@ -23,7 +23,7 @@ function s.initial_effect(c)
 	c:RegisterEffect(e2)
 end
 function s.target1_1(e,c)
-  return not c:IsSetCard(0x1157)
+  return not c:IsSetCard(0x1b01)
 end
 function s.operation1(e,tp,eg,ep,ev,re,r,rp,c)
 	local e1=Effect.CreateEffect(c)
