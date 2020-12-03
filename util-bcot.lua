@@ -165,6 +165,7 @@ function BCOT.kanohi_selfdestruct(baseC)
     local c=e:GetHandler()
     if chk==0 then return eg:IsExists(filter,1,c,c:GetEquipTarget()) end
     Duel.SetOperationInfo(0,CATEGORY_DESTROY,c,1,0,0)
+    c:CreateEffectRelation(e)
   end
   local function operation(e,tp,eg,ep,ev,re,r,rp)
     local c=e:GetHandler()
@@ -174,7 +175,7 @@ function BCOT.kanohi_selfdestruct(baseC)
   end
   local e=Effect.CreateEffect(baseC)
   e:SetCategory(CATEGORY_DESTROY)
-  e:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_F)
+  e:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
   e:SetCode(EVENT_EQUIP)
   e:SetRange(LOCATION_SZONE)
   e:SetTarget(target)
