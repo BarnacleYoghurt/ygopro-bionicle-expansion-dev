@@ -86,7 +86,7 @@ function BCOT.toa_mata_tribute(baseC)
 	e:SetCode(EFFECT_SUMMON_PROC)
 	e:SetCondition(condition)
 	e:SetOperation(operation)
-	e:SetValue(SUMMON_TYPE_ADVANCE)
+	e:SetValue(SUMMON_TYPE_TRIBUTE)
 	return e
 end
 function BCOT.toa_mata_swapkanohi(baseC)
