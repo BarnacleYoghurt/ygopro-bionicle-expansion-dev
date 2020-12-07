@@ -1,51 +1,52 @@
 --The Great Temple,Kini-Nui
+local s,id=GetID()
 function c10100024.initial_effect(c)
 	--Activate
 	local e0=Effect.CreateEffect(c)
 	e0:SetType(EFFECT_TYPE_ACTIVATE)
 	e0:SetCode(EVENT_FREE_CHAIN)
 	c:RegisterEffect(e0)
-	--Protect Equips
-	local e1=Effect.CreateEffect(c)
+	--Extra NS
+  local e1=Effect.CreateEffect(c)
+  e1:SetDescription(aux.Stringid(id,0))
 	e1:SetType(EFFECT_TYPE_FIELD)
-	e1:SetCode(EFFECT_IMMUNE_EFFECT)
-	e1:SetRange(LOCATION_SZONE)
-	e1:SetTargetRange(LOCATION_SZONE,0)
-	e1:SetTarget(c10100024.target1)
-	e1:SetValue(c10100024.value1)
-	c:RegisterEffect(e1) 
-	--Exchange
-	local e2=Effect.CreateEffect(c)
-	e2:SetDescription(aux.Stringid(10100024,0))
-	e2:SetCategory(CATEGORY_DRAW)
-	e2:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
-	e2:SetType(EFFECT_TYPE_IGNITION)
-	e2:SetRange(LOCATION_SZONE)
-	e2:SetTarget(c10100024.target2)
-	e2:SetOperation(c10100024.operation2)
-	c:RegisterEffect(e2)
+	e1:SetRange(LOCATION_FZONE)
+	e1:SetTargetRange(LOCATION_HAND+LOCATION_MZONE,0)
+	e1:SetCode(EFFECT_EXTRA_SUMMON_COUNT)
+	e1:SetTarget(aux.TargetBoolFunction(Card.IsSetCard,0x1b02))
+	c:RegisterEffect(e1)
+  --Recycle
+  local e2=Effect.CreateEffect(c)
+  e2:SetCategory(CATEGORY_TOHAND)
+  e2:SetDescription(aux.Stringid(id,1))
+  e2:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O)
+  e2:SetProperty(EFFECT_FLAG_DELAY)
+  e2:SetRange(LOCATION_FZONE)
+  e2:SetCode(EVENT_SUMMON_SUCCESS)
+  e2:SetCondition(s.condition2)
+  e2:SetTarget(s.target2)
+  e2:SetOperation(s.operation2)
+  e2:SetCountLimit(1)
+  c:RegisterEffect(e2)
 end
---e1 - Protect Equips
-function c10100024.value1(e,re)
-	return re:GetOwnerPlayer()~=e:GetHandlerPlayer()
+function s.filter2(c)
+  return c:IsType(TYPE_MONSTER) and c:IsSetCard(0xb02) and c:IsAbleToHand()
 end
-function c10100024.target1(e,c)
-	return c:IsFaceup() and c:IsType(TYPE_EQUIP)
+function s.condition2(e,tp,eg,ep,ev,re,r,rp)
+	local ec=eg:GetFirst()
+	return ec:IsPreviousControler(tp) and ec:IsSummonType(SUMMON_TYPE_TRIBUTE) and ec:IsSetCard(0x1b02)
 end
---e2 - Exchange
-function c10100024.filter2(c)
-	return c:IsSetCard(0x158) and c:IsType(TYPE_EQUIP) and c:IsDiscardable()
+function s.target2(e,tp,eg,ep,ev,re,r,rp,chk)
+  if chk==0 then return Duel.IsExistingTarget(s.filter2,tp,LOCATION_GRAVE,0,1,nil) end
+  Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_ATOHAND)
+  local g=Duel.SelectTarget(tp,s.filter2,tp,LOCATION_GRAVE,0,1,1,nil)
+  Duel.SetOperationInfo(0,CATEGORY_TOHAND,g,1,0,0)
 end
-function c10100024.target2(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.IsExistingMatchingCard(c10100024.filter2,tp,LOCATION_HAND,0,1,nil) and Duel.IsPlayerCanDraw(tp,1) end
-	Duel.SetTargetPlayer(tp)
-	Duel.SetTargetParam(1)
-	Duel.SetOperationInfo(0,CATEGORY_DRAW,nil,0,tp,1)
-end
-function c10100024.operation2(e,tp,eg,ep,ev,re,r,rp)
-	local p,d=Duel.GetChainInfo(0,CHAININFO_TARGET_PLAYER,CHAININFO_TARGET_PARAM)
-	if Duel.IsExistingMatchingCard(c10100024.filter2,tp,LOCATION_HAND,0,1,nil) and Duel.DiscardHand(tp,c10100024.filter2,1,1,REASON_EFFECT+REASON_DISCARD) then
-		Duel.BreakEffect()
-		Duel.Draw(p,d,REASON_EFFECT)
-	end
+function s.operation2(e,tp,eg,ep,ev,re,r,rp)
+  local c=e:GetHandler()
+  local tc=Duel.GetFirstTarget()
+  if c:IsRelateToEffect(e) and tc:IsRelateToEffect(e) then
+    Duel.SendtoHand(tc,tp,REASON_EFFECT)
+    Duel.ConfirmCards(1-tp,tc)
+  end
 end
