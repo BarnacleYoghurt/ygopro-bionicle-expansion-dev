@@ -40,7 +40,7 @@ function s.operation2a(e,tp,eg,ep,ev,re,r,rp)
 	re:GetHandler():RegisterFlagEffect(id,RESET_CHAIN,0,1)
 end
 function s.condition2b(e,tp,eg,ep,ev,re,r,rp)
-	return re:GetHandler():GetFlagEffect(id)>0
+	return bcot.noblekanohi_con(e) and re:GetHandler():GetFlagEffect(id)>0
 end
 function s.operation2b(e,tp,eg,ep,ev,re,r,rp)
 	local g=Group.CreateGroup()

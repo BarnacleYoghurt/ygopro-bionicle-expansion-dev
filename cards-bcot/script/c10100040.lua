@@ -23,5 +23,5 @@ function s.initial_effect(c)
 end
 function s.condition2(e)
   local tp=e:GetHandlerPlayer()
-	return Duel.GetFieldGroupCount(tp,LOCATION_MZONE,0)>1
+	return bcot.noblekanohi_con(e) and Duel.GetFieldGroupCount(tp,LOCATION_MZONE,0)>1
 end

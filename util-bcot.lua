@@ -255,3 +255,20 @@ function BCOT.kanohi_revive(baseC, targetCode)
   e:SetOperation(operation)
   return e
 end
+function BCOT.greatkanohi_con(e)
+  return bcot.kanohi_con(e,{0xb02,0xb07})
+end
+function BCOT.noblekanohi_con(e)
+  return bcot.kanohi_con(e,{0xb02,0xb07,0xb03})
+end
+function BCOT.kanohi_con(e,setcodes) --Generalization
+  local ec=e:GetHandler():GetEquipTarget()
+  if ec then
+    local be=ec:IsHasEffect(0xb04000) --EFFECT_KANOHI_SETCODE backdoor
+    for _,setcode in pairs(setcodes) do
+      if ec:IsSetCard(setcode) or (be and be:GetValue()==setcode) then return true end
+    end
+  end
+  
+  return false
+end
