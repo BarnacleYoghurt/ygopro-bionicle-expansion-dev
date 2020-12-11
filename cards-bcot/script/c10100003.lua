@@ -21,10 +21,6 @@ function s.initial_effect(c)
   e2:SetOperation(s.operation2)
   e2:SetCountLimit(1)
   c:RegisterEffect(e2)
-  --Kanohi swap
-  local e3=bcot.toa_mata_swapkanohi(c)
-	e3:SetDescription(aux.Stringid(id,2))
-	c:RegisterEffect(e3)
 end
 function s.filter2(c)
   return c:IsType(TYPE_MONSTER) and c:IsPreviousLocation(LOCATION_HAND+LOCATION_DECK)

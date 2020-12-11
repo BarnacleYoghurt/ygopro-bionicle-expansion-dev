@@ -20,10 +20,6 @@ function s.initial_effect(c)
 	e2:SetOperation(s.operation2)
   e2:SetCountLimit(1)
 	c:RegisterEffect(e2)
-  --Kanohi swap
-  local e3=bcot.toa_mata_swapkanohi(c)
-	e3:SetDescription(aux.Stringid(id,2))
-	c:RegisterEffect(e3)
 end
 function s.target2(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
   if chkc then return chkc:IsLocation(LOCATION_MZONE) and chkc:IsControler(1-tp) end
