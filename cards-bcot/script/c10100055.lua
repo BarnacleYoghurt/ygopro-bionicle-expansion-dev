@@ -40,7 +40,7 @@ function s.condition1(e)
   local tp=e:GetHandlerPlayer()
   return Duel.IsExistingMatchingCard(s.filter1,tp,LOCATION_FZONE,0,1,nil)
 end
-function s.filter2a(c)
+function s.filter2a(c,tp)
   return c:IsFaceup() and c:IsSetCard(0xb02) and Duel.IsExistingMatchingCard(s.filter2b,tp,LOCATION_GRAVE+LOCATION_HAND,0,1,nil,c)
 end
 function s.filter2b(c,ec)
@@ -49,9 +49,9 @@ function s.filter2b(c,ec)
 end
 function s.target2(e,tp,eg,ep,ev,re,r,rp,chk)
   local c=e:GetHandler()
-  if chk==0 then return Duel.IsExistingMatchingCard(s.filter2a,tp,LOCATION_MZONE,0,1,nil) and c:GetFlagEffect(id)==0 end
+  if chk==0 then return Duel.IsExistingMatchingCard(s.filter2a,tp,LOCATION_MZONE,0,1,nil,tp) and c:GetFlagEffect(id)==0 end
   c:RegisterFlagEffect(id,RESET_CHAIN,0,1)
-  local tg=Duel.SelectTarget(tp,s.filter2a,tp,LOCATION_MZONE,0,1,1,nil)
+  local tg=Duel.SelectTarget(tp,s.filter2a,tp,LOCATION_MZONE,0,1,1,nil,tp)
   local eqg=Duel.GetMatchingGroup(s.filter2b,tp,LOCATION_GRAVE+LOCATION_HAND,0,nil,tg:GetFirst())
   Duel.SetOperationInfo(0,CATEGORY_EQUIP,eqg,1,0,0)
 end
