@@ -17,36 +17,49 @@ function c10100024.initial_effect(c)
 	c:RegisterEffect(e1)
   --Recycle
   local e2=Effect.CreateEffect(c)
-  e2:SetCategory(CATEGORY_TOHAND)
-  e2:SetDescription(aux.Stringid(id,1))
-  e2:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O)
-  e2:SetProperty(EFFECT_FLAG_DELAY)
+	e2:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O)
+  e2:SetProperty(EFFECT_FLAG_CARD_TARGET+EFFECT_FLAG_DELAY)
   e2:SetRange(LOCATION_FZONE)
-  e2:SetCode(EVENT_SUMMON_SUCCESS)
-  e2:SetCondition(s.condition2)
-  e2:SetTarget(s.target2)
-  e2:SetOperation(s.operation2)
-  e2:SetCountLimit(1)
-  c:RegisterEffect(e2)
+	e2:SetCode(EVENT_BE_MATERIAL)
+	e2:SetTarget(s.target2)
+	e2:SetOperation(s.operation2)
+  e2:SetCountLimit(1,id)
+	c:RegisterEffect(e2)
 end
-function s.filter2(c)
-  return c:IsType(TYPE_MONSTER) and c:IsSetCard(0xb02) and c:IsAbleToHand()
+function s.filter2(c,e,tp,r)
+  local rsv=false --Resolvable?
+  if c:IsSetCard(0xb02) then
+    rsv=(c:IsCanBeSpecialSummoned(e,0,tp,false,false,POS_FACEUP_DEFENSE) and Duel.GetLocationCount(tp,LOCATION_MZONE)>0)
+  else
+    rsv=((not c:IsSetCard(0xb02)) and c:IsAbleToHand())
+  end
+  
+  return c:IsLocation(LOCATION_GRAVE) and c:IsControler(tp) 
+    and r==REASON_SUMMON and c:GetReasonCard():IsSetCard(0x1b02) 
+    and c:IsCanBeEffectTarget(e) and rsv
 end
-function s.condition2(e,tp,eg,ep,ev,re,r,rp)
-	local ec=eg:GetFirst()
-	return ec:IsPreviousControler(tp) and ec:IsSummonType(SUMMON_TYPE_TRIBUTE) and ec:IsSetCard(0x1b02)
+function s.target2(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
+  local pg=eg:Filter(s.filter2,nil,e,tp,r)
+  if chkc then return pg:IsContains(chkc) end
+  if chk==0 then return pg:GetCount()>0 and Duel.GetLocationCount(tp,LOCATION_MZONE)>0 end
+  Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TARGET)
+  local tg=pg:Select(pg,tp,1,1,nil)
+  Duel.SetTargetCard(tg)
+  if tg:GetFirst():IsSetCard(0xb02) then
+    Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,tg,1,0,0)
+  else
+    Duel.SetOperationInfo(0,CATEGORY_TOHAND,tg,1,0,0)
+  end
 end
-function s.target2(e,tp,eg,ep,ev,re,r,rp,chk)
-  if chk==0 then return Duel.IsExistingTarget(s.filter2,tp,LOCATION_GRAVE,0,1,nil) end
-  Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_ATOHAND)
-  local g=Duel.SelectTarget(tp,s.filter2,tp,LOCATION_GRAVE,0,1,1,nil)
-  Duel.SetOperationInfo(0,CATEGORY_TOHAND,g,1,0,0)
-end
-function s.operation2(e,tp,eg,ep,ev,re,r,rp)
-  local c=e:GetHandler()
+function s.operation2(e,tp,eg,ep,ev,re,r,rp)  
   local tc=Duel.GetFirstTarget()
-  if c:IsRelateToEffect(e) and tc:IsRelateToEffect(e) then
-    Duel.SendtoHand(tc,tp,REASON_EFFECT)
-    Duel.ConfirmCards(1-tp,tc)
+  if not e:GetHandler():IsRelateToEffect(e) or (tc:IsSetCard(0xb02) and Duel.GetLocationCount(tp,LOCATION_MZONE)<=0) then return end
+  if tc:IsRelateToEffect(e) then
+    if tc:IsSetCard(0xb02) then
+      Duel.SpecialSummon(tc,0,tp,tp,false,false,POS_FACEUP_DEFENSE)
+    else
+      Duel.SendtoHand(tc,tp,REASON_EFFECT)
+      Duel.ConfirmCards(1-tp,tc)
+    end
   end
 end
