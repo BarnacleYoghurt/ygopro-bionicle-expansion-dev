@@ -51,7 +51,7 @@ end
 function s.target2(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
   local pg=eg:Filter(s.filter2,nil,e,tp,r)
   if chkc then return pg:IsContains(chkc) end
-  if chk==0 then return pg:GetCount()>0 and Duel.GetLocationCount(tp,LOCATION_MZONE)>0 end
+  if chk==0 then return pg:GetCount()>0 end
   Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TARGET)
   local tg=pg:Select(pg,tp,1,1,nil)
   Duel.SetTargetCard(tg)
