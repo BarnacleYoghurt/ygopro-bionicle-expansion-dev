@@ -25,6 +25,16 @@ function c10100024.initial_effect(c)
 	e2:SetOperation(s.operation2)
   e2:SetCountLimit(1,id)
 	c:RegisterEffect(e2)
+  --Special Summon
+  local e3=Effect.CreateEffect(c)
+  e3:SetCategory(CATEGORY_DESTROY+CATEGORY_SPECIAL_SUMMON)
+  e3:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O)
+  e3:SetRange(LOCATION_FZONE)
+  e3:SetCode(EVENT_PHASE+PHASE_END)
+  e3:SetTarget(s.target3)
+  e3:SetOperation(s.operation3)
+  e3:SetCountLimit(1,id+1000000)
+  c:RegisterEffect(e3)
 end
 function s.filter2(c,e,tp,r)
   local rsv=false --Resolvable?
@@ -60,6 +70,24 @@ function s.operation2(e,tp,eg,ep,ev,re,r,rp)
     else
       Duel.SendtoHand(tc,tp,REASON_EFFECT)
       Duel.ConfirmCards(1-tp,tc)
+    end
+  end
+end
+function s.filter3(c,e,tp)
+  return c:GetLevel()==1 and c:IsRace(RACE_ROCK) and (c:GetAttack()==0 and c:IsDefenseBelow(0)) and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
+end
+function s.target3(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
+  if chk==0 then return Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and Duel.IsExistingMatchingCard(s.filter3,tp,LOCATION_DECK,0,1,nil,e,tp) end
+  Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,1,tp,LOCATION_DECK)
+end
+function s.operation3(e,tp,eg,ep,ev,re,r,rp)  
+  if e:GetHandler():IsRelateToEffect(e) then
+    if Duel.Destroy(e:GetHandler(),REASON_EFFECT)>0 and Duel.GetLocationCount(tp,LOCATION_MZONE)>0 then
+      Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
+      local g=Duel.SelectMatchingCard(tp,s.filter3,tp,LOCATION_DECK,0,1,1,nil,e,tp)
+      if g:GetCount()>0 then
+        Duel.SpecialSummon(g,0,tp,tp,false,false,POS_FACEUP)
+      end
     end
   end
 end
