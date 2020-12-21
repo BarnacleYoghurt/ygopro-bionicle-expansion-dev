@@ -24,7 +24,7 @@ function s.initial_effect(c)
 end
 function s.condition2(e,tp,eg,ep,ev,re,r,rp)
 	local rc=re:GetHandler()
-	return re:IsActiveType(TYPE_MONSTER) and not rc:IsCode(id) and rc:IsControler(tp)
+	return re:IsActiveType(TYPE_MONSTER) and not rc:IsCode(id) and rp==1-Duel.GetTurnPlayer()
 end
 function s.target2(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingTarget(aux.disfilter1,tp,LOCATION_MZONE,LOCATION_MZONE,1,nil) end
