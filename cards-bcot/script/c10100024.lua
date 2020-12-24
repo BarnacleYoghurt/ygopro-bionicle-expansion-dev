@@ -53,7 +53,7 @@ function s.target2(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
   if chkc then return pg:IsContains(chkc) end
   if chk==0 then return pg:GetCount()>0 end
   Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TARGET)
-  local tg=pg:Select(pg,tp,1,1,nil)
+  local tg=pg:Select(tp,1,1,nil)
   Duel.SetTargetCard(tg)
   if tg:GetFirst():IsSetCard(0xb02) then
     Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,tg,1,0,0)
