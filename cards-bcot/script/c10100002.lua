@@ -11,11 +11,11 @@ function s.initial_effect(c)
   --Negate
   local e2=Effect.CreateEffect(c)
   e2:SetDescription(aux.Stringid(id,1))
-  e2:SetCategory(CATEGORY_DISABLE)
+  e2:SetCategory(CATEGORY_DISABLE+CATEGORY_ATKCHANGE)
   e2:SetRange(LOCATION_MZONE)
 	e2:SetType(EFFECT_TYPE_QUICK_O)
 	e2:SetCode(EVENT_CHAINING)
-	e2:SetProperty(EFFECT_FLAG_CARD_TARGET)
+	e2:SetProperty(EFFECT_FLAG_CARD_TARGET+EFFECT_FLAG_DAMAGE_STEP)
   e2:SetCondition(s.condition2)
   e2:SetTarget(s.target2)
   e2:SetOperation(s.operation2)
@@ -25,6 +25,7 @@ end
 function s.condition2(e,tp,eg,ep,ev,re,r,rp)
 	local rc=re:GetHandler()
 	return re:IsActiveType(TYPE_MONSTER) and not rc:IsCode(id) and rp==1-Duel.GetTurnPlayer()
+    and (Duel.GetCurrentPhase()~=PHASE_DAMAGE or not Duel.IsDamageCalculated()) --Can be activated up to damage calc because ATK Change, like AD Thunder Lv10
 end
 function s.target2(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingTarget(aux.disfilter1,tp,LOCATION_MZONE,LOCATION_MZONE,1,e:GetHandler()) end
