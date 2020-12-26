@@ -37,40 +37,24 @@ function c10100024.initial_effect(c)
   c:RegisterEffect(e3)
 end
 function s.filter2(c,e,tp,r)
-  local rsv=false --Resolvable?
-  if c:IsSetCard(0xb02) then
-    rsv=(c:IsCanBeSpecialSummoned(e,0,tp,false,false,POS_FACEUP_DEFENSE) and Duel.GetLocationCount(tp,LOCATION_MZONE)>0)
-  else
-    rsv=((not c:IsSetCard(0xb02)) and c:IsAbleToHand())
-  end
-  
   return c:IsLocation(LOCATION_GRAVE) and c:IsControler(tp) 
-    and r==REASON_SUMMON and c:GetReasonCard():IsSetCard(0x1b02) 
-    and c:IsCanBeEffectTarget(e) and rsv
+    and r==REASON_SUMMON and c:GetReasonCard():IsSetCard(0x1b02) and c:IsSetCard(0xb02)
+    and c:IsCanBeEffectTarget(e) and c:IsCanBeSpecialSummoned(e,0,tp,false,false,POS_FACEUP_DEFENSE)
 end
 function s.target2(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
   local pg=eg:Filter(s.filter2,nil,e,tp,r)
   if chkc then return pg:IsContains(chkc) end
-  if chk==0 then return pg:GetCount()>0 end
+  if chk==0 then return pg:GetCount()>0 and Duel.GetLocationCount(tp,LOCATION_MZONE)>0 end
   Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TARGET)
   local tg=pg:Select(tp,1,1,nil)
   Duel.SetTargetCard(tg)
-  if tg:GetFirst():IsSetCard(0xb02) then
-    Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,tg,1,0,0)
-  else
-    Duel.SetOperationInfo(0,CATEGORY_TOHAND,tg,1,0,0)
-  end
+  Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,tg,1,0,0)
 end
 function s.operation2(e,tp,eg,ep,ev,re,r,rp)  
   local tc=Duel.GetFirstTarget()
-  if not e:GetHandler():IsRelateToEffect(e) or (tc:IsSetCard(0xb02) and Duel.GetLocationCount(tp,LOCATION_MZONE)<=0) then return end
+  if not e:GetHandler():IsRelateToEffect(e) or Duel.GetLocationCount(tp,LOCATION_MZONE)<=0 then return end
   if tc:IsRelateToEffect(e) then
-    if tc:IsSetCard(0xb02) then
-      Duel.SpecialSummon(tc,0,tp,tp,false,false,POS_FACEUP_DEFENSE)
-    else
-      Duel.SendtoHand(tc,tp,REASON_EFFECT)
-      Duel.ConfirmCards(1-tp,tc)
-    end
+    Duel.SpecialSummon(tc,0,tp,tp,false,false,POS_FACEUP_DEFENSE)
   end
 end
 function s.filter3(c,e,tp)
