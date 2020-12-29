@@ -69,7 +69,7 @@ function s.target2(e,tp,eg,ep,ev,re,r,rp,chk)
   Duel.SetOperationInfo(0,CATEGORY_TOHAND,g,1,tp,LOCATION_DECK)
 end
 function s.operation2(e,tp,eg,ep,ev,re,r,rp)
-  Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TOHAND)
+  Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_ATOHAND)
   local g=Duel.SelectMatchingCard(tp,s.filter2,tp,LOCATION_DECK,0,1,1,nil,tp)
   if g:GetCount()>0 then
     Duel.SendtoHand(g,tp,REASON_EFFECT)
