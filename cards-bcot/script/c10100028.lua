@@ -1,127 +1,75 @@
 --Po-Koro, Village of Stone
-function c10100028.initial_effect(c)
+local s,id=GetID()
+function s.initial_effect(c)
 	--Activate
 	local e0=Effect.CreateEffect(c)
-	e0:SetCategory(CATEGORY_TOHAND+CATEGORY_SEARCH)
 	e0:SetType(EFFECT_TYPE_ACTIVATE)
 	e0:SetCode(EVENT_FREE_CHAIN)
-	e0:SetOperation(c10100028.operation0)
 	c:RegisterEffect(e0)
-	--1 less tribute for EARTH
-	local e1=Effect.CreateEffect(c)
+	--Summon Token
+  local e1=Effect.CreateEffect(c)
+  e1:SetCategory(CATEGORY_SPECIAL_SUMMON+CATEGORY_TOKEN)
+  e1:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O)
+  e1:SetProperty(EFFECT_FLAG_DELAY)
+  e1:SetCode(EVENT_SPSUMMON_SUCCESS)
+  e1:SetRange(LOCATION_FZONE)
+	e1:SetCondition(s.condition1)
+  e1:SetTarget(s.target1)
+  e1:SetOperation(s.operation1)
+  e1:SetCountLimit(1,id)
+  c:RegisterEffect(e1)
+  
+  --Material check (why is this needed?)
+  local mcheck=Effect.CreateEffect(c)
+	mcheck:SetType(EFFECT_TYPE_FIELD)
+	mcheck:SetProperty(EFFECT_FLAG_CANNOT_DISABLE+EFFECT_FLAG_SET_AVAILABLE+EFFECT_FLAG_IGNORE_RANGE)
+	mcheck:SetRange(LOCATION_FZONE)
+	mcheck:SetCode(EFFECT_MATERIAL_CHECK)
+	mcheck:SetValue(s.value_mcheck)
+	c:RegisterEffect(mcheck)
+end
+function s.condition1(e,tp,eg,ep,ev,re,r,rp)
+	return eg:GetCount()==1 
+    and (eg:GetFirst():GetSummonType()&(SUMMON_TYPE_FUSION|SUMMON_TYPE_SYNCHRO|SUMMON_TYPE_XYZ|SUMMON_TYPE_LINK))>0
+    and eg:GetFirst():GetFlagEffect(id)~=0
+end
+function s.target1(e,tp,eg,ep,ev,re,r,rp,chk)
+  if chk==0 then return Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and Duel.IsPlayerCanSpecialSummonMonster(tp,id+10000,0,0,TYPES_TOKEN,0,1,RACE_ROCK,ATTRIBUTE_EARTH) end
+  Duel.SetOperationInfo(0,CATEGORY_TOKEN,nil,1,0,0)
+	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,1,tp,0)
+end
+function s.operation1(e,tp,eg,ep,ev,re,r,rp)
+  local st=eg:GetFirst():GetSummonType()&(SUMMON_TYPE_FUSION|SUMMON_TYPE_SYNCHRO|SUMMON_TYPE_XYZ|SUMMON_TYPE_LINK)
+  local c=e:GetHandler()
+  local e1=Effect.CreateEffect(c)
 	e1:SetType(EFFECT_TYPE_FIELD)
-	e1:SetCode(EFFECT_DECREASE_TRIBUTE)
-	e1:SetRange(LOCATION_SZONE)
-	e1:SetTargetRange(LOCATION_HAND,LOCATION_HAND)
-	e1:SetTarget(aux.TargetBoolFunction(Card.IsAttribute,ATTRIBUTE_EARTH))
-	e1:SetValue(1)
-	c:RegisterEffect(e1)
-	--Special Summon
-	local e2=Effect.CreateEffect(c)
-	e2:SetDescription(aux.Stringid(10100028,0))
-	e2:SetType(EFFECT_TYPE_IGNITION)
-	e2:SetCategory(CATEGORY_SPECIAL_SUMMON)
-	e2:SetRange(LOCATION_SZONE)
-	e2:SetCondition(c10100028.condition2)
-	e2:SetCost(c10100028.cost2)
-	e2:SetTarget(c10100028.target2)
-	e2:SetOperation(c10100028.operation2)
-	c:RegisterEffect(e2)
+	e1:SetCode(EFFECT_CANNOT_SPECIAL_SUMMON)
+	e1:SetProperty(EFFECT_FLAG_PLAYER_TARGET+EFFECT_FLAG_OATH)
+	e1:SetTargetRange(1,0)
+	e1:SetTarget(s.target1_1)
+  e1:SetLabel(st)
+	e1:SetReset(RESET_PHASE+PHASE_END)
+	Duel.RegisterEffect(e1,tp)
+	local e2=Effect.CreateEffect(e:GetHandler())
+	e2:SetProperty(EFFECT_FLAG_PLAYER_TARGET+EFFECT_FLAG_CLIENT_HINT)
+	e2:SetDescription(aux.Stringid(id,1))
+	e2:SetReset(RESET_PHASE+PHASE_END)
+	e2:SetTargetRange(1,0)
+	Duel.RegisterEffect(e2,tp)
+  
+  if Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and Duel.IsPlayerCanSpecialSummonMonster(tp,id+10000,0,0,TYPES_TOKEN,0,1,RACE_ROCK,ATTRIBUTE_EARTH) then
+    local token=Duel.CreateToken(tp,id+10000)
+    Duel.SpecialSummon(token,0,tp,tp,false,false,POS_FACEUP)
+  end
 end
---e0 - Activate
-function c10100028.filter0a(c)
-	return c:IsFaceup() and c:IsAttribute(ATTRIBUTE_EARTH)
+function s.target1_1(e,c,sump,sumtype,sumpos,targetp,se)
+	return (sumtype&e:GetLabel())==e:GetLabel()
 end
-function c10100028.filter0b(c)
-	return c:IsCode(10100004) and c:IsAbleToHand()
+function s.filter_mcheck(c)
+	return c:IsAttribute(ATTRIBUTE_EARTH) and c:IsRace(RACE_WARRIOR) and c:IsType(TYPE_MONSTER)
 end
-function c10100028.operation0(e,tp,eg,ep,ev,re,r,rp,chk)
-	local tc=Duel.GetFirstMatchingCard(c10100028.filter0b,tp,LOCATION_DECK,0,nil)
-	if Duel.IsExistingMatchingCard(c10100028.filter0a,tp,LOCATION_MZONE,0,1,nil) and tc then
-		Duel.SendtoHand(tc,nil,REASON_EFFECT)
-		Duel.ConfirmCards(1-tp,tc)
+function s.value_mcheck(e,c)
+	if c:GetMaterial():IsExists(s.filter_mcheck,1,nil) then
+		c:RegisterFlagEffect(id,RESET_EVENT+((RESETS_STANDARD|RESET_OVERLAY)&~RESET_TOFIELD)+RESET_PHASE+PHASE_END,0,1)
 	end
-end
---e2 - Special Summon
-function c10100028.filter2a(c)
-	return c:IsType(TYPE_EQUIP) and c:IsSetCard(0x158) and c:IsAbleToRemoveAsCost()
-end
-function c10100028.filter2b(c,maxlr,e,tp)
-	return (c:IsRankBelow(maxlr-1) or c:IsLevelBelow(maxlr-1)) and c:IsCanBeSpecialSummoned(e,0,tp,true,false,POS_FACEUP)
-end
-function c10100028.condition2(e,tp,eg,ep,ev,re,r,rp)
-	return Duel.GetFieldGroupCount(tp,LOCATION_MZONE,0,nil)==0
-		and Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and Duel.IsExistingMatchingCard(c10100028.filter2b,tp,LOCATION_EXTRA,0,1,nil,c10100028.calcmaxlr(tp),e,tp)
-end
-function c10100028.cost2(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.IsExistingMatchingCard(c10100028.filter2a,tp,LOCATION_GRAVE,0,1,nil) end
-	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_REMOVE)
-	local g=Duel.SelectMatchingCard(tp,c10100028.filter2a,tp,LOCATION_GRAVE,0,1,1,nil)
-	Duel.Remove(g,POS_FACEUP,REASON_COST)
-end
-function c10100028.target2(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then
-		return Duel.IsExistingMatchingCard(c10100028.filter2b,tp,LOCATION_EXTRA,0,1,nil,c10100028.calcmaxlr(tp),e,tp)
-	end
-	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,1,tp,LOCATION_EXTRA)
-end
-function c10100028.operation2(e,tp,eg,ep,ev,re,r,rp)
-	if Duel.GetLocationCount(tp,LOCATION_MZONE)<=0 then return end
-	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_DISCARD)
-	local hg=Duel.GetFieldGroup(tp,LOCATION_HAND,0)
-	local rt = 2
-	if Duel.IsExistingMatchingCard(c10100028.filter2b,tp,LOCATION_EXTRA,0,1,nil,hg:GetMaxGroup(Card.GetLevel):GetFirst():GetLevel(),e,tp) then
-		rt = 1
-	end
-	local cg=Duel.SelectMatchingCard(tp,Card.IsType,tp,LOCATION_HAND,0,rt,2,nil,TYPE_MONSTER)
-	local maxlr = cg:GetSum(Card.GetLevel)
-	Duel.SendtoGrave(cg,REASON_EFFECT)
-	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
-	local g=Duel.SelectMatchingCard(tp,c10100028.filter2b,tp,LOCATION_EXTRA,0,1,1,nil,maxlr,e,tp)
-	if g:GetCount()>0 then
-		Duel.SpecialSummon(g,0,tp,tp,true,false,POS_FACEUP)
-		local tc = g:GetFirst()
-		local e1=Effect.CreateEffect(e:GetHandler())
-		e1:SetType(EFFECT_TYPE_FIELD)
-		e1:SetProperty(EFFECT_FLAG_PLAYER_TARGET+EFFECT_FLAG_OATH)
-		e1:SetCode(EFFECT_CANNOT_SPECIAL_SUMMON)
-		e1:SetTargetRange(1,0)
-		tc:RegisterEffect(e1)
-		local e1a=e1:Clone()
-		e1:SetCode(EFFECT_CANNOT_SUMMON)
-		tc:RegisterEffect(e1a)
-		local e1b=e1a:Clone()
-		e1b:SetCode(EFFECT_CANNOT_FLIP_SUMMON)
-		tc:RegisterEffect(e1b)
-		local e2=Effect.CreateEffect(e:GetHandler())
-		e2:SetCategory(CATEGORY_TODECK)
-		e2:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_F)
-		e2:SetCode(EVENT_LEAVE_FIELD)
-		e2:SetOperation(c10100028.operation2_2)
-		tc:RegisterEffect(e2)
-	end
-end
-function c10100028.operation2_2(e,tp,eg,ep,ev,re,r,rp)
-	local c = e:GetHandler()
-	Duel.SendtoDeck(c,nil,2,REASON_EFFECT)
-end
-function c10100028.calcmaxlr(tp)
-	local maxlr = 0
-	local g1 = Duel.GetFieldGroup(tp,LOCATION_HAND,0)
-	local g2 = Duel.GetFieldGroup(tp,LOCATION_HAND,0)
-	local tc1 = g1:GetFirst()
-	local tc2 = g2:GetFirst()
-	while tc1 do
-		if tc1:GetLevel()>maxlr then
-			maxlr = tc1:GetLevel()
-		end
-		while tc2 do
-			if tc1~=tc2 and tc1:GetLevel()+tc2:GetLevel()>maxlr then
-				maxlr = tc1:GetLevel()+tc2:GetLevel()
-			end
-			tc2 = g2:GetNext()
-		end
-		tc1 = g1:GetNext()
-	end
-	return maxlr
 end
