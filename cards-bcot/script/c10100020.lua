@@ -1,70 +1,64 @@
 --Turaga Onewa
-function c10100020.initial_effect(c)
-	--Equip
+local s,id=GetID()
+function s.initial_effect(c)
+	--Link Summon
+	Link.AddProcedure(c,nil,2,2,s.check0)
+	c:EnableReviveLimit()
+	--Special Summon
 	local e1=Effect.CreateEffect(c)
-	e1:SetDescription(aux.Stringid(10100020,0))
-	e1:SetCategory(CATEGORY_EQUIP)
-	e1:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_F)
-	e1:SetCode(EVENT_SUMMON_SUCCESS)
-	e1:SetTarget(c10100020.target1)
-	e1:SetOperation(c10100020.operation1)
-	c:RegisterEffect(e1)
-	local e1a=e1:Clone()
-	e1a:SetCode(EVENT_SPSUMMON_SUCCESS)
-	c:RegisterEffect(e1a)
-	local e1b=e1:Clone()
-	e1b:SetCode(EVENT_FLIP_SUMMON_SUCCESS)
-	c:RegisterEffect(e1b)
-	--Block S/T
-	local e2=Effect.CreateEffect(c)
-	e2:SetDescription(aux.Stringid(10100020,1))
-	e2:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_F)
-	e2:SetProperty(EFFECT_FLAG_CARD_TARGET)
-	e2:SetCode(EVENT_TO_GRAVE)
-	e2:SetTarget(c10100020.target2)
-	e2:SetOperation(c10100020.operation2)
-	c:RegisterEffect(e2)
+	e1:SetCategory(CATEGORY_SPECIAL_SUMMON)
+	e1:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O)
+  e1:SetProperty(EFFECT_FLAG_DELAY)
+  e1:SetRange(LOCATION_MZONE)
+  e1:SetCode(EVENT_SPSUMMON_SUCCESS)
+  e1:SetCondition(aux.zptcon(s.filter1a))
+  e1:SetTarget(s.target1)
+  e1:SetOperation(s.operation1)
+  e1:SetCountLimit(1,id)
+  c:RegisterEffect(e1)
 end
---e1 - Equip
-function c10100020.filter1(c,ec)
-	return c:IsType(TYPE_EQUIP)	and c:IsCode(10100043) and c:CheckEquipTarget(ec)
+function s.filter0(c)
+  return c:IsAttribute(ATTRIBUTE_EARTH) and c:IsRace(RACE_WARRIOR)
 end
-function c10100020.target1(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.GetLocationCount(tp,LOCATION_SZONE)>0
-		and Duel.IsExistingMatchingCard(c10100020.filter1,tp,LOCATION_DECK+LOCATION_HAND+LOCATION_GRAVE,0,1,nil,e:GetHandler()) end
-	Duel.SetOperationInfo(0,CATEGORY_EQUIP,nil,1,tp,LOCATION_DECK)
+function s.check0(g,lc)
+  return g:IsExists(s.filter0,1,nil)
 end
-function c10100020.operation1(e,tp,eg,ep,ev,re,r,rp)
-	local c=e:GetHandler()
-	if Duel.GetLocationCount(tp,LOCATION_SZONE)<=0 or c:IsFacedown() or not c:IsRelateToEffect(e) then return end
-	Duel.Hint(HINT_SELECTMSG,tp,nil)
-	local g=Duel.SelectMatchingCard(tp,c10100020.filter1,tp,LOCATION_DECK+LOCATION_HAND+LOCATION_GRAVE,0,1,1,nil,c)
-	if g:GetCount()>0 and g:GetFirst():CheckEquipTarget(c) then
-		Duel.Equip(tp,g:GetFirst(),c)
-	end
+function s.filter1a(c)
+  return c:IsFaceup() and c:IsAttribute(ATTRIBUTE_EARTH)
 end
---e2 - Block S/T
-function c10100020.chainlimit2(c)
-	return	function (e,lp,tp)
-				return e:GetHandler()~=c
-			end
+function s.filter1b(c,e,tp)
+  return c:IsFaceup() and c:IsAttribute(ATTRIBUTE_EARTH) and c:IsRace(RACE_WARRIOR) and c:IsCanBeSpecialSummoned(e,tp,tp,false,false,POS_FACEUP_DEFENSE)
 end
-function c10100020.target2(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
-	if chkc then return chkc:IsControler(1-tp) and chkc:IsLocation(LOCATION_SZONE) and chkc:IsFacedown() end
-	if chk==0 then return Duel.IsExistingTarget(Card.IsFacedown,tp,0,LOCATION_SZONE,1,nil) end
-	Duel.Hint(HINT_SELECTMSG,tp,aux.Stringid(10100020,2))
-	local g=Duel.SelectTarget(tp,Card.IsFacedown,tp,0,LOCATION_SZONE,1,1,nil)
-	Duel.SetChainLimit(c10100020.chainlimit2(g:GetFirst()))
+function s.target1(e,tp,eg,ep,ev,re,r,rp,chk)
+  if chk==0 then return Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and Duel.IsExistingTarget(s.filter1b,tp,LOCATION_REMOVED,0,1,nil,e,tp) end
+  Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
+  local tg=Duel.SelectTarget(tp,s.filter1b,tp,LOCATION_REMOVED,0,1,1,nil,e,tp)
+  Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,tg,1,0,0)
 end
-function c10100020.operation2(e,tp,eg,ep,ev,re,r,rp)
-	local tc=Duel.GetFirstTarget()
-	if tc:IsFacedown() and tc:IsRelateToEffect(e) then
-		local e1=Effect.CreateEffect(e:GetHandler())
-		e1:SetType(EFFECT_TYPE_SINGLE)
-		e1:SetProperty(EFFECT_FLAG_OWNER_RELATE)
-		e1:SetCode(EFFECT_CANNOT_TRIGGER)
-		e1:SetReset(RESET_EVENT+0x1fe0000+RESET_PHASE+PHASE_END)
-		e1:SetValue(1)
-		tc:RegisterEffect(e1)
-	end
+function s.operation1(e,tp,eg,ep,ev,re,r,rp)
+  local c=e:GetHandler()
+  local tc=Duel.GetFirstTarget()
+  if Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and tc:IsRelateToEffect(e) then
+    if Duel.SpecialSummonStep(tc,0,tp,tp,false,false,POS_FACEUP_DEFENSE) then
+      local e1=Effect.CreateEffect(c)
+      e1:SetType(EFFECT_TYPE_SINGLE)
+      e1:SetCode(EFFECT_DISABLE)
+      e1:SetReset(RESET_EVENT+RESETS_STANDARD)
+      tc:RegisterEffect(e1,true)
+      local e2=Effect.CreateEffect(c)
+      e2:SetType(EFFECT_TYPE_SINGLE)
+      e2:SetCode(EFFECT_DISABLE_EFFECT)
+      e2:SetReset(RESET_EVENT+RESETS_STANDARD)
+      tc:RegisterEffect(e2,true)
+      local e3=Effect.CreateEffect(c)
+      e3:SetDescription(3300)
+      e3:SetType(EFFECT_TYPE_SINGLE)
+      e3:SetCode(EFFECT_LEAVE_FIELD_REDIRECT)
+      e3:SetProperty(EFFECT_FLAG_CANNOT_DISABLE+EFFECT_FLAG_CLIENT_HINT)
+      e3:SetReset(RESET_EVENT+RESETS_REDIRECT)
+      e3:SetValue(LOCATION_REMOVED)
+      tc:RegisterEffect(e3,true)
+    end
+    Duel.SpecialSummonComplete()
+  end
 end
