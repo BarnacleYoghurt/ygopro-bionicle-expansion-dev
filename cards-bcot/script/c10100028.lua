@@ -39,10 +39,10 @@ function s.initial_effect(c)
 	c:RegisterEffect(mcheck)
 end
 function s.filter1a(c,tp)
-	return c:IsFaceup() and c:IsControler(tp) and c:IsAttribute(ATTRIBUTE_EARTH) and c:IsLocation(LOCATION_MZONE) and not c:IsReason(REASON_REPLACE) 
+	return c:IsFaceup() and c:IsControler(tp) and c:IsLocation(LOCATION_MZONE) and (c:IsReason(REASON_BATTLE) or c:IsReason(REASON_EFFECT)) and not c:IsReason(REASON_REPLACE)
 end
 function s.filter1b(c)
-  return c:IsFaceup() and c:IsRace(RACE_ROCK) and c:IsAbleToRemove()
+  return c:IsFaceup() and c:IsRace(RACE_ROCK) and c:IsAbleToRemove() and not c:IsStatus(STATUS_DESTROY_CONFIRMED+STATUS_BATTLE_DESTROYED)
 end
 function s.target1(e,tp,eg,ep,ev,re,r,rp,chk)
   if chk==0 then return eg:IsExists(s.filter1a,1,nil,tp) and Duel.IsExistingMatchingCard(s.filter1b,tp,LOCATION_MZONE,0,1,nil) end
@@ -74,7 +74,7 @@ function s.filter2(c)
   return c:IsAttribute(ATTRIBUTE_EARTH) and c:IsRace(RACE_WARRIOR) and c:IsAbleToRemoveAsCost()
 end
 function s.condition2(e,tp,eg,ep,ev,re,r,rp)
-	return tp==ep and eg:GetCount()==1 
+  return eg:GetFirst():GetSummonPlayer()==tp and eg:GetCount()==1 
     and (eg:GetFirst():GetSummonType()&(SUMMON_TYPE_FUSION|SUMMON_TYPE_SYNCHRO|SUMMON_TYPE_XYZ|SUMMON_TYPE_LINK))>0
     and eg:GetFirst():GetFlagEffect(id)~=0
 end
@@ -85,9 +85,15 @@ function s.cost2(e,tp,eg,ep,ev,re,r,rp,chk)
   Duel.Remove(g,POS_FACEUP,REASON_COST)
 end
 function s.target2(e,tp,eg,ep,ev,re,r,rp,chk)
-  if chk==0 then return Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and Duel.IsPlayerCanSpecialSummonMonster(tp,id+10000,0,0,TYPES_TOKEN,0,1,RACE_ROCK,ATTRIBUTE_EARTH) end
+  local ct=eg:GetFirst():GetFlagEffectLabel(id)
+  if chk==0 then 
+    return Duel.GetLocationCount(tp,LOCATION_MZONE)>=ct 
+      and Duel.IsPlayerCanSpecialSummonMonster(tp,id+10000,0,0,TYPES_TOKEN,0,1,RACE_ROCK,ATTRIBUTE_EARTH)
+      and not Duel.IsPlayerAffectedByEffect(tp,CARD_BLUEEYES_SPIRIT)
+  end
   Duel.SetOperationInfo(0,CATEGORY_TOKEN,nil,1,0,0)
 	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,1,tp,0)
+  e:SetLabel(ct)
 end
 function s.operation2(e,tp,eg,ep,ev,re,r,rp)
   local st=eg:GetFirst():GetSummonType()&(SUMMON_TYPE_FUSION|SUMMON_TYPE_SYNCHRO|SUMMON_TYPE_XYZ|SUMMON_TYPE_LINK)
@@ -115,9 +121,13 @@ function s.operation2(e,tp,eg,ep,ev,re,r,rp)
 	e2:SetTargetRange(1,0)
 	Duel.RegisterEffect(e2,tp)
   
-  if Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and Duel.IsPlayerCanSpecialSummonMonster(tp,id+10000,0,0,TYPES_TOKEN,0,1,RACE_ROCK,ATTRIBUTE_EARTH) then
-    local token=Duel.CreateToken(tp,id+10000)
-    Duel.SpecialSummon(token,0,tp,tp,false,false,POS_FACEUP)
+  local ct=e:GetLabel()
+  if Duel.GetLocationCount(tp,LOCATION_MZONE)>=ct and Duel.IsPlayerCanSpecialSummonMonster(tp,id+10000,0,0,TYPES_TOKEN,0,1,RACE_ROCK,ATTRIBUTE_EARTH) and not Duel.IsPlayerAffectedByEffect(tp,CARD_BLUEEYES_SPIRIT) then
+    for i=1,ct do
+      local token=Duel.CreateToken(tp,id+10000)
+      Duel.SpecialSummonStep(token,0,tp,tp,false,false,POS_FACEUP)
+    end
+    Duel.SpecialSummonComplete()
   end
 end
 function s.target2_1(e,c,sump,sumtype,sumpos,targetp,se)
@@ -127,7 +137,8 @@ function s.filter_mcheck(c)
 	return c:IsAttribute(ATTRIBUTE_EARTH) and c:IsType(TYPE_MONSTER)
 end
 function s.value_mcheck(e,c)
-	if c:GetMaterial():GetCount()>0 and c:GetMaterial():FilterCount(s.filter_mcheck,nil)==c:GetMaterial():GetCount() then
-		c:RegisterFlagEffect(id,RESET_EVENT+((RESETS_STANDARD|RESET_OVERLAY)&~RESET_TOFIELD)+RESET_PHASE+PHASE_END,0,1)
+  local ct=c:GetMaterial():FilterCount(s.filter_mcheck,nil)
+	if ct>0 then
+		c:RegisterFlagEffect(id,RESET_EVENT+((RESETS_STANDARD|RESET_OVERLAY)&~RESET_TOFIELD)+RESET_PHASE+PHASE_END,0,1,ct)
 	end
 end
