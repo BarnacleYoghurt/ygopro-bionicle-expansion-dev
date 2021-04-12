@@ -74,7 +74,7 @@ function s.filter2(c)
   return c:IsAttribute(ATTRIBUTE_EARTH) and c:IsRace(RACE_WARRIOR) and c:IsAbleToRemoveAsCost()
 end
 function s.condition2(e,tp,eg,ep,ev,re,r,rp)
-	return eg:GetCount()==1 
+	return tp==ep and eg:GetCount()==1 
     and (eg:GetFirst():GetSummonType()&(SUMMON_TYPE_FUSION|SUMMON_TYPE_SYNCHRO|SUMMON_TYPE_XYZ|SUMMON_TYPE_LINK))>0
     and eg:GetFirst():GetFlagEffect(id)~=0
 end
