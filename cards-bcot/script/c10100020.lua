@@ -80,7 +80,8 @@ end
 function s.filter2b(c,e,tp)
   return c:IsFaceup() and c:IsAttribute(ATTRIBUTE_EARTH) and c:IsRace(RACE_WARRIOR) and c:IsCanBeSpecialSummoned(e,tp,tp,false,false,POS_FACEUP_DEFENSE)
 end
-function s.target2(e,tp,eg,ep,ev,re,r,rp,chk)
+function s.target2(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
+  if chkc then return chkc:IsLocation(LOCATION_REMOVED) and chkc:IsControler(tp) and s.filter2b(chkc,e,tp) end
   if chk==0 then return Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and Duel.IsExistingTarget(s.filter2b,tp,LOCATION_REMOVED,0,1,nil,e,tp) end
   Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
   local tg=Duel.SelectTarget(tp,s.filter2b,tp,LOCATION_REMOVED,0,1,1,nil,e,tp)
