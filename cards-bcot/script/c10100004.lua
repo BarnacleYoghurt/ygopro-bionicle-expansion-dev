@@ -51,7 +51,7 @@ function s.operation2(e,tp,eg,ep,ev,re,r,rp)
 	local tc=Duel.GetFirstTarget()
 	if tc:IsRelateToEffect(e) then
 		Duel.Destroy(tc,REASON_EFFECT)
-    if Duel.IsExistingMatchingCard(s.filter2b,tp,LOCATION_MZONE,0,1,nil) and Duel.SelectYesNo(tp,aux.Stringid(id,2)) then
+    if Duel.IsExistingMatchingCard(s.filter2a,tp,LOCATION_ONFIELD,LOCATION_ONFIELD,1,nil) and Duel.IsExistingMatchingCard(s.filter2b,tp,LOCATION_MZONE,0,1,nil) and Duel.SelectYesNo(tp,aux.Stringid(id,2)) then
       Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_DESTROY)
       local g=Duel.SelectMatchingCard(tp,s.filter2a,tp,LOCATION_ONFIELD,LOCATION_ONFIELD,1,1,nil)
       if g:GetCount()>0 then
