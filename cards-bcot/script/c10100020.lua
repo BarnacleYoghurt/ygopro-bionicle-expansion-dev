@@ -10,7 +10,6 @@ function s.initial_effect(c)
   e1:SetType(EFFECT_TYPE_IGNITION)
   e1:SetProperty(EFFECT_FLAG_CARD_TARGET)
   e1:SetRange(LOCATION_MZONE)
-  e1:SetCost(s.cost1)
   e1:SetTarget(s.target1)
   e1:SetOperation(s.operation1)
   e1:SetCountLimit(1,id)
@@ -34,26 +33,17 @@ end
 function s.check0(g,lc)
   return g:IsExists(s.filter0,1,nil)
 end
-function s.filter1a(c,tp)
-  return c:IsType(TYPE_MONSTER) and c:IsAbleToRemoveAsCost() and Duel.IsExistingTarget(s.filter1b,tp,LOCATION_GRAVE,0,1,c)
-end
-function s.filter1b(c)
+function s.filter1(c)
   return c:IsAttribute(ATTRIBUTE_EARTH) and c:IsLevelBelow(4) and c:IsAbleToHand()
 end
-function s.cost1(e,tp,eg,ep,ev,re,r,rp,chk)
-  if chk==0 then return Duel.IsExistingMatchingCard(s.filter1a,tp,LOCATION_GRAVE,0,1,nil,tp) end
-  Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_REMOVE)
-  local g=Duel.SelectMatchingCard(tp,s.filter1a,tp,LOCATION_GRAVE,0,1,1,nil,tp)
-  Duel.Remove(g,POS_FACEUP,REASON_COST)
-end
 function s.target1(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
-  if chkc then return chkc:IsLocation(LOCATION_GRAVE) and chkc:IsControler(tp) and s.filter1b(chkc) end
-  if chk==0 then return true end --Check for target already done by cost; might need a check for ability to banish, but the cost also mostly takes care of that
+  if chkc then return chkc:IsLocation(LOCATION_GRAVE) and chkc:IsControler(tp) and s.filter1(chkc) end
+  if chk==0 then return Duel.IsExistingMatchingCard(s.filter1,tp,LOCATION_GRAVE,0,1,nil) and Duel.IsExistingMatchingCard(Card.IsAbleToRemove,tp,LOCATION_HAND,0,1,nil) end
   Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_ATOHAND)
-	local tg=Duel.SelectTarget(tp,s.filter1b,tp,LOCATION_GRAVE,0,1,1,nil)
+	local tg=Duel.SelectTarget(tp,s.filter1,tp,LOCATION_GRAVE,0,1,1,nil)
 	Duel.SetOperationInfo(0,CATEGORY_TOHAND,tg,tg:GetCount(),0,0)
 	Duel.SetOperationInfo(0,CATEGORY_DRAW,nil,0,PLAYER_ALL,1)
-	Duel.SetOperationInfo(0,CATEGORY_REMOVE,nil,0,PLAYER_ALL,1)
+	Duel.SetOperationInfo(0,CATEGORY_REMOVE,nil,0,tp,1)
 end
 function s.operation1(e,tp,eg,ep,ev,re,r,rp)
   local pct=Duel.GetFieldGroupCount(tp,LOCATION_HAND+LOCATION_ONFIELD,0)
