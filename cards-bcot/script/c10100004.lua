@@ -22,7 +22,7 @@ function s.initial_effect(c)
   e2a:SetCountLimit(1)
 	c:RegisterEffect(e2a)
   local e2b=e2a:Clone()
-  e2b:SetCode(EVENT_CHAIN_SOLVED)
+  e2b:SetCode(EVENT_CHAINING)
   e2b:SetCondition(s.condition2b)
   c:RegisterEffect(e2b)
 end
