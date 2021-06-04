@@ -45,18 +45,50 @@ function s.operation1(e,tp,eg,ep,ev,re,r,rp)
 		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
 		local g=Duel.SelectMatchingCard(tp,s.filter1b,tp,LOCATION_HAND+LOCATION_DECK,0,1,1,nil,e,tp,lv)
 		if g:GetCount()>0 then
-			local sc=g:GetFirst()
-			Duel.SpecialSummonStep(sc,0,tp,tp,false,false,POS_FACEUP)
-			local e1=Effect.CreateEffect(e:GetHandler())
-			e1:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_CONTINUOUS)
-			e1:SetCode(EVENT_SPSUMMON_SUCCESS)
-			e1:SetOperation(s.operation1_1)
-			e1:SetReset(RESET_PHASE+PHASE_END)
-			sc:RegisterEffect(e1)
-			Duel.SpecialSummonComplete()
+      --Case handling from Magical Meltdown
+      if Duel.GetCurrentChain()==0 then --Probably not actually possible, but here just in case
+        Duel.SetChainLimitTillChainEnd(aux.FALSE)
+      elseif Duel.GetCurrentChain()==1 then
+        --Set flag on summon and reset it if something else happens (which shouldn't ever, but just in case)
+        local e1=Effect.CreateEffect(e:GetHandler())
+        e1:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
+        e1:SetCode(EVENT_SPSUMMON_SUCCESS)
+        e1:SetOperation(s.operation1_1)
+        e1:SetReset(RESET_PHASE+PHASE_END)
+        Duel.RegisterEffect(e1,tp)
+        --Prevent chaining other cards to the summon once this card's chain ends
+        local e2=Effect.CreateEffect(e:GetHandler())
+        e2:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
+        e2:SetRange(LOCATION_FZONE)
+        e2:SetCode(EVENT_CHAIN_END)
+        e2:SetOperation(s.operation1_2)
+        Duel.RegisterEffect(e2,tp)
+      end
+      --CL2 or higher don't get the protection because rulings
+      
+			Duel.SpecialSummon(g,0,tp,tp,false,false,POS_FACEUP)
 		end
 	end
 end
 function s.operation1_1(e,tp,eg,ep,ev,re,r,rp)
-	Duel.SetChainLimitTillChainEnd(aux.FALSE)
+  Duel.RegisterFlagEffect(tp,id,RESET_PHASE+PHASE_END,0,1)
+	local e1=Effect.CreateEffect(e:GetHandler())
+  e1:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
+  e1:SetCode(EVENT_CHAINING)
+  e1:SetOperation(s.operation1_1_1)
+  Duel.RegisterEffect(e1,tp)
+  local e2=e1:Clone()
+  e2:SetCode(EVENT_BREAK_EFFECT)
+  e2:SetReset(RESET_CHAIN)
+  Duel.RegisterEffect(e2,tp)
+end
+function s.operation1_1_1(e,tp,eg,ep,ev,re,r,rp)
+	Duel.ResetFlagEffect(tp,id)
+	e:Reset()
+end
+function s.operation1_2(e,tp,eg,ep,ev,re,r,rp)
+	if Duel.GetFlagEffect(tp,id)~=0 then
+		Duel.SetChainLimitTillChainEnd(aux.FALSE)
+	end
+	Duel.ResetFlagEffect(tp,id)
 end
