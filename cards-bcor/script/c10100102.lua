@@ -1,14 +1,15 @@
 --Kane-Ra, Bull Rahi
-function c10100102.initial_effect(c)
+local s,id=GetID()
+function s.initial_effect(c)
 	--pendulum summon
-	aux.EnablePendulumAttribute(c)
+	Pendulum.AddProcedure(c)
 	--Unrespondable
 	local e1=Effect.CreateEffect(c)
 	e1:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
 	e1:SetCode(EVENT_SPSUMMON_SUCCESS)
 	e1:SetRange(LOCATION_PZONE)
-	e1:SetCondition(c10100102.condition1)
-	e1:SetOperation(c10100102.operation1)
+	e1:SetCondition(s.condition1)
+	e1:SetOperation(s.operation1)
 	c:RegisterEffect(e1)
 	--Boost ATK
 	local e2=Effect.CreateEffect(c)
@@ -16,8 +17,8 @@ function c10100102.initial_effect(c)
 	e2:SetCode(EFFECT_UPDATE_ATTACK)
 	e2:SetRange(LOCATION_PZONE)
 	e2:SetTargetRange(LOCATION_MZONE,0)
-	e2:SetCondition(c10100102.condition2)
-	e2:SetTarget(c10100102.target2)
+	e2:SetCondition(s.condition2)
+	e2:SetTarget(s.target2)
 	e2:SetValue(1000)
 	c:RegisterEffect(e2)
 	--Protection
@@ -26,38 +27,39 @@ function c10100102.initial_effect(c)
 	e3:SetCode(EFFECT_INDESTRUCTABLE_EFFECT)
 	e3:SetRange(LOCATION_PZONE)		
 	e3:SetTargetRange(LOCATION_MZONE,0)	
-	e3:SetCondition(c10100102.condition2)
-	e3:SetTarget(c10100102.target2)
+	e3:SetCondition(s.condition2)
+	e3:SetTarget(s.target2)
 	e3:SetValue(1)
 	c:RegisterEffect(e3)
 end
-function c10100102.limit1(e,rp,tp)
+function s.limit1(e,rp,tp)
 	return tp==rp
 end
-function c10100102.condition1(e)
+function s.condition1(e)
 	local seq=e:GetHandler():GetSequence()
-	local tc=Duel.GetFieldCard(e:GetHandlerPlayer(),LOCATION_SZONE,13-seq)
-	return tc and tc:IsSetCard(0x15a) and tc:IsRace(RACE_BEAST) and tc:GetLevel()==7
+	local g=Duel.GetFieldGroup(e:GetHandlerPlayer(),LOCATION_PZONE,0)
+	local tc=(g-e:GetHandler()):GetFirst()
+	return tc and tc:IsSetCard(0xb06) and tc:IsRace(RACE_BEAST) and tc:IsLevel(7)
 end
-function c10100102.operation1(e,tp,eg,ep,ev,re,r,rp)
+function s.operation1(e,tp,eg,ep,ev,re,r,rp)
 	local sc=eg:GetFirst()
 	while sc do
-		if sc:IsSetCard(0x15a) and sc:GetSummonType()==SUMMON_TYPE_PENDULUM then
-			Duel.SetChainLimit(c10100102.limit1)
+		if sc:IsSetCard(0xb06) and sc:GetSummonType()==SUMMON_TYPE_PENDULUM then
+			Duel.SetChainLimit(s.limit1)
 			sc=nil
 		else
 			sc=eg:GetNext()
 		end
 	end
 end
-function c10100102.filter2(c)
-	return c:IsSetCard(0x15a) and c:IsFaceup()
+function s.filter2(c)
+	return c:IsSetCard(0xb06) and c:IsFaceup()
 end
-function c10100102.condition2(e)
+function s.condition2(e)
 	local tp=e:GetHandlerPlayer()
-	return Duel.IsExistingMatchingCard(c10100102.filter2,tp,LOCATION_MZONE,0,1,nil) and Duel.GetMatchingGroupCount(Card.IsFaceup,tp,LOCATION_MZONE,0,nil)==1
+	return Duel.IsExistingMatchingCard(s.filter2,tp,LOCATION_MZONE,0,1,nil) and Duel.GetMatchingGroupCount(Card.IsFaceup,tp,LOCATION_MZONE,0,nil)==1
 end
-function c10100102.target2(e,c)
-	return c:IsSetCard(0x15a) and c:IsFaceup()
+function s.target2(e,c)
+	return c:IsSetCard(0xb06) and c:IsFaceup()
 end
 
