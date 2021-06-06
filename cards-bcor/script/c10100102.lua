@@ -36,7 +36,6 @@ function s.limit1(e,rp,tp)
 	return tp==rp
 end
 function s.condition1(e)
-	local seq=e:GetHandler():GetSequence()
 	local g=Duel.GetFieldGroup(e:GetHandlerPlayer(),LOCATION_PZONE,0)
 	local tc=(g-e:GetHandler()):GetFirst()
 	return tc and tc:IsSetCard(0xb06) and tc:IsRace(RACE_BEAST) and tc:IsLevel(7)
