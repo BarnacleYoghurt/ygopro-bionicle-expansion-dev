@@ -48,7 +48,7 @@ function s.operation1(e,tp,eg,ep,ev,re,r,rp)
 	end
 end
 function s.filter2(c,e,tp)
-	return c:IsSetCard(0xb06) and c:IsLevelBelow(4) and c:IsType(TYPE_PENDULUM) and c:IsFaceup() and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
+	return c:IsSetCard(0xb06) and c:IsLevelBelow(4) and c:IsType(TYPE_PENDULUM) and c:IsFaceup() and c:IsCanBeSpecialSummoned(e,0,tp,false,false) and Duel.GetLocationCountFromEx(tp,tp,nil,c)>0
 end
 function s.condition2(e,tp,eg,ep,ev,re,r,rp)
 	if eg:GetCount()==0 then return false end
