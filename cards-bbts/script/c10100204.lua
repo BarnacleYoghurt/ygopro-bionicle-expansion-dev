@@ -1,8 +1,9 @@
 if not bbts then
 	dofile "expansions/util-bbts.lua"
 end
+local s,id=GetID()
 --Bohrok Pahrak
-function c10100204.initial_effect(c)
+function s.initial_effect(c)
 	--flip
   local e1=bbts.bohrok_flip(c)
   c:RegisterEffect(e1)
@@ -12,7 +13,7 @@ function c10100204.initial_effect(c)
 	e2:SetType(EFFECT_TYPE_SINGLE)
 	e2:SetRange(LOCATION_MZONE)
 	e2:SetValue(aux.tgoval)
-	e2:SetCondition(c10100204.condition2)
+	e2:SetCondition(s.condition2)
 	c:RegisterEffect(e2)
   local e2a=e2:Clone()
 	e2a:SetCode(EFFECT_INDESTRUCTABLE_EFFECT)
@@ -20,30 +21,30 @@ function c10100204.initial_effect(c)
 	--Destroy
 	local e3=Effect.CreateEffect(c)
 	e3:SetCategory(CATEGORY_DESTROY)
-  e3:SetDescription(aux.Stringid(10100204,1))
+  e3:SetDescription(aux.Stringid(id,1))
 	e3:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O)
-	e3:SetProperty(EFFECT_FLAG_TARGET)
+	e3:SetProperty(EFFECT_FLAG_CARD_TARGET)
 	e3:SetRange(LOCATION_MZONE)
 	e3:SetCode(EVENT_PHASE+PHASE_BATTLE)
-	e3:SetCondition(c10100204.condition3)
-	e3:SetTarget(c10100204.target3)
-	e3:SetOperation(c10100204.operation3)
+	e3:SetCondition(s.condition3)
+	e3:SetTarget(s.target3)
+	e3:SetOperation(s.operation3)
 	e3:SetCountLimit(1)
 	c:RegisterEffect(e3)
 end
-function c10100204.condition2(e)
+function s.condition2(e)
 	return Duel.GetAttacker()==e:GetHandler() or Duel.GetAttackTarget()==e:GetHandler()
 end
-function c10100204.condition3(e,tp,eg,ep,ev,re,r,rp)
+function s.condition3(e,tp,eg,ep,ev,re,r,rp)
 	return e:GetHandler():GetBattledGroupCount()>0
 end
-function c10100204.target3(e,tp,eg,ep,ev,re,r,rp,chk)
+function s.target3(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingTarget(Card.IsDestructable,tp,0,LOCATION_ONFIELD,1,nil) end
   Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_DESTROY)
 	local tg=Duel.SelectTarget(tp,Card.IsDestructable,tp,0,LOCATION_ONFIELD,1,1,nil)
 	Duel.SetOperationInfo(0,CATEGORY_DESTROY,tg,1,0,0)
 end
-function c10100204.operation3(e,tp,eg,ep,ev,re,r,rp)
+function s.operation3(e,tp,eg,ep,ev,re,r,rp)
 	local tc=Duel.GetFirstTarget()
 	if tc:IsRelateToEffect(e) then 
 		Duel.Destroy(tc,REASON_EFFECT)

@@ -3,7 +3,7 @@ bbts=BBTS
 --Bohrok
 function BBTS.bohrok_flip(baseC)
   local function filter(c,e,tp)
-    return c:IsSetCard(0x15c) and c:GetLevel()==4 and not c:IsCode(baseC:GetOriginalCode()) and c:IsCanBeSpecialSummoned(e,0,tp,false,false,POS_FACEDOWN_DEFENSE)
+    return c:IsSetCard(0xb08) and c:GetLevel()==4 and not c:IsCode(baseC:GetOriginalCode()) and c:IsCanBeSpecialSummoned(e,0,tp,false,false,POS_FACEDOWN_DEFENSE)
   end
   local function target(e,tp,eg,ep,ev,re,r,rp,chk)
     if chk==0 then 
@@ -39,7 +39,7 @@ function BBTS.bohrok_shuffledelayed(baseC)
     Duel.SendtoDeck(e:GetHandler(),nil,2,REASON_EFFECT)
   end
   local fid=baseC:GetFieldID()
-  baseC:RegisterFlagEffect(baseC:GetOriginalCode(),RESET_EVENT+0x1fe0000+RESET_PHASE+PHASE_END,0,1,fid)
+  baseC:RegisterFlagEffect(baseC:GetOriginalCode(),RESET_EVENT+RESETS_STANDARD+RESET_PHASE+PHASE_END,0,1,fid)
   local e=Effect.CreateEffect(baseC)
   e:SetCategory(CATEGORY_TODECK)
   e:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)

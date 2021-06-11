@@ -1,22 +1,23 @@
 if not bbts then
 	dofile "expansions/util-bbts.lua"
 end
+local s,id=GetID()
 --Bohrok Gahlok
-function c10100202.initial_effect(c)
+function s.initial_effect(c)
 	--flip
   local e1=bbts.bohrok_flip(c)
   c:RegisterEffect(e1)
 	--be unpredictable
 	local e2=Effect.CreateEffect(c)
-  e2:SetDescription(aux.Stringid(10100202,1))
+  e2:SetDescription(aux.Stringid(id,1))
 	e2:SetType(EFFECT_TYPE_IGNITION)
 	e2:SetRange(LOCATION_MZONE)
-	e2:SetTarget(c10100202.target2)
-	e2:SetOperation(c10100202.operation2)
+	e2:SetTarget(s.target2)
+	e2:SetOperation(s.operation2)
 	e2:SetCountLimit(1)
 	c:RegisterEffect(e2)
 end
-function c10100202.target2(e,tp,eg,ep,ev,re,r,rp,chk)
+function s.target2(e,tp,eg,ep,ev,re,r,rp,chk)
 	local g=Duel.GetFieldGroup(tp,0,LOCATION_GRAVE)
 	if g:GetCount()==0 then return false end
 	local top=g:GetFirst()
@@ -49,7 +50,7 @@ function c10100202.target2(e,tp,eg,ep,ev,re,r,rp,chk)
 		Duel.SetOperationInfo(0,CATEGORY_REMOVE,tg,1,0,0)
 	end
 end
-function c10100202.operation2(e,tp,eg,ep,ev,re,r,rp)
+function s.operation2(e,tp,eg,ep,ev,re,r,rp)
 	local g=Duel.GetFieldGroup(tp,0,LOCATION_GRAVE)
 	if g:GetCount()==0 then return false end
 	local top=g:GetFirst()
@@ -73,19 +74,19 @@ function c10100202.operation2(e,tp,eg,ep,ev,re,r,rp)
         local e1=Effect.CreateEffect(c)
         e1:SetType(EFFECT_TYPE_SINGLE)
         e1:SetCode(EFFECT_DISABLE)
-        e1:SetReset(RESET_EVENT+0x1fe0000+RESET_PHASE+PHASE_END)
+        e1:SetReset(RESET_EVENT+RESETS_STANDARD+RESET_PHASE+PHASE_END)
         tc:RegisterEffect(e1)
         local e2=Effect.CreateEffect(c)
         e2:SetType(EFFECT_TYPE_SINGLE)
         e2:SetCode(EFFECT_DISABLE_EFFECT)
-        e2:SetReset(RESET_EVENT+0x1fe0000+RESET_PHASE+PHASE_END)
+        e2:SetReset(RESET_EVENT+RESETS_STANDARD+RESET_PHASE+PHASE_END)
         tc:RegisterEffect(e2)
       end
 			local e3=Effect.CreateEffect(c)
 			e3:SetType(EFFECT_TYPE_SINGLE)
 			e3:SetCode(EFFECT_SET_ATTACK_FINAL)
       e3:SetValue(0)
-			e3:SetReset(RESET_EVENT+0x1fe0000+RESET_PHASE+PHASE_END)
+			e3:SetReset(RESET_EVENT+RESETS_STANDARD+RESET_PHASE+PHASE_END)
 			tc:RegisterEffect(e3)
 		end
 	elseif top:IsType(TYPE_TRAP) then
