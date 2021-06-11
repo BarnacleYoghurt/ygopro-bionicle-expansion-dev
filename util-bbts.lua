@@ -157,7 +157,7 @@ function BBTS.krana_revive(baseC)
 end
 function BBTS.krana_summon(baseC)
 	local function filter(c,e,tp)
-		return c:IsSetCard(0x15c) and c:GetLevel()==4 and c:IsCanBeSpecialSummoned(e,0,tp,false,false,POS_FACEUP_ATTACK)
+		return c:IsSetCard(0xb08) and c:GetLevel()==4 and c:IsCanBeSpecialSummoned(e,0,tp,false,false,POS_FACEUP_ATTACK)
 	end
 	local function condition(e,tp,eg,ep,ev,re,r,rp)
 		return Duel.GetCurrentPhase()==PHASE_MAIN1
