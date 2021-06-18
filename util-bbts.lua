@@ -229,7 +229,7 @@ end
 
 function BBTS.bohrokva_krana(baseC)
 	local function filter_1(c)
-		return c:IsType(TYPE_MONSTER) and c:IsSetCard(0x15d) and c:IsFaceup() and c:IsAbleToHand()
+		return c:IsType(TYPE_MONSTER) and c:IsSetCard(0xb09) and c:IsFaceup() and c:IsAbleToHand()
 	end
 	local function target_1(e,tp,eg,ep,ev,re,r,rp,chk)
 		if chk==0 then return Duel.IsExistingMatchingCard(filter_1,tp,LOCATION_REMOVED,0,1,nil) end
@@ -256,7 +256,7 @@ function BBTS.bohrokva_krana(baseC)
 			e1:SetTarget(target_1)
 			e1:SetOperation(operation_1)
 			e1:SetCountLimit(1)
-			e1:SetReset(RESET_EVENT+0x1fe0000+RESET_PHASE+PHASE_END)
+			e1:SetReset(RESET_EVENT+RESETS_STANDARD+RESET_PHASE+PHASE_END)
 			c:RegisterEffect(e1)
 		end
 	end
@@ -269,7 +269,7 @@ function BBTS.bohrokva_krana(baseC)
 end
 function BBTS.bohrokva_shuffle(baseC)
 	local function filter_1(c)
-		return c:IsType(TYPE_MONSTER) and c:IsSetCard(0x15c) and c:IsAbleToDeck() and not c:IsCode(baseC:GetOriginalCode())
+		return c:IsType(TYPE_MONSTER) and c:IsSetCard(0xb08) and c:IsAbleToDeck() and not c:IsCode(baseC:GetOriginalCode())
 	end
 	local function target_1(e,tp,eg,ep,ev,re,r,rp,chk)
 		if chk==0 then return Duel.IsExistingMatchingCard(filter_1,tp,LOCATION_GRAVE,0,2,nil) and Duel.IsPlayerCanDraw(tp, 1) end
@@ -299,7 +299,7 @@ function BBTS.bohrokva_shuffle(baseC)
 			e1:SetTarget(target_1)
 			e1:SetOperation(operation_1)
 			e1:SetCountLimit(1)
-			e1:SetReset(RESET_EVENT+0x1fe0000+RESET_PHASE+PHASE_END)
+			e1:SetReset(RESET_EVENT+RESETS_STANDARD+RESET_PHASE+PHASE_END)
 			c:RegisterEffect(e1)
 		end
 	end
