@@ -15,6 +15,8 @@ function s.initial_effect(c)
 	e1:SetOperation(s.operation1)
 	c:RegisterEffect(e1)
 	--Extra Synchro
+  local smat=Group.FromCards(c) --Force using this card in alternate procedure
+  smat:KeepAlive()
 	local synproc=Effect.CreateEffect(c) --Alternate Synchro Procedure
 	synproc:SetType(EFFECT_TYPE_FIELD)
 	synproc:SetDescription(aux.Stringid(id, 1))
@@ -24,6 +26,7 @@ function s.initial_effect(c)
 	synproc:SetCondition(s.synproc_condition)
 	synproc:SetTarget(s.synproc_target)
 	synproc:SetOperation(Synchro.Operation)
+  synproc:SetLabelObject(smat)
 	synproc:SetValue(SUMMON_TYPE_SYNCHRO)
 	local e2a=Effect.CreateEffect(c) --Grant synproc to all Synchros in ED
 	e2a:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_GRANT)
@@ -36,11 +39,17 @@ function s.initial_effect(c)
 	local e2b=Effect.CreateEffect(c) --Hand Synchro (works with ED Pendulums thanks to synproc)
 	e2b:SetType(EFFECT_TYPE_SINGLE)
 	e2b:SetProperty(EFFECT_FLAG_CANNOT_DISABLE+EFFECT_FLAG_UNCOPYABLE)
-	e2b:SetCode(EFFECT_HAND_SYNCHRO)
+	e2b:SetCode(id)
 	e2b:SetCondition(s.condition2)
 	e2b:SetValue(s.value2)
 	e2b:SetLabel(id)
 	c:RegisterEffect(e2b)
+  local e2c=Effect.CreateEffect(c) --Allow no other materials when using ED
+  e2c:SetProperty(EFFECT_FLAG_CANNOT_DISABLE+EFFECT_FLAG_UNCOPYABLE)
+	e2c:SetType(EFFECT_TYPE_SINGLE)
+	e2c:SetCode(EFFECT_SYNCHRO_MATERIAL_CUSTOM)
+	e2c:SetOperation(s.operation2)
+	c:RegisterEffect(e2c)
 end
 function s.condition1(e,tp,eg,ep,ev,re,r,rp)
 	return e:GetHandler():GetSummonType()==SUMMON_TYPE_SYNCHRO
@@ -66,28 +75,34 @@ function s.operation1(e,tp,eg,ep,ev,re,r,rp)
 end
 
 function s.synproc_getBaseSynproc(sc) --Get the Synchro Summon Procedure of sc (false if none registered)
-	local sc=e:GetHandler()
 	local ssprocs = {sc:GetCardEffect(EFFECT_SPSUMMON_PROC)}
-	for _,ssproc in ipairs(ssproc) do
-		if ssproc:GetDescription()==1172 then
+	for _,ssproc in ipairs(ssprocs) do
+		if ssproc:GetValue()==SUMMON_TYPE_SYNCHRO then
 			return ssproc
 		end
 	end
 	return false
 end
 function s.synproc_runWithExtraHand(fun,...) --Run function with LOCATION_HAND "constant" altered to also include LOCATION_EXTRA
-	local origval = LOCATION_HAND
+	local hand_origval = LOCATION_HAND
+  local hsyn_origval = EFFECT_HAND_SYNCHRO
 	LOCATION_HAND = LOCATION_HAND + LOCATION_EXTRA --I deserve to be trampled by a herd of Kikanalo for this
+  EFFECT_HAND_SYNCHRO = id
 	local res = fun(...)
-	LOCATION_HAND = origval
+	LOCATION_HAND = hand_origval
+  EFFECT_HAND_SYNCHRO = hsyn_origval
 	return res
 end
 function s.synproc_condition(e,c,smat,mg,min,max)
 	local fun = s.synproc_getBaseSynproc(e:GetHandler()):GetCondition()
+  if not smat then smat=Group.CreateGroup() end
+  smat:Merge(e:GetLabelObject())
 	return s.synproc_runWithExtraHand(fun,e,c,smat,mg,min,max)
 end
 function s.synproc_target(e,tp,eg,ep,ev,re,r,rp,chk,c,smat,mg,min,max)
 	local fun = s.synproc_getBaseSynproc(e:GetHandler()):GetTarget()
+  if not smat then smat=Group.CreateGroup() end
+  smat:Merge(e:GetLabelObject())
 	return s.synproc_runWithExtraHand(fun,e,tp,eg,ep,ev,re,r,rp,chk,c,smat,mg,min,max)
 end
 
@@ -107,6 +122,9 @@ function s.value2(e,c,sc)
 		c:RegisterEffect(e1)
 		return true
 	else return false end
+end
+function s.operation2(e,tg,ntg,sg,lv,sc,tp)
+	return (not sg:IsExists(Card.IsLocation,1,nil,LOCATION_EXTRA)) or sg:GetCount()==2,false
 end
 function s.chk(c)
 	if not c:IsHasEffect(EFFECT_HAND_SYNCHRO+EFFECT_SYNCHRO_CHECK) then return false end
