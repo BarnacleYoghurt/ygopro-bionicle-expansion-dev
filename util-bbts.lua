@@ -55,7 +55,7 @@ end
 --Krana
 function BBTS.krana_equip(baseC)
 	local function filter(c)
-		return c:IsFaceup() and c:IsSetCard(0x15c) and c:IsLevelAbove(4)
+		return c:IsFaceup() and c:IsSetCard(0xb08) and c:IsLevelAbove(4)
 	end
 	local function target(e,tp,eg,ep,ev,re,r,rp,chk)
 		if chk==0 then return Duel.GetLocationCount(tp,LOCATION_SZONE)>0
@@ -81,7 +81,7 @@ function BBTS.krana_equip(baseC)
 		e1:SetCode(EFFECT_EQUIP_LIMIT)
 		e1:SetValue(value_1)
 		e1:SetLabelObject(tc)
-		e1:SetReset(RESET_EVENT+0x1fe0000)
+		e1:SetReset(RESET_EVENT+RESETS_STANDARD)
 		c:RegisterEffect(e1)
 	end
 	
@@ -97,7 +97,7 @@ function BBTS.krana_equip(baseC)
 	e:SetCountLimit(1)
 	return e
 end
-function BBTS.krana_revive(baseC)
+function BBTS.krana_revive(baseC,clienthint)
 	local function condition(e,tp,eg,ep,ev,re,r,rp)
 		local rc=nil
     if re then
@@ -111,7 +111,7 @@ function BBTS.krana_revive(baseC)
     end
     if eg:GetCount()~=1 then return false end
     local tc=eg:GetFirst()
-    return tc:IsType(TYPE_MONSTER) and tc:IsLocation(LOCATION_GRAVE) and tc:GetPreviousControler()==1-tp and rc and rc:IsType(TYPE_MONSTER) and rc:IsSetCard(0x15c)
+    return tc:IsType(TYPE_MONSTER) and tc:IsLocation(LOCATION_GRAVE) and tc:GetPreviousControler()==1-tp and rc and rc:IsType(TYPE_MONSTER) and rc:IsSetCard(0xb08)
 	end
 	local function cost(e,tp,eg,ep,ev,re,r,rp,chk)
 		local c=e:GetHandler()
@@ -139,6 +139,7 @@ function BBTS.krana_revive(baseC)
       e1:SetTarget(target_1)
       e1:SetReset(RESET_PHASE+PHASE_END)
       Duel.RegisterEffect(e1,tp)
+      aux.RegisterClientHint(e:GetHandler(),nil,tp,1,0,clienthint,nil)
 		end
 	end
 	
@@ -203,7 +204,7 @@ function BBTS.krana_summon(baseC)
 end
 function BBTS.krana_condition_equipped(e,tp,eg,ep,ev,re,r,rp)
 	local tc=e:GetHandler():GetEquipTarget()
-	return tc and tc:IsSetCard(0x15c)
+	return tc and tc:IsSetCard(0xb08)
 end
 --Bohrok Va
 function BBTS.bohrokva_selfss(baseC,reqCode)

@@ -1,8 +1,9 @@
 if not bbts then
 	dofile "expansions/util-bbts.lua"
 end
+local s,id=GetID()
 --Krana Su, Worker
-function c10100210.initial_effect(c)
+function s.initial_effect(c)
 	--Equip
 	local e1=bbts.krana_equip(c)
 	c:RegisterEffect(e1)
@@ -18,6 +19,6 @@ function c10100210.initial_effect(c)
 	e2b:SetCode(EFFECT_UPDATE_DEFENSE)
 	c:RegisterEffect(e2b)
 	--Revive
-	local e3=bbts.krana_revive(c)
+	local e3=bbts.krana_revive(c,aux.Stringid(id,2))
 	c:RegisterEffect(e3)
 end
