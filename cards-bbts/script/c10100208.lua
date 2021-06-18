@@ -19,7 +19,7 @@ function s.initial_effect(c)
 	e1:SetCountLimit(1,id)
 	c:RegisterEffect(e1)
 	--Revive
-	local e2=bbts.krana_revive(c)
+	local e2=bbts.krana_revive(c,aux.Stringid(id,2))
 	c:RegisterEffect(e2)
 end
 function s.filter1(c,tp)
