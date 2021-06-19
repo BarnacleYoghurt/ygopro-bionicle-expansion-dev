@@ -1,106 +1,45 @@
 --Bohrok Swarm Fusion
-function c10100227.initial_effect(c)
+local s,id=GetID()
+function s.initial_effect(c)
 	--Activate
-	local e1=Effect.CreateEffect(c)
-	e1:SetCategory(CATEGORY_SPECIAL_SUMMON+CATEGORY_FUSION_SUMMON)
-	e1:SetType(EFFECT_TYPE_ACTIVATE)
-	e1:SetCode(EVENT_FREE_CHAIN)
-	e1:SetTarget(c10100227.target1)
-	e1:SetOperation(c10100227.operation1)
+	local e1=Fusion.CreateSummonEff(c,aux.FilterBoolFunction(Card.IsSetCard,0xb08))
 	c:RegisterEffect(e1)
   --Shuffle
   local e2=Effect.CreateEffect(c)
   e2:SetCategory(CATEGORY_TODECK+CATEGORY_DRAW)
-  e2:SetDescription(aux.Stringid(10100227,0))
+  e2:SetDescription(aux.Stringid(id,0))
   e2:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O)
   e2:SetProperty(EFFECT_FLAG_DELAY)
   e2:SetRange(LOCATION_GRAVE)
   e2:SetCode(EVENT_REMOVE)
-  e2:SetCondition(c10100227.condition2)
-  e2:SetCost(c10100227.cost2)
-  e2:SetTarget(c10100227.target2)
-  e2:SetOperation(c10100227.operation2)
-  e2:SetCountLimit(1,10100227)
+  e2:SetCondition(s.condition2)
+  e2:SetCost(s.cost2)
+  e2:SetTarget(s.target2)
+  e2:SetOperation(s.operation2)
+  e2:SetCountLimit(1,id)
   c:RegisterEffect(e2)
 end
-function c10100227.filter1a(c,e)
-	return not c:IsImmuneToEffect(e)
+function s.filter2(c,tp)
+  return c:IsPreviousLocation(LOCATION_GRAVE) and c:IsControler(tp) and c:IsSetCard(0xb08)
 end
-function c10100227.filter1b(c,e,tp,m,f,chkf)
-	return c:IsType(TYPE_FUSION) and c:IsSetCard(0x15c) and (not f or f(c))
-		and c:IsCanBeSpecialSummoned(e,SUMMON_TYPE_FUSION,tp,false,false) and c:CheckFusionMaterial(m,nil,chkf)
+function s.condition2(e,tp,eg,ep,ev,re,r,rp)
+  return eg and eg:IsExists(s.filter2,1,nil,tp)
 end
-function c10100227.target1(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then
-		local chkf=Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and PLAYER_NONE or tp
-    local mg1=Duel.GetFusionMaterial(tp)
-		local res=Duel.IsExistingMatchingCard(c10100227.filter1b,tp,LOCATION_EXTRA,0,1,nil,e,tp,mg1,nil,chkf)
-		if not res then
-			local ce=Duel.GetChainMaterial(tp)
-			if ce~=nil then
-				local fgroup=ce:GetTarget()
-				local mg2=fgroup(ce,e,tp)
-				local mf=ce:GetValue()
-				res=Duel.IsExistingMatchingCard(c10100227.filter1b,tp,LOCATION_EXTRA,0,1,nil,e,tp,mg2,mf,chkf)
-			end
-		end
-		return res
-	end
-	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,1,tp,LOCATION_EXTRA)
-end
-function c10100227.operation1(e,tp,eg,ep,ev,re,r,rp)
-	local chkf=Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and PLAYER_NONE or tp
-	local mg1=Duel.GetFusionMaterial(tp):Filter(c10100227.filter1a,nil,e)
-	local sg1=Duel.GetMatchingGroup(c10100227.filter1b,tp,LOCATION_EXTRA,0,nil,e,tp,mg1,nil,chkf)
-	local mg2=nil
-	local sg2=nil
-	local ce=Duel.GetChainMaterial(tp)
-	if ce~=nil then
-		local fgroup=ce:GetTarget()
-		mg2=fgroup(ce,e,tp)
-		local mf=ce:GetValue()
-		sg2=Duel.GetMatchingGroup(c10100227.filter1b,tp,LOCATION_EXTRA,0,nil,e,tp,mg2,mf,chkf)
-	end
-	if sg1:GetCount()>0 or (sg2~=nil and sg2:GetCount()>0) then
-		local sg=sg1:Clone()
-		if sg2 then sg:Merge(sg2) end
-		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
-		local tg=sg:Select(tp,1,1,nil)
-		local tc=tg:GetFirst()
-		if sg1:IsContains(tc) and (sg2==nil or not sg2:IsContains(tc) or not Duel.SelectYesNo(tp,ce:GetDescription())) then
-			local mat1=Duel.SelectFusionMaterial(tp,tc,mg1,nil,chkf)
-			tc:SetMaterial(mat1)
-			Duel.SendtoGrave(mat1,REASON_EFFECT+REASON_MATERIAL+REASON_FUSION)
-			Duel.BreakEffect()
-			Duel.SpecialSummon(tc,SUMMON_TYPE_FUSION,tp,tp,false,false,POS_FACEUP)
-		else
-			local mat2=Duel.SelectFusionMaterial(tp,tc,mg2,nil,chkf)
-			local fop=ce:GetOperation()
-			fop(ce,e,tp,tc,mat2)
-		end
-		tc:CompleteProcedure()
-	end
-end
-function c10100227.filter2(c,tp)
-  return c:IsPreviousLocation(LOCATION_GRAVE) and c:IsControler(tp) and c:IsSetCard(0x15c)
-end
-function c10100227.condition2(e,tp,eg,ep,ev,re,r,rp)
-  return eg and eg:IsExists(c10100227.filter2,1,nil,tp)
-end
-function c10100227.cost2(e,tp,eg,ep,ev,re,r,rp,chk)
+function s.cost2(e,tp,eg,ep,ev,re,r,rp,chk)
   local c=e:GetHandler()
   if chk==0 then return c:IsAbleToRemoveAsCost() end
   Duel.Remove(c,POS_FACEUP,REASON_COST)
 end
-function c10100227.target2(e,tp,eg,ep,ev,re,r,rp,chk)
-  local sg=eg:Filter(c10100227.filter2,nil,tp):Filter(Card.IsAbleToDeck,nil)
+function s.target2(e,tp,eg,ep,ev,re,r,rp,chk)
+  local sg=eg:Filter(s.filter2,nil,tp):Filter(Card.IsAbleToDeck,nil)
   if chk==0 then return sg:GetCount() > 0 and Duel.IsPlayerCanDraw(tp,1) end
   Duel.SetOperationInfo(0,CATEGORY_TODECK,sg,sg:GetCount(),0,0)
   Duel.SetOperationInfo(0,CATEGORY_DRAW,nil,0,tp,1)
 end
-function c10100227.operation2(e,tp,eg,ep,ev,re,r,rp)
-  local sg=eg:Filter(c10100227.filter2,nil,tp):Filter(Card.IsAbleToDeck,nil)
-  if sg:GetCount()>0 and Duel.SendtoDeck(sg,nil,2,REASON_EFFECT)==eg:GetCount() then
+function s.operation2(e,tp,eg,ep,ev,re,r,rp)
+  local sg=eg:Filter(s.filter2,nil,tp):Filter(Card.IsAbleToDeck,nil)
+  local ct=eg:FilterCount(s.filter2,nil,tp)
+  if sg:GetCount()>0 and Duel.SendtoDeck(sg,nil,2,REASON_EFFECT)==ct then
     if sg:IsExists(Card.IsLocation,1,nil,LOCATION_DECK) then Duel.ShuffleDeck(tp) end
     Duel.BreakEffect()
     Duel.Draw(tp,1,REASON_EFFECT)

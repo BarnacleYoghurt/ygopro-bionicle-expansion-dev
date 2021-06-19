@@ -313,7 +313,7 @@ end
 --Bohrok Kaita
 function BBTS.bohrokkaita_krana(baseC)
 	local function filter(c)
-		return c:IsType(TYPE_MONSTER) and c:IsSetCard(0x15d) and c:IsAbleToHand()
+		return c:IsType(TYPE_MONSTER) and c:IsSetCard(0xb09) and c:IsAbleToHand()
 	end
 	local function condition(e,tp,eg,ep,ev,re,r,rp)
 		return bit.band(e:GetHandler():GetSummonType(),SUMMON_TYPE_FUSION)==SUMMON_TYPE_FUSION
