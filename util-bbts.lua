@@ -353,36 +353,16 @@ function BBTS.bohrokkaita_krana(baseC)
 end
 --Bohrok Va Kaita
 function BBTS.bohrokvakaita_synchrolimit(baseC)	
-	function filter(c,syncard,tuner,f)
-		return c:IsFaceup() and c:IsNotTuner() and c:IsCanBeSynchroMaterial(syncard,tuner) and c:IsSetCard(0x15c) and (f==nil or f(c))
-	end
-	function target(e,syncard,f,minc,maxc)
-		local c=e:GetHandler()
-		local lv=syncard:GetLevel()-c:GetLevel()
-		if lv<=0 then return false end
-		local g=Duel.GetMatchingGroup(filter,syncard:GetControler(),LOCATION_MZONE,LOCATION_MZONE,c,syncard,c,f)
-		return g:CheckWithSumEqual(Card.GetSynchroLevel,lv,minc,maxc,syncard)
-	end
-	function operation(e,tp,eg,ep,ev,re,r,rp,syncard,f,minc,maxc)
-		local c=e:GetHandler()
-		local lv=syncard:GetLevel()-c:GetLevel()
-		local g=Duel.GetMatchingGroup(filter,syncard:GetControler(),LOCATION_MZONE,LOCATION_MZONE,c,syncard,c,f)
-		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SMATERIAL)
-		local sg=g:SelectWithSumEqual(tp,Card.GetSynchroLevel,lv,minc,maxc,syncard)
-		Duel.SetSynchroMaterial(sg)
-	end
 	local e=Effect.CreateEffect(baseC)
-	e:SetType(EFFECT_TYPE_SINGLE)
-	e:SetCode(EFFECT_SYNCHRO_MATERIAL_CUSTOM)
 	e:SetProperty(EFFECT_FLAG_CANNOT_DISABLE+EFFECT_FLAG_UNCOPYABLE)
-	e:SetTarget(target)
-	e:SetValue(1)
-	e:SetOperation(operation)
+	e:SetType(EFFECT_TYPE_SINGLE)
+	e:SetCode(EFFECT_SYNCHRO_MAT_RESTRICTION)
+	e:SetValue(aux.TargetBoolFunction(Card.IsSetCard,0xb08))
 	return e
 end
 function BBTS.bohrokvakaita_switch(baseC)	
 	local function filter(c,e,tp)
-		return c:IsSetCard(0x15c) and c:IsType(TYPE_FUSION) and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
+		return c:IsSetCard(0xb08) and c:IsType(TYPE_FUSION) and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
 	end
 	local function condition(e,tp,eg,ep,ev,re,r,rp)
 		return bit.band(e:GetHandler():GetSummonType(),SUMMON_TYPE_FUSION)==SUMMON_TYPE_FUSION
