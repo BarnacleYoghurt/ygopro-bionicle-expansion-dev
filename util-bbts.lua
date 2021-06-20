@@ -395,18 +395,19 @@ function BBTS.bohrokvakaita_switch(baseC)
 	e:SetOperation(operation)
 	return e
 end
+--Bahrag
 function bbts.bahrag_pendset(baseC)
 	function condition(e,tp,eg,ep,ev,re,r,rp)
 		return e:GetHandler():IsFaceup() and tp==Duel.GetTurnPlayer()
 	end
 	function target(e,tp,eg,ep,ev,re,r,rp,chk)
-		if chk==0 then return Duel.CheckLocation(tp,LOCATION_SZONE,6) or Duel.CheckLocation(tp,LOCATION_SZONE,7) end
+		if chk==0 then return Duel.CheckLocation(tp,LOCATION_PZONE,0) or Duel.CheckLocation(tp,LOCATION_PZONE,1) end
 	end
 	function operation(e,tp,eg,ep,ev,re,r,rp)
-		if not Duel.CheckLocation(tp,LOCATION_SZONE,6) and not Duel.CheckLocation(tp,LOCATION_SZONE,7) then return false end
+		if not Duel.CheckLocation(tp,LOCATION_PZONE,0) and not Duel.CheckLocation(tp,LOCATION_PZONE,1) then return false end
 		local c=e:GetHandler()
 		if c:IsRelateToEffect(e) then
-			Duel.MoveToField(c,tp,tp,LOCATION_SZONE,POS_FACEUP,true)
+			Duel.MoveToField(c,tp,tp,LOCATION_PZONE,POS_FACEUP,true)
 		end
 	end
 	local e=Effect.CreateEffect(baseC)
