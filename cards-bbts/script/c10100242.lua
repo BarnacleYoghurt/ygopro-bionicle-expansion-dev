@@ -6,11 +6,11 @@ function s.initial_effect(c)
   --Summon procedure
 	Fusion.AddContactProc(c,s.target0,s.operation0,aux.FALSE)
   --Set ATK/DEF
-  local e3=Effect.CreateEffect(c)
-	e3:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_CONTINUOUS)
-	e3:SetCode(EVENT_SPSUMMON_SUCCESS)
-	e3:SetOperation(s.operation1)
-	c:RegisterEffect(e3)
+  local e1=Effect.CreateEffect(c)
+	e1:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_CONTINUOUS)
+	e1:SetCode(EVENT_SPSUMMON_SUCCESS)
+	e1:SetOperation(s.operation1)
+	c:RegisterEffect(e1)
 end
 function s.filter0a(c)
   return c:IsType(TYPE_MONSTER) and c:IsSetCard(0xb09)
