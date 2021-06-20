@@ -1,35 +1,36 @@
 --Pokawi, Bird Rahi
-function c10100236.initial_effect(c)
+local s,id=GetID()
+function s.initial_effect(c)
 	--Reduce ATK
 	local e1=Effect.CreateEffect(c)
 	e1:SetCategory(CATEGORY_ATKCHANGE)
-	e1:SetDescription(aux.Stringid(10100236,0))
+	e1:SetDescription(aux.Stringid(id,0))
 	e1:SetType(EFFECT_TYPE_QUICK_O)
 	e1:SetRange(LOCATION_HAND+LOCATION_MZONE)
 	e1:SetCode(EVENT_FREE_CHAIN)	
-	e1:SetCost(c10100236.cost1)
-	e1:SetTarget(c10100236.target1)
-	e1:SetOperation(c10100236.operation1)
+	e1:SetCost(s.cost1)
+	e1:SetTarget(s.target1)
+	e1:SetOperation(s.operation1)
 	c:RegisterEffect(e1)
 end
-function c10100236.filter1a(c)
-	return c:IsType(TYPE_MONSTER) and c:IsSetCard(0x15a) and c:IsAbleToRemoveAsCost()
+function s.filter1a(c)
+	return c:IsType(TYPE_MONSTER) and c:IsSetCard(0xb06) and c:IsAbleToRemoveAsCost()
 end
-function c10100236.filter1b(c)
-	return c:IsFaceup() and c:IsType(TYPE_MONSTER) and c:IsSetCard(0x15a)
+function s.filter1b(c)
+	return c:IsFaceup() and c:IsType(TYPE_MONSTER) and c:IsSetCard(0xb06)
 end
-function c10100236.cost1(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return e:GetHandler():IsAbleToRemoveAsCost() and Duel.IsExistingMatchingCard(c10100236.filter1a,tp,LOCATION_GRAVE,0,1,nil) end
+function s.cost1(e,tp,eg,ep,ev,re,r,rp,chk)
+	if chk==0 then return e:GetHandler():IsAbleToRemoveAsCost() and Duel.IsExistingMatchingCard(s.filter1a,tp,LOCATION_GRAVE,0,1,nil) end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_REMOVE)
-	local g=Duel.SelectMatchingCard(tp,c10100236.filter1a,tp,LOCATION_GRAVE,0,1,1,nil)
+	local g=Duel.SelectMatchingCard(tp,s.filter1a,tp,LOCATION_GRAVE,0,1,1,nil)
 	g:AddCard(e:GetHandler())
 	Duel.Remove(g,POS_FACEUP,REASON_COST)
 end
-function c10100236.target1(e,tp,eg,ep,ev,re,r,rp,chk)
+function s.target1(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingMatchingCard(Card.IsFaceup,tp,0,LOCATION_MZONE,1,nil) end
 end
-function c10100236.operation1(e,tp,eg,ep,ev,re,r,rp)
-	local val=Duel.GetMatchingGroupCount(c10100236.filter1b,tp,LOCATION_REMOVED,0,nil)*500
+function s.operation1(e,tp,eg,ep,ev,re,r,rp)
+	local val=Duel.GetMatchingGroupCount(s.filter1b,tp,LOCATION_REMOVED,0,nil)*500
 	local tg=Duel.GetMatchingGroup(Card.IsFaceup,tp,0,LOCATION_MZONE,nil)
 	local tc=tg:GetFirst()
 	while tc do
@@ -37,7 +38,7 @@ function c10100236.operation1(e,tp,eg,ep,ev,re,r,rp)
     e1:SetType(EFFECT_TYPE_SINGLE)
     e1:SetCode(EFFECT_UPDATE_ATTACK)
     e1:SetValue(-val)
-    e1:SetReset(RESET_PHASE+PHASE_END+RESET_EVENT+0x1fe0000)
+    e1:SetReset(RESET_PHASE+PHASE_END+RESET_EVENT+RESETS_STANDARD)
 		tc:RegisterEffect(e1)
 		tc = tg:GetNext()
 	end
