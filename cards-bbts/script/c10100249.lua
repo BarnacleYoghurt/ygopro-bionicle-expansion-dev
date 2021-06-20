@@ -15,16 +15,16 @@ function s.initial_effect(c)
   e2:SetRange(LOCATION_SZONE)
 	e2:SetTargetRange(0,1)
 	e2:SetCode(EFFECT_CANNOT_ACTIVATE)
-  e2:SetCondition(s.condition5)
-	e2:SetValue(s.value5)
+  e2:SetCondition(s.condition2)
+	e2:SetValue(s.value2)
 	c:RegisterEffect(e2)
 end
 function s.filter0(c)
 	return c:IsRace(RACE_WARRIOR) and c:IsLevel(2)
 end
-function s.condition5(e)
+function s.condition2(e)
 	return Duel.GetAttacker()==e:GetHandler():GetEquipTarget()
 end
-function s.value5(e,re,tp)
+function s.value2(e,re,tp)
 	return re:IsActiveType(TYPE_MONSTER)
 end
