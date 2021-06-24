@@ -45,7 +45,7 @@ function s.operation1(e,tp,eg,ep,ev,re,r,rp)
 	end
 end
 function s.filter2(c,tp)
-  return c:IsFaceup() and c:IsControler(tp)
+  return c:IsFaceup() and c:IsControler(tp) and c:IsPreviousPosition(POS_FACEUP)
 end
 function s.condition2(e,tp,eg,ep,ev,re,r,rp)
 	return eg:IsExists(s.filter2,1,nil,tp)
