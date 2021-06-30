@@ -6,8 +6,11 @@ function s.initial_effect(c)
 	e1:SetCategory(CATEGORY_ATKCHANGE)
 	e1:SetDescription(aux.Stringid(id,0))
 	e1:SetType(EFFECT_TYPE_QUICK_O)
+  e1:SetProperty(EFFECT_FLAG_DAMAGE_STEP)
 	e1:SetRange(LOCATION_HAND+LOCATION_MZONE)
-	e1:SetCode(EVENT_FREE_CHAIN)	
+	e1:SetCode(EVENT_FREE_CHAIN)
+	e1:SetHintTiming(TIMING_DAMAGE_STEP)
+  e1:SetCondition(s.condition1)
 	e1:SetCost(s.cost1)
 	e1:SetTarget(s.target1)
 	e1:SetOperation(s.operation1)
@@ -18,6 +21,9 @@ function s.filter1a(c)
 end
 function s.filter1b(c)
 	return c:IsFaceup() and c:IsType(TYPE_MONSTER) and c:IsSetCard(0xb06)
+end
+function s.condition1(e,tp,eg,ep,ev,re,r,rp)
+	return Duel.GetCurrentPhase()~=PHASE_DAMAGE or not Duel.IsDamageCalculated()
 end
 function s.cost1(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return e:GetHandler():IsAbleToRemoveAsCost() and Duel.IsExistingMatchingCard(s.filter1a,tp,LOCATION_GRAVE,0,1,nil) end
