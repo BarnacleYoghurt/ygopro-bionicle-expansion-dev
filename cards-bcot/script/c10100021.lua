@@ -1,62 +1,50 @@
 --Turaga Nuju
-function c10100021.initial_effect(c)
-	--Equip
-	local e1=Effect.CreateEffect(c)
-	e1:SetDescription(aux.Stringid(10100021,0))
-	e1:SetCategory(CATEGORY_EQUIP)
-	e1:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_F)
-	e1:SetCode(EVENT_SUMMON_SUCCESS)
-	e1:SetTarget(c10100021.target1)
-	e1:SetOperation(c10100021.operation1)
-	c:RegisterEffect(e1)
-	local e1a=e1:Clone()
-	e1a:SetCode(EVENT_SPSUMMON_SUCCESS)
-	c:RegisterEffect(e1a)
-	local e1b=e1:Clone()
-	e1b:SetCode(EVENT_FLIP_SUMMON_SUCCESS)
-	c:RegisterEffect(e1b)
-	--Untargetable
-	local e2=Effect.CreateEffect(c)
-	e2:SetDescription(aux.Stringid(10100021,1))
-	e2:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_F)
-	e2:SetCode(EVENT_TO_GRAVE)
-	e2:SetProperty(EFFECT_FLAG_DELAY+EFFECT_FLAG_DAMAGE_STEP+EFFECT_FLAG_CARD_TARGET)
-	e2:SetTarget(c10100021.target2)
-	e2:SetOperation(c10100021.operation2)
-	c:RegisterEffect(e2)
+local s,id=GetID()
+function s.initial_effect(c)
+	--Link Summon
+	Link.AddProcedure(c,nil,2,2,s.check0)
+	c:EnableReviveLimit()
+	--Flip
+  local e1=Effect.CreateEffect(c)
+  e1:SetDescription(aux.Stringid(id,0))
+  e1:SetType(EFFECT_TYPE_IGNITION)
+  e1:SetRange(LOCATION_MZONE)
+  e1:SetTarget(s.target1)
+  e1:SetOperation(s.operation1)
+  e1:SetCountLimit(1)
+  c:RegisterEffect(e1)
 end
---e1 - Equip
-function c10100021.filter1(c,ec)
-	return c:IsType(TYPE_EQUIP)	and c:IsCode(10100044) and c:CheckEquipTarget(ec)
+function s.filter0(c)
+  return c:IsAttribute(ATTRIBUTE_WATER) and c:IsRace(RACE_WARRIOR)
 end
-function c10100021.target1(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.GetLocationCount(tp,LOCATION_SZONE)>0
-		and Duel.IsExistingMatchingCard(c10100021.filter1,tp,LOCATION_DECK+LOCATION_HAND+LOCATION_GRAVE,0,1,nil,e:GetHandler()) end
-	Duel.SetOperationInfo(0,CATEGORY_EQUIP,nil,1,tp,LOCATION_DECK)
+function s.check0(g,lc)
+  return g:IsExists(s.filter0,1,nil)
 end
-function c10100021.operation1(e,tp,eg,ep,ev,re,r,rp)
-	local c=e:GetHandler()
-	if Duel.GetLocationCount(tp,LOCATION_SZONE)<=0 or c:IsFacedown() or not c:IsRelateToEffect(e) then return end
-	Duel.Hint(HINT_SELECTMSG,tp,nil)
-	local g=Duel.SelectMatchingCard(tp,c10100021.filter1,tp,LOCATION_DECK+LOCATION_HAND+LOCATION_GRAVE,0,1,1,nil,c)
-	if g:GetCount()>0 and g:GetFirst():CheckEquipTarget(c) then
-		Duel.Equip(tp,g:GetFirst(),c)
-	end
+function s.filter1(c)
+  return c:IsFaceup() and c:IsCanTurnSet()
 end
---e2 - Untargetable
-function c10100021.target2(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.IsExistingMatchingCard(Card.IsFaceup,tp,LOCATION_MZONE,0,1,nil,e:GetHandler()) end
-	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_FACEUP)
-	Duel.SelectTarget(tp,Card.IsFaceup,tp,LOCATION_MZONE,0,1,1,nil)
+function s.rescon1(sg,e,tp,mg)
+  return sg:IsExists(Card.IsControler,1,nil,tp) and sg:IsExists(Card.IsControler,1,nil,1-tp)
 end
-function c10100021.operation2(e,tp,eg,ep,ev,re,r,rp)
-	local tc=Duel.GetFirstTarget()
-	if tc and tc:IsFaceup() then
-		local e1=Effect.CreateEffect(e:GetHandler())
-		e1:SetType(EFFECT_TYPE_SINGLE)
-		e1:SetCode(EFFECT_CANNOT_BE_EFFECT_TARGET)
-		e1:SetValue(aux.tgval)
-		e1:SetReset(RESET_EVENT+0x1fe0000+RESET_PHASE+PHASE_END)
-		tc:RegisterEffect(e1)
+function s.target1(e,tp,eg,ep,ev,re,r,rp,chk)
+	local rg=Duel.GetMatchingGroup(s.filter1,tp,LOCATION_MZONE,LOCATION_MZONE,nil)
+	if chk==0 then return aux.SelectUnselectGroup(rg,e,tp,2,2,s.rescon1,0) end
+	Duel.SetOperationInfo(0,CATEGORY_POSITION,rg,2,0,0)
+end
+function s.operation1(e,tp,eg,ep,ev,re,r,rp)
+	local rg=Duel.GetMatchingGroup(s.filter1,tp,LOCATION_MZONE,LOCATION_MZONE,nil)
+	local g=aux.SelectUnselectGroup(rg,e,tp,2,2,s.rescon1,1,tp,HINTMSG_POSCHANGE)
+	if #g==2 then
+		Duel.HintSelection(g,true)
+		Duel.ChangePosition(g,POS_FACEDOWN_DEFENSE)
+    for tc in aux.Next(g) do
+			local e1=Effect.CreateEffect(e:GetHandler())
+			e1:SetDescription(3313)
+			e1:SetProperty(EFFECT_FLAG_CLIENT_HINT)
+			e1:SetType(EFFECT_TYPE_SINGLE)
+			e1:SetCode(EFFECT_CANNOT_CHANGE_POSITION)
+			e1:SetReset(RESET_EVENT+RESETS_STANDARD+RESET_PHASE+PHASE_END,2)
+			tc:RegisterEffect(e1)
+		end
 	end
 end
