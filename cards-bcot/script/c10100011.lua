@@ -1,82 +1,58 @@
+if not bcot then
+	dofile "expansions/util-bcot.lua"
+end
 --Great Kanohi Akaku
-function c10100011.initial_effect(c)
-	--Activate
-	local e1=Effect.CreateEffect(c)
-	e1:SetCategory(CATEGORY_EQUIP)
-	e1:SetType(EFFECT_TYPE_ACTIVATE)
-	e1:SetCode(EVENT_FREE_CHAIN)
-	e1:SetProperty(EFFECT_FLAG_CARD_TARGET)
-	e1:SetTarget(c10100011.target1)
-	e1:SetOperation(c10100011.operation1)
-	c:RegisterEffect(e1)
-	--Equip limit
+local s,id=GetID()
+function s.initial_effect(c)
+	aux.AddEquipProcedure(c)
+  --Destroy if replaced
+  local e1=bcot.kanohi_selfdestruct(c)
+  c:RegisterEffect(e1)
+	--Lock drawn cards
 	local e2=Effect.CreateEffect(c)
-	e2:SetType(EFFECT_TYPE_SINGLE)
-	e2:SetCode(EFFECT_EQUIP_LIMIT)
-	e2:SetProperty(EFFECT_FLAG_CANNOT_DISABLE)
-	e2:SetValue(c10100011.condition2)
+	e2:SetProperty(EFFECT_FLAG_DELAY)
+	e2:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O)
+	e2:SetCode(EVENT_DRAW)
+  e2:SetRange(LOCATION_SZONE)
+  e2:SetCondition(s.condition2)
+	e2:SetOperation(s.operation2)
 	c:RegisterEffect(e2)
-	--Piercing Damage
-	local e3=Effect.CreateEffect(c)
-	e3:SetType(EFFECT_TYPE_EQUIP)
-	e3:SetCode(EFFECT_PIERCE)
+	--Search
+  local e3=bcot.kanohi_search(c,10100005)
+  e3:SetDescription(aux.Stringid(id,0))
+  e3:SetCountLimit(1,id)
 	c:RegisterEffect(e3)
-	--Swap
-	local e4=Effect.CreateEffect(c)
-	e4:SetDescription(aux.Stringid(10100011,0))
-	e4:SetCategory(CATEGORY_EQUIP)
-	e4:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_QUICK_O)
-	e4:SetRange(LOCATION_SZONE)
-	e4:SetCode(EVENT_FREE_CHAIN)
-	e4:SetCost(c10100011.cost4)
-	e4:SetTarget(c10100011.target4)
-	e4:SetOperation(c10100011.operation4)
-	e4:SetProperty(EFFECT_FLAG_UNCOPYABLE)
-	c:RegisterEffect(e4)
 end
---e1 - Activate
-function c10100011.filter1(c)
-	return c:IsFaceup() and c:IsSetCard(0x155) and not c:GetEquipGroup():IsExists(Card.IsSetCard,1,nil,0x158)
+function s.condition2(e,tp,eg,ep,ev,re,r,rp)
+	return bcot.greatkanohi_con(e) and ep==1-tp
 end
-function c10100011.target1(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
-	if chkc then return chkc:IsLocation(LOCATION_MZONE) and c10100011.filter1(chkc) end
-	if chk==0 then return Duel.IsExistingTarget(c10100011.filter1,tp,LOCATION_MZONE,LOCATION_MZONE,1,nil) end
-	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_EQUIP)
-	Duel.SelectTarget(tp,c10100011.filter1,tp,LOCATION_MZONE,LOCATION_MZONE,1,1,nil)
-	Duel.SetOperationInfo(0,CATEGORY_EQUIP,e:GetHandler(),1,0,0)
+function s.operation2(e,tp,eg,ep,ev,re,r,rp)
+  local c=e:GetHandler()
+  for tc in aux.Next(eg) do
+    local rct=1
+		if Duel.GetTurnPlayer()~=tp then rct=2
+		elseif Duel.GetCurrentPhase()==PHASE_END then rct=3 end
+      
+    tc:RegisterFlagEffect(id,RESET_EVENT+RESETS_STANDARD+RESET_PHASE+PHASE_END,EFFECT_FLAG_CLIENT_HINT,rct,0,aux.Stringid(id,1))
+    local e1=Effect.CreateEffect(c)
+    e1:SetType(EFFECT_TYPE_SINGLE)
+    e1:SetCode(EFFECT_PUBLIC)
+    e1:SetReset(RESET_EVENT+RESETS_STANDARD+RESET_PHASE+PHASE_END,rct)
+    tc:RegisterEffect(e1)
+    local e2a=Effect.CreateEffect(c)
+    e2a:SetType(EFFECT_TYPE_SINGLE)
+    e2a:SetCode(EFFECT_CANNOT_TRIGGER)
+    e2a:SetRange(LOCATION_HAND)
+    e2a:SetCondition(s.condition2_2)
+    e2a:SetValue(1)
+    e2a:SetReset(RESET_EVENT+RESETS_STANDARD+RESET_PHASE+PHASE_END,2)
+    tc:RegisterEffect(e2a)
+    local e2b=e2a:Clone()
+    e2b:SetCode(EFFECT_CANNOT_SSET)
+    tc:RegisterEffect(e2b)
+  end
 end
-function c10100011.operation1(e,tp,eg,ep,ev,re,r,rp)
-	local c=e:GetHandler()
-	local tc=Duel.GetFirstTarget()
-	if c:IsRelateToEffect(e) and tc:IsRelateToEffect(e) and tc:IsFaceup() then
-		Duel.Equip(tp,c,tc)
-	end
-end
---e2 - Equip Limit
-function c10100011.condition2(e,c)
-	return c:IsSetCard(0x155)
-end
---e4 - Swap
-function c10100011.filter4(c,ec)
-	return c:IsSetCard(0x158) and c:CheckEquipTarget(ec)
-end
-function c10100011.cost4(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.CheckLPCost(tp,800) end
-	Duel.PayLPCost(tp,800)
-end
-function c10100011.target4(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
-	if chk==0 then return Duel.IsExistingMatchingCard(c10100011.filter4,tp,LOCATION_GRAVE+LOCATION_HAND,0,1,nil,e:GetHandler():GetEquipTarget()) end
-	Duel.SetOperationInfo(0,CATEGORY_EQUIP,e:GetHandler(),1,0,0)
-end
-function c10100011.operation4(e,tp,eg,ep,ev,re,r,rp)
-	local c=e:GetHandler()
-	local ec=c:GetEquipTarget()
-	if Duel.SendtoGrave(c,REASON_EFFECT) then
-		Duel.BreakEffect()
-		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_EQUIP)
-		local g=Duel.SelectMatchingCard(tp,c10100011.filter4,tp,LOCATION_GRAVE+LOCATION_HAND,0,1,1,nil,ec)
-		if g:GetCount()>0 then
-			Duel.Equip(tp,g:GetFirst(),ec)
-		end
-	end
+function s.condition2_2(e) --TODO: "while you control this face-up card!"
+  local c=e:GetHandler()
+  return c:IsType(TYPE_SPELL+TYPE_TRAP) and c:IsPublic() and c:GetFlagEffect(id)~=0
 end
