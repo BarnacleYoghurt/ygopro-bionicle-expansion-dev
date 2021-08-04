@@ -42,7 +42,7 @@ function s.operation1(e,tp,eg,ep,ev,re,r,rp)
       Duel.BreakEffect()
       Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TODECK)
       local rg=Duel.SelectMatchingCard(tp,Card.IsAbleToDeck,tp,LOCATION_HAND,0,1,1,nil)
-      Duel.SendtoDeck(rg,nil,0,REASON_COST)
+      Duel.SendtoDeck(rg,nil,0,REASON_EFFECT)
     end
 	end
 end
