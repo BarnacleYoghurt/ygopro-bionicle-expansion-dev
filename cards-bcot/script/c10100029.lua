@@ -29,7 +29,17 @@ function s.initial_effect(c)
   e2b:SetCode(EFFECT_CANNOT_BE_EFFECT_TARGET)
   e2b:SetValue(aux.tgoval)
   c:RegisterEffect(e2b)
+  --Negate
+	local e3=Effect.CreateEffect(c)
+	e3:SetType(EFFECT_TYPE_FIELD)
+	e3:SetCode(EFFECT_DISABLE)
+	e3:SetRange(LOCATION_SZONE)
+	e3:SetTargetRange(0,LOCATION_MZONE)
+  e3:SetCondition(s.condition3)
+	e3:SetTarget(s.target3)
+	c:RegisterEffect(e3)
   
+	Duel.AddCustomActivityCounter(id,ACTIVITY_CHAIN,s.chainfilter)
   aux.GlobalCheck(s,function()
     --Attacks this turn
 		s[0]=0
@@ -71,6 +81,9 @@ function s.initial_effect(c)
       end
 		end)
 	end)
+end
+function s.chainfilter(re,tp,cid)
+	return not re:IsActiveType(TYPE_MONSTER)
 end
 function s.checkop_attacks(e,tp,eg,ep,ev,re,r,rp)
 	s[ep]=s[ep]+1
@@ -121,4 +134,11 @@ function s.condition2(e)
     sum=s[4+tp]
   end
   return s.condition(e) and sum==0
+end
+function s.condition3(e)
+  local tp=e:GetHandlerPlayer()
+  return s.condition(e) and Duel.GetCustomActivityCount(id,tp,ACTIVITY_CHAIN)==0
+end
+function s.target3(e,c)
+	return c:IsStatus(STATUS_SPSUMMON_TURN) and c:IsSummonType(SUMMON_TYPE_SPECIAL)
 end
