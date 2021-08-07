@@ -55,7 +55,7 @@ function s.condition3(e)
 	return e:GetHandler():IsDefensePos()
 end
 function s.value3(e,c)
-	return c~=e:GetHandler()
+	return not c:IsCode(id)
 end
 function s.condition4(e,tp,eg,ep,ev,re,r,rp)
   return rp==1-tp and eg:IsExists(s.filter2,1,nil,tp)
