@@ -29,20 +29,17 @@ function s.filter1(c)
 	return c:IsLevel(2) and c:IsRace(RACE_WARRIOR) and not c:IsCode(id) and c:IsAbleToHand()
 end
 function s.target1(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.IsExistingMatchingCard(s.filter1,tp,LOCATION_DECK,0,1,nil) end
-	Duel.SetOperationInfo(0,CATEGORY_TOHAND,nil,1,tp,LOCATION_DECK)
+	if chk==0 then return Duel.IsExistingMatchingCard(s.filter1,tp,LOCATION_DECK+LOCATION_GRAVE,0,1,nil) end
+	Duel.SetOperationInfo(0,CATEGORY_TOHAND,nil,1,tp,LOCATION_DECK+LOCATION_GRAVE)
 end
 function s.operation1(e,tp,eg,ep,ev,re,r,rp)
-	if not e:GetHandler():IsRelateToEffect(e) then return end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_ATOHAND)
-	local g=Duel.SelectMatchingCard(tp,s.filter1,tp,LOCATION_DECK,0,1,1,nil)
+	local g=Duel.SelectMatchingCard(tp,s.filter1,tp,LOCATION_DECK+LOCATION_GRAVE,0,1,1,nil)
 	if g:GetCount()>0 then
 		if Duel.SendtoHand(g,nil,REASON_EFFECT)>0 then
       Duel.ConfirmCards(1-tp,g)
       Duel.BreakEffect()
-      Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TODECK)
-      local rg=Duel.SelectMatchingCard(tp,Card.IsAbleToDeck,tp,LOCATION_HAND,0,1,1,nil)
-      Duel.SendtoDeck(rg,nil,0,REASON_EFFECT)
+      Duel.DiscardHand(tp,nil,1,1,REASON_EFFECT+REASON_DISCARD)
     end
 	end
 end
