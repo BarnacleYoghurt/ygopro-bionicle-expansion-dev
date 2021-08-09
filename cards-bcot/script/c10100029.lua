@@ -6,30 +6,30 @@ function s.initial_effect(c)
 	e0:SetType(EFFECT_TYPE_ACTIVATE)
 	e0:SetCode(EVENT_FREE_CHAIN)
 	c:RegisterEffect(e0)
-	--No attacks/targeting
-  local e1a=Effect.CreateEffect(c)
-  e1a:SetType(EFFECT_TYPE_FIELD)
-  e1a:SetProperty(EFFECT_FLAG_SET_AVAILABLE+EFFECT_FLAG_IGNORE_IMMUNE)
-  e1a:SetCode(EFFECT_CANNOT_BE_BATTLE_TARGET)
-  e1a:SetRange(LOCATION_SZONE)
-  e1a:SetTargetRange(LOCATION_MZONE,0)
-  e1a:SetCondition(s.condition1)
-  e1a:SetValue(aux.imval2)
-  c:RegisterEffect(e1a)
-	local e1b=e1a:Clone()
-  e1b:SetCode(EFFECT_CANNOT_BE_EFFECT_TARGET)
-  e1b:SetValue(aux.tgoval)
-  c:RegisterEffect(e1b)
-  --Destruction protection
-	local e2=Effect.CreateEffect(c)
-	e2:SetType(EFFECT_TYPE_FIELD)
-  e2:SetProperty(EFFECT_FLAG_SET_AVAILABLE)
-  e2:SetCode(EFFECT_INDESTRUCTABLE_EFFECT)
-	e2:SetRange(LOCATION_SZONE)
-	e2:SetTargetRange(LOCATION_MZONE,0)
-  e2:SetCondition(s.condition2)
-	e2:SetValue(aux.indoval)
-	c:RegisterEffect(e2)
+	--No attacks
+  --Apply flag effects for tracking
+  local e1=Effect.CreateEffect(c)
+  e1:SetType(EFFECT_TYPE_FIELD)
+  e1:SetCode(EFFECT_CANNOT_ATTACK)
+  e1:SetRange(LOCATION_SZONE)
+  e1:SetTargetRange(0,LOCATION_MZONE)
+  e1:SetCondition(s.condition1)
+  e1:SetTarget(s.target1)
+  c:RegisterEffect(e1)
+  --Destruction/targeting protection
+	local e2a=Effect.CreateEffect(c)
+	e2a:SetType(EFFECT_TYPE_FIELD)
+  e2a:SetProperty(EFFECT_FLAG_SET_AVAILABLE)
+  e2a:SetCode(EFFECT_INDESTRUCTABLE_EFFECT)
+	e2a:SetRange(LOCATION_SZONE)
+	e2a:SetTargetRange(LOCATION_MZONE,0)
+  e2a:SetCondition(s.condition2)
+	e2a:SetValue(aux.indoval)
+	c:RegisterEffect(e2a)
+	local e2b=e2a:Clone()
+  e2b:SetCode(EFFECT_CANNOT_BE_EFFECT_TARGET)
+  e2b:SetValue(aux.tgoval)
+  c:RegisterEffect(e2b)
   --Negate
 	local e3=Effect.CreateEffect(c)
 	e3:SetType(EFFECT_TYPE_FIELD)
@@ -72,6 +72,13 @@ function s.initial_effect(c)
     ge3:SetCode(EVENT_REMOVE)
     ge3:SetOperation(s.checkop_leave)
     Duel.RegisterEffect(ge3,0)
+    --At the end of each opponent's BP, flag the monsters that did not attack
+    local ge4=Effect.CreateEffect(c)
+    ge4:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
+    ge4:SetCode(EVENT_PHASE+PHASE_BATTLE)
+    ge4:SetCountLimit(1)
+    ge4:SetOperation(s.checkop_attackflags)
+    Duel.RegisterEffect(ge4,0)
 		aux.AddValuesReset(function()
 			for p=0,1 do
         s[p+2]=s[p]
@@ -102,6 +109,18 @@ function s.checkop_leave(e,tp,eg,ep,ev,re,r,rp)
     end
   end
 end
+function s.checkop_attackflags(e,tp,eg,ep,ev,re,r,rp)
+  if tp==Duel.GetTurnPlayer() then return end
+  Debug.Message("lessgo")
+	local g=Duel.GetFieldGroup(tp,LOCATION_MZONE,LOCATION_MZONE)
+  for tc in aux.Next(g) do
+    tc:ResetFlagEffect(id)
+    if tc:IsFaceup() and tc:GetAttackedCount()==0 then
+      Debug.Message(tc:GetCode())
+      tc:RegisterFlagEffect(id,RESET_EVENT+RESETS_STANDARD,0,1)
+    end
+  end
+end
 
 function s.filter(c)
   return c:IsFaceup() and c:IsAttribute(ATTRIBUTE_WATER)
@@ -114,6 +133,9 @@ end
 function s.condition1(e)
   local tp=e:GetHandlerPlayer()
   return s.condition(e) and s[tp+2]==0
+end
+function s.target1(e,c)
+  return c:GetFlagEffect(id)==0
 end
 function s.condition2(e)
   local tp=e:GetHandlerPlayer()
