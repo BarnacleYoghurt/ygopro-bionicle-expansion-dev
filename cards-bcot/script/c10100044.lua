@@ -8,33 +8,50 @@ function s.initial_effect(c)
   --Destroy if replaced
   local e1=bcot.kanohi_selfdestruct(c)
   c:RegisterEffect(e1)
-  --Direct attack
+  --Change Position
   local e2=Effect.CreateEffect(c)
-  e2:SetType(EFFECT_TYPE_EQUIP)
-  e2:SetCode(EFFECT_DIRECT_ATTACK)
-	e2:SetCondition(s.condition2)
-	e2:SetValue(1)
-	c:RegisterEffect(e2)
-  --Change damage
-  local e3=Effect.CreateEffect(c)
-	e3:SetType(EFFECT_TYPE_EQUIP)
-	e3:SetCode(EFFECT_CHANGE_BATTLE_DAMAGE)
-	e3:SetCondition(s.condition3)
-	e3:SetValue(aux.ChangeBattleDamage(1,800))
-	c:RegisterEffect(e3)
+  e2:SetType(EFFECT_TYPE_IGNITION)
+  e2:SetRange(LOCATION_SZONE)
+  e2:SetCondition(bcot.noblekanohi_con)
+  e2:SetCost(s.cost2)
+  e2:SetTarget(s.target2)
+  e2:SetOperation(s.operation2)
+  e2:SetCountLimit(1)
+  c:RegisterEffect(e2)
 	--Recycle
   local e4=bcot.kanohi_revive(c,10100021)
   e4:SetDescription(aux.Stringid(id,1))
   e4:SetCountLimit(1,id)
   c:RegisterEffect(e4)
 end
-function s.condition2(e)
-  local ec=e:GetHandler():GetEquipTarget()
-  local tp=e:GetHandlerPlayer()
-	return bcot.noblekanohi_con(e) and Duel.GetMatchingGroupCount(Card.IsFaceup,tp,LOCATION_MZONE,0,ec)==0
+function s.cost2(e,tp,eg,ep,ev,re,r,rp,chk)
+	if chk==0 then return e:GetHandler():GetEquipTarget():GetAttackAnnouncedCount()==0 end
+	local e1=Effect.CreateEffect(e:GetHandler())
+	e1:SetType(EFFECT_TYPE_EQUIP)
+	e1:SetCode(EFFECT_CANNOT_ATTACK)
+	e1:SetProperty(EFFECT_FLAG_CANNOT_DISABLE+EFFECT_FLAG_OATH)
+	e1:SetReset(RESET_EVENT+RESETS_STANDARD+RESET_PHASE+PHASE_END)
+	e:GetHandler():RegisterEffect(e1)
 end
-function s.condition3(e)
-	local c=e:GetHandler()
-	local tp=e:GetHandlerPlayer()
-	return Duel.GetAttackTarget()==nil and c:GetEffectCount(EFFECT_DIRECT_ATTACK)<2 and Duel.GetFieldGroupCount(tp,0,LOCATION_MZONE)>0
+function s.target2(e,tp,eg,ep,ev,re,r,rp,chk)
+  if chk==0 then return Duel.IsExistingMatchingCard(Card.IsCanChangePosition,tp,LOCATION_MZONE,LOCATION_MZONE,1,nil) end
+  local g=Duel.GetMatchingGroup(Card.IsCanChangePosition,tp,LOCATION_MZONE,LOCATION_MZONE,nil)
+  Duel.SetOperationInfo(0,CATEGORY_POSITION,g,1,0,0)
 end
+function s.operation2(e,tp,eg,ep,ev,re,r,rp)
+  local c=e:GetHandler()
+  if c:IsRelateToEffect(e) then
+    local g=Duel.SelectMatchingCard(tp,Card.IsCanChangePosition,tp,LOCATION_MZONE,LOCATION_MZONE,1,1,nil)
+    if g:GetCount()>0 then
+      local tc=g:GetFirst()
+      local pos=POS_FACEUP_DEFENSE
+      if tc:IsPosition(POS_FACEUP_DEFENSE) then
+        pos=POS_FACEUP_ATTACK
+      elseif tc:IsFacedown() then
+        pos=Duel.SelectPosition(tp,tc,POS_FACEUP_ATTACK+POS_FACEUP_DEFENSE)
+      end
+      Duel.ChangePosition(tc,pos)
+    end
+  end
+end
+    
