@@ -6,8 +6,7 @@ function s.initial_effect(c)
 	e0:SetType(EFFECT_TYPE_ACTIVATE)
 	e0:SetCode(EVENT_FREE_CHAIN)
 	c:RegisterEffect(e0)
-	--No attacks
-  --Apply flag effects for tracking
+	--Attack prevention
   local e1=Effect.CreateEffect(c)
   e1:SetType(EFFECT_TYPE_FIELD)
   e1:SetCode(EFFECT_CANNOT_ATTACK)
@@ -72,13 +71,6 @@ function s.initial_effect(c)
     ge3:SetCode(EVENT_REMOVE)
     ge3:SetOperation(s.checkop_leave)
     Duel.RegisterEffect(ge3,0)
-    --At the end of each opponent's BP, flag the monsters that did not attack
-    local ge4=Effect.CreateEffect(c)
-    ge4:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
-    ge4:SetCode(EVENT_PHASE+PHASE_BATTLE)
-    ge4:SetCountLimit(1)
-    ge4:SetOperation(s.checkop_attackflags)
-    Duel.RegisterEffect(ge4,0)
 		aux.AddValuesReset(function()
 			for p=0,1 do
         s[p+2]=s[p]
@@ -109,18 +101,6 @@ function s.checkop_leave(e,tp,eg,ep,ev,re,r,rp)
     end
   end
 end
-function s.checkop_attackflags(e,tp,eg,ep,ev,re,r,rp)
-  if tp==Duel.GetTurnPlayer() then return end
-  Debug.Message("lessgo")
-	local g=Duel.GetFieldGroup(tp,LOCATION_MZONE,LOCATION_MZONE)
-  for tc in aux.Next(g) do
-    tc:ResetFlagEffect(id)
-    if tc:IsFaceup() and tc:GetAttackedCount()==0 then
-      Debug.Message(tc:GetCode())
-      tc:RegisterFlagEffect(id,RESET_EVENT+RESETS_STANDARD,0,1)
-    end
-  end
-end
 
 function s.filter(c)
   return c:IsFaceup() and c:IsAttribute(ATTRIBUTE_WATER)
@@ -135,7 +115,7 @@ function s.condition1(e)
   return s.condition(e) and s[tp+2]==0
 end
 function s.target1(e,c)
-  return c:GetFlagEffect(id)==0
+  return c:IsStatus(STATUS_SUMMON_TURN+STATUS_FLIP_SUMMON_TURN+STATUS_SPSUMMON_TURN)
 end
 function s.condition2(e)
   local tp=e:GetHandlerPlayer()
