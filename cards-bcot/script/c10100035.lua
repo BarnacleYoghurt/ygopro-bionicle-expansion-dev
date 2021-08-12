@@ -26,22 +26,32 @@ function s.initial_effect(c)
 	c:RegisterEffect(e2)
 end
 function s.filter1(c)
-	return c:IsLevel(2) and c:IsRace(RACE_WARRIOR) and not c:IsCode(id) and c:IsAbleToHand()
+	return c:IsLevel(2) and c:IsRace(RACE_WARRIOR) and not c:IsCode(id) and (c:IsAbleToHand() or c:IsAbleToDeck())
 end
 function s.target1(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingMatchingCard(s.filter1,tp,LOCATION_DECK+LOCATION_GRAVE,0,1,nil) end
 	Duel.SetOperationInfo(0,CATEGORY_TOHAND,nil,1,tp,LOCATION_DECK+LOCATION_GRAVE)
+	Duel.SetOperationInfo(0,CATEGORY_TODECK,nil,1,tp,LOCATION_DECK+LOCATION_GRAVE)
 end
 function s.operation1(e,tp,eg,ep,ev,re,r,rp)
-	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_ATOHAND)
-	local g=Duel.SelectMatchingCard(tp,s.filter1,tp,LOCATION_DECK+LOCATION_GRAVE,0,1,1,nil)
-	if g:GetCount()>0 then
-		if Duel.SendtoHand(g,nil,REASON_EFFECT)>0 then
-      Duel.ConfirmCards(1-tp,g)
-      Duel.BreakEffect()
-      Duel.DiscardHand(tp,nil,1,1,REASON_EFFECT+REASON_DISCARD)
+  local function OpToDecktop(c)
+    if c:IsLocation(LOCATION_DECK) then
+      Duel.ShuffleDeck(tp)
+      Duel.MoveToDeckTop(c)
+    else
+      Duel.HintSelection(Group.FromCards(c),true)
+      Duel.SendtoDeck(c,nil,SEQ_DECKTOP,REASON_EFFECT)
     end
-	end
+    if not c:IsLocation(LOCATION_EXTRA) then
+      Duel.ConfirmDecktop(tp,1)
+    end
+  end
+  
+	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SELECT)
+	local g=Duel.SelectMatchingCard(tp,aux.NecroValleyFilter(s.filter1),tp,LOCATION_DECK+LOCATION_GRAVE,0,1,1,nil)
+  if g:GetCount()>0 then
+    aux.ToHandOrElse(g:GetFirst(),tp,Card.IsAbleToDeck,OpToDecktop,aux.Stringid(id,1))
+  end
 end
 function s.filter2(c,tp)
   return c:IsLocation(LOCATION_MZONE) and c:IsControler(tp) and c:IsFaceup() and c:IsSetCard(0x1b01) and not c:IsReason(REASON_REPLACE)
@@ -49,7 +59,7 @@ end
 function s.target2(e,tp,eg,ep,ev,re,r,rp,chk)
   local c=e:GetHandler()
 	if chk==0 then return c:IsFaceup() and c:IsCanTurnSet() and eg:IsExists(s.filter2,1,nil,tp) and not eg:IsContains(c) end
-	return Duel.SelectYesNo(tp,aux.Stringid(id,1))
+	return Duel.SelectYesNo(tp,aux.Stringid(id,2))
 end
 function s.value2(e,c)
 	return s.filter2(c,e:GetHandlerPlayer())
