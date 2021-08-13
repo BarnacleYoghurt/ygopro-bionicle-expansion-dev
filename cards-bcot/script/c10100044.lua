@@ -42,16 +42,7 @@ function s.operation2(e,tp,eg,ep,ev,re,r,rp)
   local c=e:GetHandler()
   if c:IsRelateToEffect(e) then
     local g=Duel.SelectMatchingCard(tp,Card.IsCanChangePosition,tp,LOCATION_MZONE,LOCATION_MZONE,1,1,nil)
-    if g:GetCount()>0 then
-      local tc=g:GetFirst()
-      local pos=POS_FACEUP_DEFENSE
-      if tc:IsPosition(POS_FACEUP_DEFENSE) then
-        pos=POS_FACEUP_ATTACK
-      elseif tc:IsFacedown() then
-        pos=Duel.SelectPosition(tp,tc,POS_FACEUP_ATTACK+POS_FACEUP_DEFENSE)
-      end
-      Duel.ChangePosition(tc,pos)
-    end
+    Duel.ChangePosition(g,POS_FACEUP_DEFENSE,POS_FACEUP_ATTACK,POS_FACEUP_ATTACK,POS_FACEUP_ATTACK)
   end
 end
     
