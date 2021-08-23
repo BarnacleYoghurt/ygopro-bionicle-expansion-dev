@@ -122,6 +122,9 @@ function s.condition2(e)
   local sum
   if Duel.GetTurnPlayer()~=tp then
     sum=s[4+tp]+s[4+tp+2]
+    if Duel.GetTurnCount()==1 then
+      sum=1 --No last Standby Phase on turn 1 when going second!
+    end
   elseif Duel.GetCurrentPhase()==PHASE_DRAW then
     sum=s[4+tp]+s[4+tp+2]+s[4+tp+4]
   else
