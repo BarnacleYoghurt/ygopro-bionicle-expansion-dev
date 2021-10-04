@@ -38,6 +38,7 @@ function s.initial_effect(c)
 	mcheck:SetValue(s.value_mcheck)
 	c:RegisterEffect(mcheck)
 end
+s.listed_attributes = {ATTRIBUTE_EARTH}
 function s.filter1a(c,tp)
 	return c:IsFaceup() and c:IsControler(tp) and c:IsLocation(LOCATION_MZONE) and (c:IsReason(REASON_BATTLE) or c:IsReason(REASON_EFFECT)) and not c:IsReason(REASON_REPLACE)
 end

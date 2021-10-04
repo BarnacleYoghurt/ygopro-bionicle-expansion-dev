@@ -26,6 +26,7 @@ function s.initial_effect(c)
   e2:SetCountLimit(1,id)
   c:RegisterEffect(e2)
 end
+s.listed_attributes = {ATTRIBUTE_WATER}
 function s.condition1(e,tp,eg,ep,ev,re,r,rp)
   local g=Duel.GetMatchingGroup(Card.IsType,tp,LOCATION_GRAVE,0,nil,TYPE_MONSTER)
   return g:GetCount()>0 and g:GetCount()==g:FilterCount(Card.IsAttribute,nil,ATTRIBUTE_WATER)

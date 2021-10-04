@@ -30,6 +30,7 @@ function s.initial_effect(c)
 	e2:SetCountLimit(1,id)
 	c:RegisterEffect(e2)
 end
+s.listed_attributes = {ATTRIBUTE_FIRE}
 function s.filter1(c)
   return c:IsFaceup() and c:IsAttribute(ATTRIBUTE_FIRE)
 end

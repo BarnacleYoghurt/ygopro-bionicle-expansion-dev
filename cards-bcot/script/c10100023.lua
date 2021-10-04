@@ -1,97 +1,102 @@
 --The Island of Mata Nui
-function c10100023.initial_effect(c)
+local s,id=GetID()
+function s.initial_effect(c)
 	--Activate
-	local e1=Effect.CreateEffect(c)
-	e1:SetType(EFFECT_TYPE_ACTIVATE)
-	e1:SetCode(EVENT_FREE_CHAIN)
-	c:RegisterEffect(e1)
-	--Substitute
+	local e0=Effect.CreateEffect(c)
+	e0:SetType(EFFECT_TYPE_ACTIVATE)
+	e0:SetCode(EVENT_FREE_CHAIN)
+	c:RegisterEffect(e0)
+	--ATK/DEF up
+	local e1a=Effect.CreateEffect(c)
+	e1a:SetType(EFFECT_TYPE_FIELD)
+	e1a:SetCode(EFFECT_UPDATE_ATTACK)
+	e1a:SetRange(LOCATION_FZONE)
+  e1a:SetTargetRange(LOCATION_MZONE,LOCATION_MZONE)
+	e1a:SetTarget(s.target1)
+	e1a:SetValue(600)
+	c:RegisterEffect(e1a)
+  local e1b=e1a:Clone()
+  e1b:SetCode(EFFECT_UPDATE_DEFENSE)
+  c:RegisterEffect(e1b)
+	--Reveal & Search
 	local e2=Effect.CreateEffect(c)
-	e2:SetDescription(aux.Stringid(10100023,1))
-	e2:SetType(EFFECT_TYPE_CONTINUOUS+EFFECT_TYPE_FIELD)
-	e2:SetCode(EFFECT_DESTROY_REPLACE)
-	e2:SetRange(LOCATION_SZONE)
-	e2:SetTarget(c10100023.target2)
-	e2:SetValue(c10100023.value2)
-	e2:SetOperation(c10100023.operation2)
+	e2:SetDescription(aux.Stringid(id,0))
+	e2:SetCategory(CATEGORY_TOHAND+CATEGORY_SEARCH)
+	e2:SetType(EFFECT_TYPE_IGNITION)
+	e2:SetRange(LOCATION_FZONE)
+	e2:SetCost(s.cost2)
+	e2:SetTarget(s.target2)
+	e2:SetOperation(s.operation2)
+	e2:SetCountLimit(1,id)
 	c:RegisterEffect(e2)
-	--To Grave
+	--Activate from GY
 	local e3=Effect.CreateEffect(c)
-	e3:SetDescription(aux.Stringid(10100023,2))
-	e3:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
-	e3:SetCode(EVENT_TO_GRAVE)
-	e3:SetCategory(CATEGORY_TOHAND+CATEGORY_SEARCH)
-	e3:SetProperty(EFFECT_FLAG_DAMAGE_STEP+EFFECT_FLAG_DELAY)
-	e3:SetCondition(c10100023.condition3)
-	e3:SetTarget(c10100023.target3)
-	e3:SetOperation(c10100023.operation3)
-	e3:SetCountLimit(1,10100023)
+	e3:SetDescription(aux.Stringid(id,1))
+	e3:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O)
+  e3:SetProperty(EFFECT_FLAG_DELAY)
+	e3:SetCode(EVENT_DESTROYED)
+	e3:SetRange(LOCATION_GRAVE)
+	e3:SetCondition(s.condition3)
+	e3:SetOperation(s.operation3)
+  e3:SetCountLimit(1,id+1000000)
 	c:RegisterEffect(e3)
-	--Summon Restrict
-	local e4=Effect.CreateEffect(c)
-	e4:SetDescription(aux.Stringid(10100023,0))
-	e4:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_F)
-	e4:SetCode(EVENT_SUMMON_SUCCESS)
-	e4:SetRange(LOCATION_SZONE)
-	e4:SetCondition(c10100023.condition4)
-	e4:SetOperation(c10100023.operation4)
-	c:RegisterEffect(e4)
 end
---e2 - Substitute
-function c10100023.filter2(c,tp)
-	return c:IsFaceup() and c:IsSetCard(0x1155) and c:IsControler(tp) and c:IsLocation(LOCATION_MZONE)
+function s.target1(e,c)
+  return c:IsSetCard(0x1b02) and c:IsSummonType(SUMMON_TYPE_NORMAL)
 end
-function c10100023.value2(e,c)
-	return c10100023.filter2(c,e:GetHandlerPlayer())
+function s.filter2a(c,tp)
+  return c:IsType(TYPE_MONSTER) and not c:IsPublic() and Duel.IsExistingMatchingCard(s.filter2b,tp,LOCATION_DECK,0,1,nil,c)
 end
-function c10100023.target2(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return eg:IsExists(c10100023.filter2,1,nil,tp) end
-	return Duel.SelectYesNo(tp,aux.Stringid(10100023,3))
+function s.filter2b(c,rc)
+  if not c:IsAbleToHand() then return false end
+  if (c:IsCode(10100024) and rc:IsSetCard(0x1b02)) then return true end
+  if not (c:IsType(TYPE_FIELD) and c:IsSetCard(0xb05) and c.listed_attributes) then return false end
+  
+  for _,attr in ipairs(c.listed_attributes) do
+    if (rc:GetAttribute()&attr)~=0 then return true end
+  end
+  return false
 end
-function c10100023.operation2(e,tp,eg,ep,ev,re,r,rp)
-	Duel.SendtoGrave(e:GetHandler(),REASON_EFFECT)
+function s.cost2(e,tp,eg,ep,ev,re,r,rp,chk)
+  local c=e:GetHandler()
+  if chk==0 then return c:IsAbleToGraveAsCost() end
+	Duel.SendtoGrave(c,REASON_COST)
 end
---e3 - To Grave
-function c10100023.filter3(c)
-	return (c:IsType(TYPE_FIELD) and c:IsSetCard(0x159)) or c:IsCode(10100024) or c:IsCode(10100060)
-end
-function c10100023.condition3(e,tp,eg,ep,ev,re,r,rp,chk)
-	return e:GetHandler():IsPreviousLocation(LOCATION_ONFIELD)
-end
-function c10100023.target3(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.IsExistingMatchingCard(c10100023.filter3,tp,LOCATION_DECK,0,1,nil) end
+function s.target2(e,tp,eg,ep,ev,re,r,rp,chk)
+	if chk==0 then return Duel.IsExistingMatchingCard(s.filter2a,tp,LOCATION_HAND,0,1,nil,tp) end
 	Duel.SetOperationInfo(0,CATEGORY_TOHAND,nil,1,tp,LOCATION_DECK)
 end
-function c10100023.operation3(e,tp,eg,ep,ev,re,r,rp)
-	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_ATOHAND)
-	local g=Duel.SelectMatchingCard(tp,c10100023.filter3,tp,LOCATION_DECK,0,1,1,nil)
-	if g:GetCount()>0 then
-		Duel.SendtoHand(g,nil,REASON_EFFECT)
-		Duel.ConfirmCards(1-tp,g)
-	end
+function s.operation2(e,tp,eg,ep,ev,re,r,rp)
+	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_CONFIRM)
+  local rg=Duel.SelectMatchingCard(tp,s.filter2a,tp,LOCATION_HAND,0,1,1,nil,tp)
+  if rg:GetCount()>0 then
+    Duel.ConfirmCards(1-tp,rg)
+    Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_ATOHAND)
+    local ag=Duel.SelectMatchingCard(tp,s.filter2b,tp,LOCATION_DECK,0,1,1,nil,rg:GetFirst())
+    if ag:GetCount()>0 then
+      Duel.SendtoHand(ag,nil,REASON_EFFECT)
+      Duel.ConfirmCards(1-tp,ag)
+    end
+  end
 end
---e4 - Summon Restrict
-function c10100023.condition4(e,tp,eg,ep,ev,re,r,rp)
-	return eg and eg:GetFirst() and eg:GetFirst():GetLevel()>=6
+function s.filter3(c,tp)
+  return c:IsPreviousLocation(LOCATION_FZONE) and c:IsPreviousControler(tp) and not c:IsCode(id)
 end
-function c10100023.operation4(e,tp,eg,ep,ev,re,r,rp)
-	local e1=Effect.CreateEffect(e:GetHandler())
-	e1:SetType(EFFECT_TYPE_FIELD)
-	e1:SetRange(LOCATION_SZONE)
-	e1:SetCode(EFFECT_CANNOT_SUMMON)
-	e1:SetReset(RESET_EVENT+0x1fe0000+RESET_PHASE+PHASE_END,3)
-	e1:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
-	e1:SetTargetRange(1,1)
-	e1:SetTarget(c10100023.target4_1)
-	e1:SetLabel(eg:GetFirst():GetAttribute())
-	Duel.RegisterEffect(e1,tp)
-	local e2=e1:Clone()
-	e2:SetCode(EFFECT_CANNOT_FLIP_SUMMON)
-	Duel.RegisterEffect(e2,tp)
-	local e3=e1:Clone()
-	e3:SetCode(EFFECT_CANNOT_SPECIAL_SUMMON)
-	Duel.RegisterEffect(e3,tp)
+function s.condition3(e,tp,eg,ep,ev,re,r,rp)
+	return eg:IsExists(s.filter3,1,nil,tp)
 end
-function c10100023.target4_1(e,c)
-	return c:GetAttribute()~=e:GetLabel()
+function s.operation3(e,tp,eg,ep,ev,re,r,rp)
+  local c=e:GetHandler()
+  if c:IsRelateToEffect(e) then
+    if aux.PlayFieldSpell(c,e,tp,eg,ep,ev,re,r,rp) then
+      local e1=Effect.CreateEffect(c)
+      e1:SetDescription(3300)
+      e1:SetType(EFFECT_TYPE_SINGLE)
+      e1:SetCode(EFFECT_LEAVE_FIELD_REDIRECT)
+      e1:SetProperty(EFFECT_FLAG_CANNOT_DISABLE+EFFECT_FLAG_CLIENT_HINT)
+      e1:SetReset(RESET_EVENT+RESETS_REDIRECT)
+      e1:SetValue(LOCATION_REMOVED)
+      c:RegisterEffect(e1)
+    end
+  end
 end

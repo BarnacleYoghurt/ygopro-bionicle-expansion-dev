@@ -82,6 +82,7 @@ function s.initial_effect(c)
 		end)
 	end)
 end
+s.listed_attributes = {ATTRIBUTE_WATER}
 function s.chainfilter(re,tp,cid)
 	return not re:IsActiveType(TYPE_MONSTER)
 end
