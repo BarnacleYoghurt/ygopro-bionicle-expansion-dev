@@ -21,7 +21,7 @@ function s.initial_effect(c)
   c:RegisterEffect(e2)
 end
 function s.condition2(e,tp,eg,ep,ev,re,r,rp)
-  return eg:IsExists(Card.IsSummonLocation,1,nil,LOCATION_HAND+LOCATION_GRAVE+LOCATION_DECK)
+  return (not eg:IsContains(e:GetHandler())) and eg:IsExists(Card.IsSummonLocation,1,nil,LOCATION_HAND+LOCATION_GRAVE+LOCATION_DECK)
 end
 function s.target2(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
   if chkc then return chkc:IsLocation(LOCATION_MZONE) end
