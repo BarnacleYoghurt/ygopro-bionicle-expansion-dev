@@ -24,7 +24,6 @@ function s.initial_effect(c)
 	e2:SetCategory(CATEGORY_TOHAND+CATEGORY_SEARCH)
 	e2:SetType(EFFECT_TYPE_IGNITION)
 	e2:SetRange(LOCATION_FZONE)
-	e2:SetCost(s.cost2)
 	e2:SetTarget(s.target2)
 	e2:SetOperation(s.operation2)
 	e2:SetCountLimit(1,id)
@@ -56,11 +55,6 @@ function s.filter2b(c,rc)
     if (rc:GetAttribute()&attr)~=0 then return true end
   end
   return false
-end
-function s.cost2(e,tp,eg,ep,ev,re,r,rp,chk)
-  local c=e:GetHandler()
-  if chk==0 then return c:IsAbleToGraveAsCost() end
-	Duel.SendtoGrave(c,REASON_COST)
 end
 function s.target2(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingMatchingCard(s.filter2a,tp,LOCATION_HAND,0,1,nil,tp) end
