@@ -8,7 +8,7 @@ function s.initial_effect(c)
   --Destroy if replaced
   local e1=bcot.kanohi_selfdestruct(c)
   c:RegisterEffect(e1)
-  --Spell/Trap immune
+  --Immune to non-targeting effects
 	local e2=Effect.CreateEffect(c)
 	e2:SetType(EFFECT_TYPE_EQUIP)
 	e2:SetCode(EFFECT_IMMUNE_EFFECT)
@@ -21,6 +21,9 @@ function s.initial_effect(c)
   e3:SetCountLimit(1,id)
 	c:RegisterEffect(e3)
 end
-function s.value2(e,te)
-  return (te:IsActiveType(TYPE_SPELL) or te:IsActiveType(TYPE_TRAP)) and te:GetHandler()~=e:GetHandler()
+function s.value2(e,re)
+  if e:GetOwnerPlayer()==re:GetOwnerPlayer() then return false end
+	if not re:IsHasProperty(EFFECT_FLAG_CARD_TARGET) then return true end
+	local g=Duel.GetChainInfo(0,CHAININFO_TARGET_CARDS)
+	return not g or not g:IsContains(e:GetHandler():GetEquipTarget())
 end
