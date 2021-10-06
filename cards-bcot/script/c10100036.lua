@@ -2,38 +2,32 @@
 local s,id=GetID()
 function s.initial_effect(c)
 	--Special Summon
-	local e1a=Effect.CreateEffect(c)
-	e1a:SetDescription(aux.Stringid(id,0))
-	e1a:SetCategory(CATEGORY_SPECIAL_SUMMON)
-	e1a:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O)
-  e1a:SetProperty(EFFECT_FLAG_DELAY)
-	e1a:SetCode(EVENT_SUMMON_SUCCESS)
-  e1a:SetRange(LOCATION_GRAVE)
-	e1a:SetCondition(s.condition1)
-	e1a:SetTarget(s.target1)
-	e1a:SetOperation(s.operation1)
-	e1a:SetCountLimit(1,id)
-	c:RegisterEffect(e1a)
-  local e1b=e1a:Clone()
-  e1b:SetCode(EVENT_SPSUMMON_SUCCESS)
-  c:RegisterEffect(e1b)
-	--Swap
+	local e1=Effect.CreateEffect(c)
+	e1:SetDescription(aux.Stringid(id,0))
+	e1:SetCategory(CATEGORY_SPECIAL_SUMMON)
+	e1:SetType(EFFECT_TYPE_IGNITION)
+  e1:SetRange(LOCATION_HAND+LOCATION_GRAVE)
+	e1:SetCondition(s.condition1)
+	e1:SetTarget(s.target1)
+	e1:SetOperation(s.operation1)
+	e1:SetCountLimit(1,id)
+	c:RegisterEffect(e1)
+	--Direct attack
 	local e2=Effect.CreateEffect(c)
 	e2:SetDescription(aux.Stringid(id,1))
-	e2:SetCategory(CATEGORY_SPECIAL_SUMMON)
+	e2:SetCategory(CATEGORY_TOHAND)
 	e2:SetType(EFFECT_TYPE_IGNITION)
 	e2:SetRange(LOCATION_MZONE)
-	e2:SetCost(s.cost2)
 	e2:SetTarget(s.target2)
 	e2:SetOperation(s.operation2)
 	e2:SetCountLimit(1,id+1000000)
 	c:RegisterEffect(e2)
 end
-function s.filter1(c,tp)
-  return c:IsFaceup() and c:IsSummonPlayer(tp) and c:IsSetCard(0xb01)
+function s.filter1(c)
+  return c:IsFaceup() and c:IsRace(RACE_WARRIOR) and c:IsAttackBelow(1000)
 end
 function s.condition1(e,tp,eg,ep,ev,re,r,rp)
-	return eg:IsExists(s.filter1,1,nil,tp)
+	return Duel.IsExistingMatchingCard(s.filter1,tp,LOCATION_MZONE,0,1,nil)
 end
 function s.target1(e,tp,eg,ep,ev,re,r,rp,chk)
   local c=e:GetHandler()
@@ -43,27 +37,30 @@ end
 function s.operation1(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
 	if c:IsRelateToEffect(e) then
-		Duel.SpecialSummon(c,0,tp,tp,false,false,POS_FACEUP_DEFENSE)
+		Duel.SpecialSummon(c,0,tp,tp,false,false,POS_FACEUP)    
+    local e1=Effect.CreateEffect(c)
+    e1:SetDescription(3301)
+    e1:SetType(EFFECT_TYPE_SINGLE)
+    e1:SetCode(EFFECT_LEAVE_FIELD_REDIRECT)
+    e1:SetProperty(EFFECT_FLAG_CANNOT_DISABLE+EFFECT_FLAG_CLIENT_HINT)
+    e1:SetReset(RESET_EVENT+RESETS_REDIRECT)
+    e1:SetValue(LOCATION_DECKBOT)
+    c:RegisterEffect(e1)
 	end
 end
-function s.filter2(c,e,tp)
-	return c:IsLevel(2) and c:IsRace(RACE_WARRIOR) and c:IsCanBeSpecialSummoned(e,0,tp,false,false) and not c:IsCode(id)
-end
-function s.cost2(e,tp,eg,ep,ev,re,r,rp,chk)
-	local c=e:GetHandler()
-	if chk==0 then return c:IsAbleToHandAsCost() end
-	Duel.SendtoHand(c,nil,REASON_COST)
-end
 function s.target2(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.GetLocationCount(tp,LOCATION_MZONE)>-1 and Duel.IsExistingMatchingCard(s.filter2,tp,LOCATION_HAND,0,1,nil,e,tp) end
-	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,1,tp,LOCATION_HAND)
+	if chk==0 then return Duel.IsAbleToEnterBP() end
+	Duel.SetOperationInfo(0,CATEGORY_TOHAND,e:GetHandler(),1,0,0)
 end
 function s.operation2(e,tp,eg,ep,ev,re,r,rp,c)
-	if Duel.GetLocationCount(tp,LOCATION_MZONE)>0 then
-    Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
-    local g=Duel.SelectMatchingCard(tp,s.filter2,tp,LOCATION_HAND,0,1,1,nil,e,tp)
-    if g:GetCount()>0 then
-      Duel.SpecialSummon(g,0,tp,tp,false,false,POS_FACEUP)
-    end
-  end
+  local c=e:GetHandler()
+  local e1=Effect.CreateEffect(c)
+  e1:SetType(EFFECT_TYPE_FIELD)
+  e1:SetCode(EFFECT_DIRECT_ATTACK)
+  e1:SetTargetRange(LOCATION_MZONE,0)
+  e1:SetTarget(aux.TargetBoolFunction(Card.IsSetCard,0x1b01))
+  e1:SetReset(RESET_PHASE+PHASE_END)
+  Duel.RegisterEffect(e1,tp)
+  
+  Duel.SendtoHand(c,nil,REASON_EFFECT)
 end
