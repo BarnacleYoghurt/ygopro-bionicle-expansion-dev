@@ -45,7 +45,7 @@ end
 function s.operation1(e,tp,eg,ep,ev,re,r,rp)
 	if Duel.GetLocationCount(tp,LOCATION_MZONE)>0 then
     Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
-    local tc=Duel.SelectMatchingCard(tp,s.filter1b,tp,LOCATION_HAND,0,1,1,nil,e,tp):GetFirst()
+    local tc=Duel.SelectMatchingCard(tp,s.filter1,tp,LOCATION_HAND,0,1,1,nil,e,tp):GetFirst()
     if tc and Duel.SpecialSummonStep(tc,0,tp,tp,false,false,POS_FACEUP) then
       local e1=Effect.CreateEffect(e:GetHandler())
       e1:SetProperty(EFFECT_FLAG_CANNOT_DISABLE)
