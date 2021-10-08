@@ -14,11 +14,12 @@ function s.initial_effect(c)
 	e1:SetTargetRange(0,LOCATION_MZONE)
 	e1:SetValue(s.value1)
 	c:RegisterEffect(e1)
-	--Special Summon
+	--Search
 	local e2a=Effect.CreateEffect(c)
 	e2a:SetDescription(aux.Stringid(id,0))
 	e2a:SetCategory(CATEGORY_TOHAND+CATEGORY_SEARCH)
 	e2a:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O)
+  e2a:SetProperty(EFFECT_FLAG_CARD_TARGET)
   e2a:SetCode(EVENT_SUMMON_SUCCESS)
 	e2a:SetRange(LOCATION_FZONE)
 	e2a:SetTarget(s.target2)
@@ -36,18 +37,24 @@ end
 function s.value1(e,c)
 	return c:IsFaceup() and c:IsAttribute(ATTRIBUTE_WIND) and Duel.IsExistingMatchingCard(s.filter1,c:GetControler(),LOCATION_MZONE,0,1,nil,c:GetAttack())
 end
-function s.filter2(c,tc)
-  return c:IsAttribute(ATTRIBUTE_WIND) and c:IsRace(RACE_WARRIOR) and tc:HasLevel() and c:IsLevelBelow(tc:GetLevel())
+function s.filter2a(c,e,tp)
+  return c:IsSummonPlayer(tp) and c:HasLevel() and c:IsCanBeEffectTarget(e) and Duel.IsExistingMatchingCard(s.filter2b,tp,LOCATION_DECK,0,1,nil,c)
+end
+function s.filter2b(c,tc)
+  return c:IsAttribute(ATTRIBUTE_WIND) and c:IsRace(RACE_WARRIOR) and not c:IsCode(tc:GetCode()) and c:IsLevelBelow(tc:GetLevel())
 end
 function s.target2(e,tp,eg,ep,ev,re,r,rp,chk)
-  local tc=eg:Filter(Card.IsSummonPlayer,nil,tp):GetFirst()
-	if chk==0 then return tc and Duel.IsExistingMatchingCard(s.filter2,tp,LOCATION_DECK,0,1,nil,tc) end
-  tc:CreateEffectRelation(e)
+  local pg=eg:Filter(s.filter2a,nil,e,tp)
+  if chkc then return pg:IsContains(chkc) end
+	if chk==0 then return pg:GetCount()>0 end
+  Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TARGET)
+  local tg=pg:Select(tp,1,1,nil)
+  Duel.SetTargetCard(tg)
 	Duel.SetOperationInfo(0,CATEGORY_TOHAND,nil,1,tp,LOCATION_DECK)
 end
 function s.operation2(e,tp,eg,ep,ev,re,r,rp)
   local c=e:GetHandler()
-  local tc=eg:Filter(Card.IsSummonPlayer,nil,tp):GetFirst()
+  local tc=Duel.GetFirstTarget()
   if c:IsRelateToEffect(e) and tc:IsRelateToEffect(e) and tc:IsFaceup() then
     local e1=Effect.CreateEffect(c)
 		e1:SetType(EFFECT_TYPE_SINGLE)
@@ -87,7 +94,7 @@ function s.operation2(e,tp,eg,ep,ev,re,r,rp)
     aux.RegisterClientHint(c,nil,tp,1,0,aux.Stringid(id,1),nil)
     
     Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_ATOHAND)
-    local g=Duel.SelectMatchingCard(tp,s.filter2,tp,LOCATION_DECK,0,1,1,nil,tc)
+    local g=Duel.SelectMatchingCard(tp,s.filter2b,tp,LOCATION_DECK,0,1,1,nil,tc)
     Duel.SendtoHand(g,nil,REASON_EFFECT)
     Duel.ConfirmCards(1-tp,g)
   end
