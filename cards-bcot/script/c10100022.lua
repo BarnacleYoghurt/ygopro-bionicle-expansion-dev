@@ -21,11 +21,12 @@ function s.initial_effect(c)
   e2:SetProperty(EFFECT_FLAG_DELAY)
 	e2:SetCode(EVENT_TO_GRAVE)
   e2:SetCondition(s.condition2)
+  e2:SetTarget(s.target2)
 	e2:SetOperation(s.operation2)
 	e2:SetCountLimit(1,id+1000000)
 	c:RegisterEffect(e2)
-	if not GhostBelleTable then GhostBelleTable={} end
-	table.insert(GhostBelleTable,e2)
+	--if not GhostBelleTable then GhostBelleTable={} end
+	--table.insert(GhostBelleTable,e2)
 	if not AshBlossomTable then AshBlossomTable={} end
 	table.insert(AshBlossomTable,e2)
 end
@@ -58,35 +59,47 @@ function s.operation1(e,tp,eg,ep,ev,re,r,rp)
     end
   end
 end
+function s.filter2(c)
+  return c:IsAttribute(ATTRIBUTE_WIND) and c:IsAbleToHand()
+end
 function s.condition2(e,tp,eg,ep,ev,re,r,rp)
   return e:GetHandler():IsPreviousLocation(LOCATION_ONFIELD)
 end
-function s.operation2(e,tp,eg,ep,ev,re,r,rp)
-  local e1=Effect.CreateEffect(e:GetHandler())
-	e1:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
-	e1:SetCode(EVENT_PHASE+PHASE_STANDBY)
-	e1:SetCountLimit(1)
-	e1:SetLabel(Duel.GetTurnCount())
-	e1:SetCondition(s.condition2_1)
-	e1:SetOperation(s.operation2_1)
-  if Duel.IsTurnPlayer(tp) then
-    e1:SetReset(RESET_PHASE+PHASE_END+RESET_SELF_TURN,2)
-  else
-    e1:SetReset(RESET_PHASE+PHASE_END+RESET_SELF_TURN,1)
-  end
-	Duel.RegisterEffect(e1,tp)
+function s.target2(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
+  local c=e:GetHandler()
+  if chkc then return chkc~=c and chkc:IsLocation(LOCATION_GRAVE) and chkc:IsControler(tp) and aux.NecroValleyFilter(s.filter2)(chkc) end 
+  if chk==0 then return Duel.IsExistingMatchingCard(aux.NecroValleyFilter(s.filter2),tp,LOCATION_GRAVE,0,1,c) end
+	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_ATOHAND)
+  local g=Duel.SelectTarget(tp,s.filter2,tp,LOCATION_GRAVE,0,1,1,c)
+  Duel.SetOperationInfo(0,CATEGORY_TOHAND,g,1,0,0)
 end
-function s.filter2_1(c)
-  return c:IsAttribute(ATTRIBUTE_WIND) and c:IsAbleToHand()
+function s.operation2(e,tp,eg,ep,ev,re,r,rp)
+  local tc=Duel.GetFirstTarget()
+  if tc:IsRelateToEffect(e) then
+    local e1=Effect.CreateEffect(e:GetHandler())
+    e1:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
+    e1:SetCode(EVENT_PHASE+PHASE_STANDBY)
+    e1:SetCountLimit(1)
+    e1:SetLabel(Duel.GetTurnCount())
+    e1:SetLabelObject(tc)
+    e1:SetCondition(s.condition2_1)
+    e1:SetOperation(s.operation2_1)
+    if Duel.IsTurnPlayer(tp) then
+      e1:SetReset(RESET_PHASE+PHASE_END+RESET_SELF_TURN,2)
+    else
+      e1:SetReset(RESET_PHASE+PHASE_END+RESET_SELF_TURN,1)
+    end
+    Duel.RegisterEffect(e1,tp)
+    tc:CreateEffectRelation(e1)
+  end
 end
 function s.condition2_1(e,tp,eg,ep,ev,re,r,rp)
 	return Duel.IsTurnPlayer(tp) and Duel.GetTurnCount()~=e:GetLabel()
 end
 function s.operation2_1(e,tp,eg,ep,ev,re,r,rp)
-	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_ATOHAND)
-	local g=Duel.SelectMatchingCard(tp,aux.NecroValleyFilter(s.filter2_1),tp,LOCATION_GRAVE,0,1,1,nil)
-	if g:GetCount()>0 then
-		if Duel.SendtoHand(g,nil,REASON_EFFECT)>0 and Duel.GetFieldGroupCount(tp,LOCATION_MZONE,0)<Duel.GetFieldGroupCount(1-tp,LOCATION_MZONE,0) then
+	local tc=e:GetLabelObject()
+	if tc:IsRelateToEffect(e) and aux.NecroValleyFilter(s.filter2)(tc) then
+		if Duel.SendtoHand(tc,nil,REASON_EFFECT)>0 and Duel.GetFieldGroupCount(tp,LOCATION_MZONE,0)<Duel.GetFieldGroupCount(1-tp,LOCATION_MZONE,0) then
       Duel.BreakEffect()
       Duel.Draw(tp,1,REASON_EFFECT)
     end
