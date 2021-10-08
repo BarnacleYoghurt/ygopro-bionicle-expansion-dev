@@ -43,7 +43,7 @@ end
 function s.filter2b(c,tc)
   return c:IsAttribute(ATTRIBUTE_WIND) and c:IsRace(RACE_WARRIOR) and not c:IsCode(tc:GetCode()) and c:IsLevelBelow(tc:GetLevel())
 end
-function s.target2(e,tp,eg,ep,ev,re,r,rp,chk)
+function s.target2(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
   local pg=eg:Filter(s.filter2a,nil,e,tp)
   if chkc then return pg:IsContains(chkc) end
 	if chk==0 then return pg:GetCount()>0 end
