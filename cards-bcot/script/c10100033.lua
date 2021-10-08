@@ -8,7 +8,7 @@ function s.initial_effect(c)
   e1:SetCode(EFFECT_SPSUMMON_PROC)
   e1:SetRange(LOCATION_HAND)
   e1:SetOperation(s.operation1)
-  e1:SetCountLimit(1,id+EFFECT_COUNT_CODE_OATH)
+  e1:SetCountLimit(1,id,EFFECT_COUNT_CODE_OATH)
   c:RegisterEffect(e1)
   --Raise ATK
 	local e2=Effect.CreateEffect(c)
