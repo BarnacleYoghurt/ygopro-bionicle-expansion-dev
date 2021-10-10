@@ -33,7 +33,7 @@ end
 function s.operation2(e,tp,eg,ep,ev,re,r,rp)
   local tc=Duel.GetFirstTarget()
   if tc:IsRelateToEffect(e) then
-    if Duel.SendtoHand(tc,nil,REASON_EFFECT)>0 and tc:IsPreviousControler(tp) then
+    if Duel.SendtoHand(tc,nil,REASON_EFFECT)>0 and tc:IsPreviousControler(tp) and Duel.SelectYesNo(tp,aux.Stringid(id,2)) then
       Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_RTOHAND)
       local g2=Duel.SelectMatchingCard(tp,aux.TRUE,tp,LOCATION_MZONE,LOCATION_MZONE,1,1,nil)
       if g2:GetCount()>0 then
