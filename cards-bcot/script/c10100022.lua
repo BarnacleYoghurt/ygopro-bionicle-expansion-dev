@@ -77,6 +77,7 @@ function s.operation2(e,tp,eg,ep,ev,re,r,rp)
   local tc=Duel.GetFirstTarget()
   if tc:IsRelateToEffect(e) then
     local e1=Effect.CreateEffect(e:GetHandler())
+    e1:SetDescription(aux.Stringid(id,2))
     e1:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
     e1:SetCode(EVENT_PHASE+PHASE_STANDBY)
     e1:SetCountLimit(1)
@@ -90,7 +91,8 @@ function s.operation2(e,tp,eg,ep,ev,re,r,rp)
       e1:SetReset(RESET_PHASE+PHASE_END+RESET_SELF_TURN,1)
     end
     Duel.RegisterEffect(e1,tp)
-    tc:CreateEffectRelation(e1)
+    tc:RegisterFlagEffect(id,RESET_EVENT+RESETS_STANDARD,0,1)
+    e:GetHandler():SetCardTarget(tc) --Just to get a visual hint in case of multiple copies, at least while Matau is in GY
   end
 end
 function s.condition2_1(e,tp,eg,ep,ev,re,r,rp)
@@ -98,7 +100,7 @@ function s.condition2_1(e,tp,eg,ep,ev,re,r,rp)
 end
 function s.operation2_1(e,tp,eg,ep,ev,re,r,rp)
 	local tc=e:GetLabelObject()
-	if tc:IsRelateToEffect(e) and aux.NecroValleyFilter(s.filter2)(tc) then
+	if e:GetLabelObject():GetFlagEffect(id)~=0 and aux.NecroValleyFilter(s.filter2)(tc) then
 		if Duel.SendtoHand(tc,nil,REASON_EFFECT)>0 and Duel.GetFieldGroupCount(tp,LOCATION_MZONE,0)<Duel.GetFieldGroupCount(1-tp,LOCATION_MZONE,0) then
       Duel.BreakEffect()
       Duel.Draw(tp,1,REASON_EFFECT)
