@@ -36,7 +36,7 @@ function s.condition2(e)
 	return bcot.noblekanohi_con(e) and Duel.GetFieldGroup(tp,LOCATION_MZONE,0,nil):GetCount()==1
 end
 function s.target2(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and Duel.IsPlayerCanSpecialSummonMonster(tp,id+10000,0,0x4011,0,0,1,RACE_BEAST,ATTRIBUTE_WIND) end
+	if chk==0 then return Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and Duel.IsPlayerCanSpecialSummonMonster(tp,id+10000,0,0x4011,0,0,3,RACE_SPELLCASTER,ATTRIBUTE_WIND) end
 	Duel.SetOperationInfo(0,CATEGORY_TOKEN+CATEGORY_SPECIAL_SUMMON,nil,1,0,0)
 end
 function s.operation2(e,tp,eg,ep,ev,re,r,rp)
