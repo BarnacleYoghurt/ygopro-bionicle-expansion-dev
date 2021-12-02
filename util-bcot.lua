@@ -119,6 +119,59 @@ function BCOT.toa_mata_swapkanohi(baseC)
 	e:SetOperation(operation)
 	return e
 end
+function BCOT.toa_mata_combination_tagout(baseC,attr1,attr2)
+  local function filter2(c,e,tp)
+    return c:IsLevel(6) and c:IsSetCard(0xb02) and c:IsAttribute(attr2) and c:IsCanBeSpecialSummoned(e,0,tp,false,false) 
+  end
+  local function filter1(c,e,tp)
+    return c:IsLevel(6) and c:IsSetCard(0xb02) and c:IsAttribute(attr1) and c:IsCanBeSpecialSummoned(e,0,tp,false,false) 
+      and Duel.IsExistingTarget(filter2,tp,LOCATION_GRAVE,0,1,c,e,tp)
+  end
+  local function condition(e,tp,eg,ep,ev,re,r,rp)
+    return e:GetHandler():GetOverlayCount()==0
+  end
+  local function cost(e,tp,eg,ep,ev,re,r,rp,chk)
+    if chk==0 then return e:GetHandler():IsReleasable() end
+    Duel.Release(e:GetHandler(),REASON_COST)
+  end
+  local function target(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
+    if chkc then return false end
+    local ft=Duel.GetLocationCount(tp,LOCATION_MZONE)
+    if e:GetHandler():GetSequence()<5 then ft=ft+1 end
+    if chk==0 then return ft>0 and Duel.IsExistingTarget(filter1,tp,LOCATION_GRAVE,0,1,nil,e,tp) end
+    Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
+    local g1=Duel.SelectTarget(tp,filter1,tp,LOCATION_GRAVE,0,1,1,nil,e,tp)
+    Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
+    local g2=Duel.SelectTarget(tp,filter2,tp,LOCATION_GRAVE,0,1,1,g1:GetFirst(),e,tp)
+    g1:Merge(g2)
+    Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,g1,2,0,0)
+  end
+  local function operation(e,tp,eg,ep,ev,re,r,rp)
+    local ft=Duel.GetLocationCount(tp,LOCATION_MZONE)
+    if Duel.IsPlayerAffectedByEffect(tp,CARD_BLUEEYES_SPIRIT) then ft=1 end
+    local g=Duel.GetTargetCards(e)
+    if g:GetCount()==0 then return end
+    if g:GetCount()<=ft then
+      Duel.SpecialSummon(g,0,tp,tp,false,false,POS_FACEUP)
+    else
+      Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
+      local sg=g:Select(tp,ft,ft,nil)
+      Duel.SpecialSummon(sg,0,tp,tp,false,false,POS_FACEUP)
+      g:Sub(sg)
+      Duel.SendtoGrave(g,REASON_RULE)
+    end
+  end
+  local e=Effect.CreateEffect(baseC)
+  e:SetCategory(CATEGORY_SPECIAL_SUMMON)
+  e:SetType(EFFECT_TYPE_QUICK_O)
+  e:SetCode(EVENT_FREE_CHAIN)
+  e:SetRange(LOCATION_MZONE)
+  e:SetCondition(condition)
+  e:SetCost(cost)
+  e:SetTarget(target)
+  e:SetOperation(operation)
+  return e
+end
 --Kanohi
 function BCOT.kanohi_equip_great(baseC)
   local function filter1(c)
