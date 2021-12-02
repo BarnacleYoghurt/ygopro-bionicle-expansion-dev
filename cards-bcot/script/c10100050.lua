@@ -1,92 +1,93 @@
 --Suva Kaita
-function c10100050.initial_effect(c)
-	--Special Summon from Grave
-	local e1=Effect.CreateEffect(c)
-	e1:SetDescription(aux.Stringid(10100050,0))
-	e1:SetCategory(CATEGORY_SPECIAL_SUMMON)
-	e1:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_F)
-	e1:SetProperty(EFFECT_FLAG_CARD_TARGET)
-	e1:SetCode(EVENT_SUMMON_SUCCESS)
-	e1:SetCondition(c10100050.condition1)
-	e1:SetTarget(c10100050.target1)
-	e1:SetOperation(c10100050.operation1)
-	e1:SetCountLimit(1,10100050)
+local s,id=GetID()
+function s.initial_effect(c)
+  --Multi-attribute
+  local e1=Effect.CreateEffect(c)
+	e1:SetType(EFFECT_TYPE_SINGLE)
+	e1:SetProperty(EFFECT_FLAG_SINGLE_RANGE)
+	e1:SetCode(EFFECT_ADD_ATTRIBUTE)
+	e1:SetRange(LOCATION_HAND+LOCATION_GRAVE)
+	e1:SetValue(ATTRIBUTE_WIND+ATTRIBUTE_WATER+ATTRIBUTE_FIRE+ATTRIBUTE_EARTH)
 	c:RegisterEffect(e1)
-	local e1a=e1:Clone()
-	e1a:SetCode(EVENT_SPSUMMON_SUCCESS)
-	c:RegisterEffect(e1a)
-	--Special Summon from Banished
+	--Special Summon from GY
 	local e2=Effect.CreateEffect(c)
-	e2:SetDescription(aux.Stringid(10100050,1))
+	e2:SetDescription(aux.Stringid(id,0))
 	e2:SetCategory(CATEGORY_SPECIAL_SUMMON)
-	e2:SetType(EFFECT_TYPE_IGNITION)
-	e2:SetRange(LOCATION_GRAVE)
-	e2:SetCost(c10100050.cost2)
-	e2:SetTarget(c10100050.target2)
-	e2:SetOperation(c10100050.operation2)
-	e2:SetCountLimit(1,10100050)
+	e2:SetType(EFFECT_TYPE_QUICK_O)
+  e2:SetCode(EVENT_FREE_CHAIN)
+	e2:SetProperty(EFFECT_FLAG_CARD_TARGET)
+  e2:SetRange(LOCATION_MZONE)
+	e2:SetCost(s.cost2)
+	e2:SetTarget(s.target2)
+	e2:SetOperation(s.operation2)
+	e2:SetCountLimit(1,id)
 	c:RegisterEffect(e2)
+	--Special Summon from Banished
+	local e3=Effect.CreateEffect(c)
+	e3:SetDescription(aux.Stringid(id,1))
+	e3:SetCategory(CATEGORY_SPECIAL_SUMMON)
+	e3:SetType(EFFECT_TYPE_IGNITION)
+	e3:SetRange(LOCATION_GRAVE)
+	e3:SetCost(s.cost3)
+	e3:SetTarget(s.target3)
+	e3:SetOperation(s.operation3)
+	e3:SetCountLimit(1,id+1000000)
+	c:RegisterEffect(e3)
 end
---e1 - Special Summon from Grave
-function c10100050.filter1a(c)
-	return c:IsFaceup() and c:IsType(TYPE_MONSTER) and c:IsSetCard(0x155)
+function s.filter2(c,e,tp)
+	return c:IsType(TYPE_MONSTER) and c:IsSetCard(0xb02) and c:IsLevel(6) and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
 end
-function c10100050.filter1b(c,e,tp)
-	return c:IsType(TYPE_MONSTER) and c:IsSetCard(0x155) and c:GetLevel()>0 and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
+function s.cost2(e,tp,eg,ep,ev,re,r,rp,chk)
+  if chk==0 then return e:GetHandler():IsReleasable() end
+	Duel.Release(e:GetHandler(),REASON_COST)
 end
-function c10100050.condition1(e,tp,eg,ep,ev,re,r,rp)
-	return Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and not Duel.IsExistingMatchingCard(c10100050.filter1a,tp,LOCATION_MZONE,0,1,nil)
-end
-function c10100050.target1(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chkc then return chkc:IsControler(tp) and chkc:IsLocation(LOCATION_GRAVE) and c10100050.filter1(chkc,e,tp) end
-	if chk==0 then return Duel.IsExistingTarget(c10100050.filter1b,tp,LOCATION_GRAVE,0,1,nil,e,tp) end
+function s.target2(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
+	if chkc then return chkc:IsControler(tp) and chkc:IsLocation(LOCATION_GRAVE) and s.filter2(chkc,e,tp) end
+  local ft=Duel.GetLocationCount(tp,LOCATION_MZONE)
+	if e:GetHandler():GetSequence()<5 then ft=ft+1 end
+	if chk==0 then return ft>0 and Duel.IsExistingTarget(s.filter2,tp,LOCATION_GRAVE,0,1,nil,e,tp) end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
-	local g=Duel.SelectTarget(tp,c10100050.filter1b,tp,LOCATION_GRAVE,0,1,1,nil,e,tp)
-	Duel.SetOperationInfo(0,CATEGORY_SPSUMMON,g,1,0,0)
+	local g=Duel.SelectTarget(tp,s.filter2,tp,LOCATION_GRAVE,0,1,1,nil,e,tp)
+	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,g,1,0,0)
 end
-function c10100050.operation1(e,tp,eg,ep,ev,re,r,rp)
-	local tc = Duel.GetFirstTarget()
-	if tc and c10100050.filter1b(tc,e,tp) then
-		if Duel.SpecialSummon(tc,0,tp,tp,false,false,POS_FACEUP) then
-			Duel.BreakEffect()
-			print(e:GetHandler():GetCode())
-			print(e:GetHandler():GetBattlePosition())
-			if Duel.ChangePosition(e:GetHandler(),POS_FACEUP_DEFENSE) then
-				print(e:GetHandler():GetBattlePosition())
-				local e1=Effect.CreateEffect(e:GetHandler())
-				e1:SetType(EFFECT_TYPE_SINGLE)
-				e1:SetCode(EFFECT_CHANGE_LEVEL)
-				e1:SetProperty(EFFECT_FLAG_CANNOT_DISABLE)
-				e1:SetValue(tc:GetLevel())
-				e1:SetReset(RESET_EVENT+0x1fe0000)
-				e:GetHandler():RegisterEffect(e1)
-				local e2=Effect.CreateEffect(e:GetHandler())
-				e2:SetType(EFFECT_TYPE_SINGLE)
-				e2:SetCode(EFFECT_CHANGE_CODE)
-				e2:SetProperty(EFFECT_FLAG_CANNOT_DISABLE)
-				e2:SetValue(tc:GetCode())
-				e2:SetReset(RESET_EVENT+0x1fe0000)
-				e:GetHandler():RegisterEffect(e2)
-			end
-		end
+function s.operation2(e,tp,eg,ep,ev,re,r,rp)
+  local tc=Duel.GetFirstTarget()
+	if tc:IsRelateToEffect(e) and s.filter2(tc,e,tp) then
+    Duel.SpecialSummon(tc,0,tp,tp,false,false,POS_FACEUP)
 	end
 end
---e2 - Special Summon from Banished
-function c10100050.filter2(c,e,tp)
-	return c:IsType(TYPE_MONSTER) and c:IsSetCard(0x155) and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
+function s.target2_1(e,c,sump,sumtype,sumpos,targetp,se)
+	return c:IsLocation(LOCATION_EXTRA) and not (c:IsSetCard(0xb02))
 end
-function c10100050.cost2(e,tp,eg,ep,ev,re,r,rp,chk)
+function s.filter3(c,e,tp)
+	return c:IsType(TYPE_MONSTER) and c:IsSetCard(0xb02) and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
+end
+function s.cost3(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return e:GetHandler():IsAbleToRemoveAsCost() end
 	Duel.Remove(e:GetHandler(),POS_FACEUP,REASON_COST)
 end
-function c10100050.target2(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and Duel.IsExistingMatchingCard(c10100050.filter2,tp,LOCATION_REMOVED,0,1,nil,e,tp) end
-	Duel.SetOperationInfo(0,CATEGORY_SPSUMMON,nil,1,0,0)
+function s.target3(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
+  if chkc then return chkc:IsControler(tp) and chkc:IsLocation(LOCATION_REMOVED) and s.filter3(chkc,e,tp) end
+	if chk==0 then return Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and Duel.IsExistingTarget(s.filter3,tp,LOCATION_REMOVED,0,1,nil,e,tp) end
+  Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
+	local g=Duel.SelectTarget(tp,s.filter3,tp,LOCATION_REMOVED,0,1,1,nil,e,tp)
+	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,g,1,0,0)
 end
-function c10100050.operation2(e,tp,eg,ep,ev,re,r,rp)
-	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
-	local g=Duel.SelectMatchingCard(tp,c10100050.filter2,tp,LOCATION_REMOVED,0,1,1,nil,e,tp)
-	if g:GetCount()>0 then
-		Duel.SpecialSummon(g,0,tp,tp,false,false,POS_FACEUP)
+function s.operation3(e,tp,eg,ep,ev,re,r,rp)
+	local c=e:GetHandler()
+  local e1=Effect.CreateEffect(c)
+  e1:SetType(EFFECT_TYPE_FIELD)
+  e1:SetProperty(EFFECT_FLAG_PLAYER_TARGET+EFFECT_FLAG_OATH)
+  e1:SetCode(EFFECT_CANNOT_SPECIAL_SUMMON)
+  e1:SetRange(LOCATION_FZONE)
+  e1:SetTargetRange(1,0)
+  e1:SetTarget(s.target2_1)
+  e1:SetReset(RESET_PHASE+PHASE_END)
+  Duel.RegisterEffect(e1,tp)
+	aux.RegisterClientHint(c,nil,tp,1,0,aux.Stringid(id,2),nil)
+  
+  local tc=Duel.GetFirstTarget()
+	if tc:IsRelateToEffect(e) and s.filter2(tc,e,tp) then
+		Duel.SpecialSummon(tc,0,tp,tp,false,false,POS_FACEUP)
 	end
 end
