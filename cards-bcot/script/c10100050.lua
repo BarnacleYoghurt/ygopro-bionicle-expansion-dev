@@ -87,7 +87,7 @@ function s.operation3(e,tp,eg,ep,ev,re,r,rp)
 	aux.RegisterClientHint(c,nil,tp,1,0,aux.Stringid(id,2),nil)
   
   local tc=Duel.GetFirstTarget()
-	if tc:IsRelateToEffect(e) and s.filter2(tc,e,tp) then
+	if tc:IsRelateToEffect(e) and s.filter3(tc,e,tp) then
 		Duel.SpecialSummon(tc,0,tp,tp,false,false,POS_FACEUP)
 	end
 end
