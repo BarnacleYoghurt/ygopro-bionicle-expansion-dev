@@ -29,25 +29,20 @@ function s.condition1(e,tp,eg,ep,ev,re,r,rp)
   return re:IsActiveType(TYPE_SPELL+TYPE_TRAP) and (Duel.IsChainDisablable(ev) or eg:IsExists(Card.IsAbleToRemove,1,nil,tp))
 end
 function s.cost1(e,tp,eg,ep,ev,re,r,rp,chk)
-  local min=1
-  if not eg:IsExists(Card.IsAbleToRemove,1,nil,tp) then min=2 end
-  local max=2
-  if not Duel.IsChainDisablable(ev) then max=1 end
-	if chk==0 then return max>min and e:GetHandler():CheckRemoveOverlayCard(tp,min,REASON_COST) end
-	e:GetHandler():RemoveOverlayCard(tp,min,max,REASON_COST)
-  local ct=Duel.GetOperatedGroup():GetCount()
-	e:SetLabel(ct)
+	if chk==0 then return e:GetHandler():CheckRemoveOverlayCard(tp,2,REASON_COST) end
+	e:GetHandler():RemoveOverlayCard(tp,2,2,REASON_COST)
 end
 function s.target1(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return true end
-	Duel.SetOperationInfo(0,CATEGORY_REMOVE,eg,1,0,0)
-	if e:GetLabel()>1 then
-		Duel.SetOperationInfo(0,CATEGORY_NEGATE,eg,1,0,0)
+	if chk==0 then return re:GetHandler():IsAbleToRemove() end
+  Duel.SetOperationInfo(0,CATEGORY_NEGATE,eg,1,0,0)
+  if re:GetHandler():IsRelateToEffect(re) then
+		Duel.SetOperationInfo(0,CATEGORY_REMOVE,eg,1,0,re:GetHandler():GetLocation())
+	else
+		Duel.SetOperationInfo(0,CATEGORY_REMOVE,eg,1,0,re:GetHandler():GetPreviousLocation())
 	end
 end
 function s.operation1(e,tp,eg,ep,ev,re,r,rp)
-  if e:GetLabel()>1 then
-    Duel.NegateEffect(ev)
+  if Duel.NegateEffect(ev) and re:GetHandler():IsRelateToEffect(re) then
+    Duel.Remove(eg,POS_FACEUP,REASON_EFFECT)
   end
-  Duel.Remove(eg,POS_FACEUP,REASON_EFFECT)
 end
