@@ -21,6 +21,7 @@ function s.initial_effect(c)
 	e3:SetCode(EFFECT_PUBLIC)
 	e3:SetRange(LOCATION_SZONE)
 	e3:SetTargetRange(0,LOCATION_HAND)
+  e3:SetCondition(s.condition)
 	c:RegisterEffect(e3)
 	--Xyz
 	local e4=Effect.CreateEffect(c)
