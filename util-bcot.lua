@@ -138,7 +138,10 @@ function BCOT.toa_mata_combination_tagout(baseC,attr1,attr2)
     if chkc then return false end
     local ft=Duel.GetLocationCount(tp,LOCATION_MZONE)
     if e:GetHandler():GetSequence()<5 then ft=ft+1 end
-    if chk==0 then return ft>0 and Duel.IsExistingTarget(filter1,tp,LOCATION_GRAVE,0,1,nil,e,tp) end
+    if chk==0 then 
+      return ft>1 and not Duel.IsPlayerAffectedByEffect(tp,CARD_BLUEEYES_SPIRIT) 
+        and Duel.IsExistingTarget(filter1,tp,LOCATION_GRAVE,0,1,nil,e,tp) 
+    end
     Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
     local g1=Duel.SelectTarget(tp,filter1,tp,LOCATION_GRAVE,0,1,1,nil,e,tp)
     Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
@@ -151,14 +154,21 @@ function BCOT.toa_mata_combination_tagout(baseC,attr1,attr2)
     if Duel.IsPlayerAffectedByEffect(tp,CARD_BLUEEYES_SPIRIT) then ft=1 end
     local g=Duel.GetTargetCards(e)
     if g:GetCount()==0 then return end
-    if g:GetCount()<=ft then
-      Duel.SpecialSummon(g,0,tp,tp,false,false,POS_FACEUP)
-    else
+    if g:GetCount()>ft then
       Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
-      local sg=g:Select(tp,ft,ft,nil)
-      Duel.SpecialSummon(sg,0,tp,tp,false,false,POS_FACEUP)
-      g:Sub(sg)
-      Duel.SendtoGrave(g,REASON_RULE)
+      g=g:Select(tp,ft,ft,nil)
+    end
+    local tc=g:GetFirst()
+    for tc in aux.Next(g) do
+      Duel.SpecialSummonStep(tc,0,tp,tp,false,false,POS_FACEUP)
+      --Cannot attack this turn
+      local e1=Effect.CreateEffect(e:GetHandler())
+      e1:SetDescription(3206)
+      e1:SetProperty(EFFECT_FLAG_CLIENT_HINT)
+      e1:SetType(EFFECT_TYPE_SINGLE)
+      e1:SetCode(EFFECT_CANNOT_ATTACK)
+      e1:SetReset(RESET_EVENT+RESETS_STANDARD+RESET_PHASE+PHASE_END)
+      tc:RegisterEffect(e1)
     end
   end
   local e=Effect.CreateEffect(baseC)
