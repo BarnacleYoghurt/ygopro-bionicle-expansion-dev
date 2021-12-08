@@ -46,21 +46,22 @@ function s.initial_effect(c)
 	e6:SetCondition(s.condition6)
 	e6:SetTarget(s.target6)
 	e6:SetOperation(s.operation6)
+  e6:SetCountLimit(1)
 	c:RegisterEffect(e6)
 end
 function s.condition(e)
   return bcot.kanohi_con(e,{0x2b02})
 end
 function s.filter6a(c,e,tp,lv)
-	return c:IsSetCard(0xb02) and c:IsLevel(lv) and c:IsCanBeSpecialSummoned(e,0,tp,tp,false,false) 
+	return c:IsSetCard(0x1b02) and c:IsLevel(lv) and c:IsCanBeSpecialSummoned(e,0,tp,tp,false,false) 
     and Duel.IsExistingMatchingCard(s.filter6b,tp,LOCATION_EXTRA,0,1,nil,tp,Group.FromCards(c))
 end
 function s.filter6b(c,tp,sg)
   local g=Duel.GetFieldGroup(tp,LOCATION_MZONE,0)
-	return c:IsSetCard(0xb02) and c:IsXyzSummonable(nil,Group.Merge(sg,g)) and Duel.GetLocationCountFromEx(tp,tp,nil,c)>0
+	return c:IsSetCard(0xb02) and c:IsXyzSummonable(sg:GetFirst(),Group.Merge(sg,g)) and Duel.GetLocationCountFromEx(tp,tp,nil,c)>0
 end
 function s.condition6(e,tp,eg,ep,ev,re,r,rp)
-  return bcot.kanohi_con(e,{0xb02}) and e:GetHandler():GetEquipTarget():IsControler(tp)
+  return bcot.kanohi_con(e,{0x1b02}) and e:GetHandler():GetEquipTarget():IsControler(tp)
 end
 function s.target6(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
   local ec=e:GetHandler():GetEquipTarget()
@@ -75,23 +76,13 @@ function s.operation6(e,tp,eg,ep,ev,re,r,rp)
   if Duel.GetLocationCount(tp,LOCATION_MZONE)<=0 or not (ec and ec:HasLevel() and e:GetHandler():IsRelateToEffect(e)) then return end
   Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
   local g=Duel.SelectMatchingCard(tp,s.filter6a,tp,LOCATION_HAND,0,1,1,nil,e,tp,ec:GetLevel())
-	if g:GetCount()>0 and Duel.SpecialSummonStep(g:GetFirst(),0,tp,tp,false,false,POS_FACEUP) then
-    local e1=Effect.CreateEffect(e:GetHandler())
-		e1:SetType(EFFECT_TYPE_SINGLE)
-		e1:SetCode(EFFECT_DISABLE)
-		e1:SetReset(RESET_EVENT+RESETS_STANDARD)
-		g:GetFirst():RegisterEffect(e1)
-		local e2=e1:Clone()
-		e2:SetCode(EFFECT_DISABLE_EFFECT)
-		g:GetFirst():RegisterEffect(e2)
-    Duel.SpecialSummonComplete()
-    
+	if g:GetCount()>0 and Duel.SpecialSummon(g,0,tp,tp,false,false,POS_FACEUP)>0 then
     Duel.BreakEffect()
     local fg=Duel.GetFieldGroup(tp,LOCATION_MZONE,0)
 		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
 		local xyzg=Duel.SelectMatchingCard(tp,s.filter6b,tp,LOCATION_EXTRA,0,1,1,nil,tp,g,fg)
 		if xyzg:GetCount()>0 then
-			Duel.XyzSummon(tp,xyzg:GetFirst())
+			Duel.XyzSummon(tp,xyzg:GetFirst(),g:GetFirst())
 		end
   end
 end
