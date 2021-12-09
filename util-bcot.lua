@@ -170,6 +170,7 @@ function BCOT.toa_mata_combination_tagout(baseC,attr1,attr2)
       e1:SetReset(RESET_EVENT+RESETS_STANDARD+RESET_PHASE+PHASE_END)
       tc:RegisterEffect(e1)
     end
+    Duel.SpecialSummonComplete()
   end
   local e=Effect.CreateEffect(baseC)
   e:SetCategory(CATEGORY_SPECIAL_SUMMON)
