@@ -88,6 +88,6 @@ function s.operation3(e,tp,eg,ep,ev,re,r,rp)
   
   local tc=Duel.GetFirstTarget()
 	if tc:IsRelateToEffect(e) and s.filter3(tc,e,tp) then
-		Duel.SpecialSummon(tc,0,tp,tp,false,false,POS_FACEUP)
+		Duel.SpecialSummon(tc,0,tp,tp,false,false,POS_FACEUP_DEFENSE)
 	end
 end

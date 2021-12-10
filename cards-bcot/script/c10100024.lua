@@ -53,8 +53,16 @@ end
 function s.operation2(e,tp,eg,ep,ev,re,r,rp)  
   local tc=Duel.GetFirstTarget()
   if not e:GetHandler():IsRelateToEffect(e) or Duel.GetLocationCount(tp,LOCATION_MZONE)<=0 then return end
-  if tc:IsRelateToEffect(e) then
-    Duel.SpecialSummon(tc,0,tp,tp,false,false,POS_FACEUP_DEFENSE)
+  if tc:IsRelateToEffect(e) and Duel.SpecialSummonStep(tc,0,tp,tp,false,false,POS_FACEUP_DEFENSE) then
+    local e1=Effect.CreateEffect(e:GetHandler())
+    e1:SetDescription(3300)
+    e1:SetType(EFFECT_TYPE_SINGLE)
+    e1:SetCode(EFFECT_LEAVE_FIELD_REDIRECT)
+    e1:SetProperty(EFFECT_FLAG_CANNOT_DISABLE+EFFECT_FLAG_CLIENT_HINT)
+    e1:SetReset(RESET_EVENT+RESETS_REDIRECT)
+    e1:SetValue(LOCATION_REMOVED)
+    tc:RegisterEffect(e1,true)
+    Duel.SpecialSummonComplete()
   end
 end
 function s.filter3(c,e,tp)
