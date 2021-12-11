@@ -46,7 +46,7 @@ function s.filter4a(c,e,tp,lv)
 end
 function s.filter4b(c,tp,sg)
   local g=Duel.GetFieldGroup(tp,LOCATION_MZONE,0)
-	return c:IsSetCard(0xb02) and c:IsXyzSummonable(sg:GetFirst(),Group.Merge(sg,g)) and Duel.GetLocationCountFromEx(tp,tp,Group.Merge(sg,g),c)>0
+	return c:IsSetCard(0xb02) and c:IsXyzSummonable(sg:GetFirst(),Group.Merge(g,sg)) and Duel.GetLocationCountFromEx(tp,tp,Group.Merge(g,sg),c)>0
 end
 function s.condition4(e,tp,eg,ep,ev,re,r,rp)
   return bcot.kanohi_con(e,{0x1b02}) and e:GetHandler():GetEquipTarget():IsControler(tp)
@@ -66,9 +66,8 @@ function s.operation4(e,tp,eg,ep,ev,re,r,rp)
   local g=Duel.SelectMatchingCard(tp,s.filter4a,tp,LOCATION_HAND,0,1,1,nil,e,tp,ec:GetLevel())
 	if g:GetCount()>0 and Duel.SpecialSummon(g,0,tp,tp,false,false,POS_FACEUP)>0 then
     Duel.BreakEffect()
-    local fg=Duel.GetFieldGroup(tp,LOCATION_MZONE,0)
 		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
-		local xyzg=Duel.SelectMatchingCard(tp,s.filter4b,tp,LOCATION_EXTRA,0,1,1,nil,tp,g,fg)
+		local xyzg=Duel.SelectMatchingCard(tp,s.filter4b,tp,LOCATION_EXTRA,0,1,1,nil,tp,g)
 		if xyzg:GetCount()>0 then
 			Duel.XyzSummon(tp,xyzg:GetFirst(),g:GetFirst())
 		end
