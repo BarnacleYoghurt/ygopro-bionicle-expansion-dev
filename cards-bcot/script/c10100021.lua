@@ -60,15 +60,16 @@ function s.target2(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
   if chkc then return chkc:IsLocation(LOCATION_ONFIELD) and chkc:IsControler(1-tp) and chkc:IsAbleToHand() end
 	if chk==0 then return Duel.IsExistingMatchingCard(s.filter2,tp,LOCATION_MZONE,0,1,nil) and Duel.IsExistingTarget(Card.IsAbleToHand,tp,0,LOCATION_ONFIELD,1,nil) end
 	local fg=Duel.GetMatchingGroup(s.filter2,tp,LOCATION_MZONE,0,nil)
-  local g=Duel.SelectTarget(tp,Card.IsAbleToHand,tp,0,LOCATION_ONFIELD,1,1,nil)
-  Duel.SetOperationInfo(0,CATEGORY_POSITION,fg,1,0,0)
-  Duel.SetOperationInfo(0,CATEGORY_TOHAND,g,1,0,0)
+  local g=Duel.SelectTarget(tp,Card.IsAbleToHand,tp,0,LOCATION_ONFIELD,1,fg:GetCount(),nil)
+  Duel.SetOperationInfo(0,CATEGORY_POSITION,fg,g:GetCount(),0,0)
+  Duel.SetOperationInfo(0,CATEGORY_TOHAND,g,g:GetCount(),0,0)
 end
 function s.operation2(e,tp,eg,ep,ev,re,r,rp)
-	local tc=Duel.GetFirstTarget()
+	local g=Duel.GetTargetCards(e)
+  local ct=Duel.GetChainInfo(0,CHAININFO_TARGET_CARDS):GetCount() --Number of targets including removed ones
   Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_POSCHANGE)
-  local g=Duel.SelectMatchingCard(tp,s.filter2,tp,LOCATION_MZONE,0,1,1,nil)
-	if Duel.ChangePosition(g,POS_FACEDOWN_DEFENSE)>0 and tc:IsRelateToEffect(e) then
-    Duel.SendtoHand(tc,nil,REASON_EFFECT)
+  local fg=Duel.SelectMatchingCard(tp,s.filter2,tp,LOCATION_MZONE,0,ct,ct,nil)
+	if Duel.ChangePosition(fg,POS_FACEDOWN_DEFENSE)==ct then
+    Duel.SendtoHand(g,nil,REASON_EFFECT)
 	end
 end
