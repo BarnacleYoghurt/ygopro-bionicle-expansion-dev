@@ -19,6 +19,7 @@ function s.initial_effect(c)
 	e2:SetType(EFFECT_TYPE_QUICK_O)
 	e2:SetRange(LOCATION_MZONE)
 	e2:SetCode(EVENT_FREE_CHAIN)
+  e2:SetCost(s.cost2)
 	e2:SetTarget(s.target2)
 	e2:SetOperation(s.operation2)
 	c:RegisterEffect(e2)
@@ -46,6 +47,10 @@ end
 function s.filter2b(c,ec)
   return c:IsSetCard(0xb04) and c:CheckEquipTarget(ec) 
     and not (c:IsLocation(LOCATION_GRAVE) and c:IsReason(REASON_DESTROY) and c:IsPreviousLocation(LOCATION_ONFIELD) and c:IsPreviousPosition(POS_FACEUP) and c:GetTurnID()==Duel.GetTurnCount())
+end
+function s.cost2(e,tp,eg,ep,ev,re,r,rp,chk)
+  if chk==0 then return Duel.CheckLPCost(tp,500) end
+  Duel.PayLPCost(tp,500)
 end
 function s.target2(e,tp,eg,ep,ev,re,r,rp,chk)
   local c=e:GetHandler()
