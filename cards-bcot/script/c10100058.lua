@@ -22,6 +22,7 @@ function s.initial_effect(c)
 	c:RegisterEffect(e1)
 	--Tag out
   local e2=bcot.toa_mata_combination_tagout(c,ATTRIBUTE_WIND,ATTRIBUTE_WATER)
+	e2:SetDescription(aux.Stringid(id,1))
   e2:SetCountLimit(1,id)
   c:RegisterEffect(e2)
 end

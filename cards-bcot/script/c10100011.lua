@@ -16,7 +16,7 @@ function s.initial_effect(c)
 	e2:SetTargetRange(0,LOCATION_HAND)
   e2:SetCondition(s.condition2)
 	c:RegisterEffect(e2)
-	--Reveal drawn cards
+	--Banish Spell/Trap
 	local e3=Effect.CreateEffect(c)
   e3:SetDescription(aux.Stringid(id,0))
   e3:SetCategory(CATEGORY_REMOVE)
