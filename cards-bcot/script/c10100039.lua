@@ -1,5 +1,6 @@
 --Turaga Nui
-function c10100039.initial_effect(c)
+local s,id=GetID()
+function s.initial_effect(c)
 	c:EnableReviveLimit()
 	--Cannot SS by other ways
 	local e0=Effect.CreateEffect(c)
@@ -8,80 +9,92 @@ function c10100039.initial_effect(c)
 	e0:SetCode(EFFECT_SPSUMMON_CONDITION)
 	e0:SetValue(aux.FALSE)
 	c:RegisterEffect(e0)
-	--Special Summon
+	--Special Summon as Warrior
 	local e1=Effect.CreateEffect(c)
-	e1:SetType(EFFECT_TYPE_FIELD)
-	e1:SetCode(EFFECT_SPSUMMON_PROC)
-	e1:SetProperty(EFFECT_FLAG_UNCOPYABLE)
+  e1:SetDescription(aux.Stringid(id,0))
+  e1:SetCategory(CATEGORY_SPECIAL_SUMMON)
+	e1:SetType(EFFECT_TYPE_IGNITION)
 	e1:SetRange(LOCATION_HAND)
-	e1:SetCondition(c10100039.condition1)
-	e1:SetValue(1)
+	e1:SetCost(s.cost1)
+  e1:SetTarget(s.target1)
+  e1:SetOperation(s.operation1)
+  e1:SetCountLimit(1,id)
 	c:RegisterEffect(e1)
-	--Change Level
+	--Special Summon and negate
 	local e2=Effect.CreateEffect(c)
-	e2:SetDescription(aux.Stringid(10100039,0))
-	e2:SetType(EFFECT_TYPE_IGNITION)
-	e2:SetCountLimit(1)
-	e2:SetRange(LOCATION_MZONE)
-	e2:SetTarget(c10100039.target2)
-	e2:SetOperation(c10100039.operation2)
+	e2:SetDescription(aux.Stringid(id,1))
+  e2:SetCategory(CATEGORY_SPECIAL_SUMMON+CATEGORY_DISABLE)
+	e2:SetType(EFFECT_TYPE_QUICK_O)
+  e2:SetCode(EVENT_CHAINING)
+	e2:SetRange(LOCATION_GRAVE)
+  e2:SetCondition(s.condition2)
+	e2:SetTarget(s.target2)
+	e2:SetOperation(s.operation2)
+	e2:SetCountLimit(1,id+1000000)
 	c:RegisterEffect(e2)
-	--When leave field
-	local e3=Effect.CreateEffect(c)
-	e3:SetDescription(aux.Stringid(10100039,1))
-	e3:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_F)
-	e3:SetCategory(CATEGORY_SPECIAL_SUMMON)
-	e3:SetCode(EVENT_LEAVE_FIELD)
-	e3:SetTarget(c10100039.target3)
-	e3:SetOperation(c10100039.operation3)
-	c:RegisterEffect(e3)
 end
---e1 - Special Summon
-function c10100039.filter1(c)
-	return c:IsSetCard(0x156) and not c:IsCode(10100039)
+function s.filter1(c,tp)
+	return c:IsType(TYPE_MONSTER) and (c:IsControler(tp) or c:IsFaceup()) and (c:IsInMainMZone(tp) or Duel.GetLocationCount(tp,LOCATION_MZONE)>0)
 end
-function c10100039.condition1(e,c)
-	if c==nil then return true end
-	local g=Duel.GetMatchingGroup(c10100039.filter1,c:GetControler(),LOCATION_GRAVE,0,nil)
-	return g:GetClassCount(Card.GetCode)>=6
+function s.cost1(e,tp,eg,ep,ev,re,r,rp,chk)
+	if chk==0 then return Duel.CheckReleaseGroupCost(tp,s.filter1,1,true,nil,e:GetHandler(),tp) end
+	local sg=Duel.SelectReleaseGroupCost(tp,s.filter1,1,1,true,nil,e:GetHandler(),tp)
+	Duel.Release(sg,REASON_COST)
+  e:SetLabel(sg:GetFirst():GetAttribute())
 end
---e2 - Change Level
-function c10100039.target2(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return true end
-	local t={}
-	local i=1
-	local p=1
-	local lv=e:GetHandler():GetLevel()
-	for i=1,8 do 
-		if lv~=i then t[p]=i p=p+1 end
-	end
-	t[p]=nil
-	Duel.Hint(HINT_SELECTMSG,tp,aux.Stringid(26082117,1))
-	e:SetLabel(Duel.AnnounceNumber(tp,table.unpack(t)))
+function s.target1(e,tp,eg,ep,ev,re,r,rp,chk)
+  local c=e:GetHandler()
+	if chk==0 then return c:IsCanBeSpecialSummoned(e,0,tp,true,true) end
+	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,c,1,0,LOCATION_HAND)
 end
-function c10100039.operation2(e,tp,eg,ep,ev,re,r,rp)
-	local c=e:GetHandler()
-	if c:IsFaceup() and c:IsRelateToEffect(e) then
-		local e1=Effect.CreateEffect(c)
-		e1:SetType(EFFECT_TYPE_SINGLE)
-		e1:SetCode(EFFECT_CHANGE_LEVEL)
-		e1:SetValue(e:GetLabel())
-		e1:SetReset(RESET_EVENT+0x1fe0000+RESET_PHASE+PHASE_END)
-		c:RegisterEffect(e1)
-	end
+function s.operation1(e,tp,eg,ep,ev,re,r,rp)
+  local c=e:GetHandler()
+  if c:IsRelateToEffect(e) and Duel.SpecialSummon(c,0,tp,tp,true,true,POS_FACEUP)>0 then
+    local e1=Effect.CreateEffect(c)
+    e1:SetType(EFFECT_TYPE_SINGLE)
+    e1:SetCode(EFFECT_CHANGE_RACE)
+    e1:SetRange(LOCATION_MZONE)
+    e1:SetValue(RACE_WARRIOR)
+    e1:SetReset(RESET_EVENT+RESETS_STANDARD)
+    c:RegisterEffect(e1)
+    local e2=Effect.CreateEffect(c)
+    e2:SetType(EFFECT_TYPE_SINGLE)
+    e2:SetCode(EFFECT_CHANGE_ATTRIBUTE)
+    e2:SetRange(LOCATION_MZONE)
+    e2:SetValue(e:GetLabel())
+    e2:SetReset(RESET_EVENT+RESETS_STANDARD)
+    c:RegisterEffect(e2)
+  end
 end
---e3 - When leave field
-function c10100039.filter3(c,e,tp)
-	return c:IsSetCard(0x156) and c:IsCanBeSpecialSummoned(e,0,tp,false,false) and not c:IsCode(10100039)
+function s.filter2(c)
+  return c:IsSetCard(0xb03) and c:IsType(TYPE_LINK)
 end
-function c10100039.target3(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and Duel.IsExistingMatchingCard(c10100039.filter3,tp,LOCATION_GRAVE,0,1,nil,e,tp) end
-	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,1,tp,LOCATION_GRAVE)
+function s.condition2(e,tp,eg,ep,ev,re,r,rp)
+  return ep~=tp and Duel.GetMatchingGroup(s.filter2,tp,LOCATION_GRAVE,0,nil):GetClassCount(Card.GetCode)>=6
 end
-function c10100039.operation3(e,tp,eg,ep,ev,re,r,rp)
-	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
-	local g=Duel.SelectMatchingCard(tp,c10100039.filter3,tp,LOCATION_GRAVE,0,1,1,nil,e,tp)
-	if g:GetCount()>0 then
-		Duel.SpecialSummon(g,0,tp,tp,false,false,POS_FACEUP)
-	end
+function s.target2(e,tp,eg,ep,ev,re,r,rp,chk)
+  local c=e:GetHandler()
+	if chk==0 then 
+      return Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and c:IsCanBeSpecialSummoned(e,0,tp,true,true) 
+        and Duel.IsExistingMatchingCard(Card.IsFaceup,tp,0,LOCATION_ONFIELD,1,nil) 
+  end
+	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,c,1,0,LOCATION_GRAVE)
+end
+function s.operation2(e,tp,eg,ep,ev,re,r,rp)
+  local c=e:GetHandler()
+  if Duel.SpecialSummon(c,0,tp,tp,true,true,POS_FACEUP)>0 then
+    local g=Duel.GetMatchingGroup(Card.IsFaceup,tp,0,LOCATION_ONFIELD,nil)
+    for tc in aux.Next(g) do
+      local e1=Effect.CreateEffect(c)
+      e1:SetType(EFFECT_TYPE_SINGLE)
+      e1:SetCode(EFFECT_DISABLE)
+      e1:SetReset(RESET_EVENT+RESETS_STANDARD)
+      tc:RegisterEffect(e1)
+      local e2=Effect.CreateEffect(c)
+      e2:SetType(EFFECT_TYPE_SINGLE)
+      e2:SetCode(EFFECT_DISABLE_EFFECT)
+      e2:SetReset(RESET_EVENT+RESETS_STANDARD)
+      tc:RegisterEffect(e2)
+    end
+  end
 end
