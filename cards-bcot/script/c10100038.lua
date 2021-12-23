@@ -28,6 +28,7 @@ function s.initial_effect(c)
 	e2:SetCondition(s.condition2)
 	e2:SetTarget(s.target2)
 	e2:SetOperation(s.operation2)
+	e2:SetCountLimit(1)
 	c:RegisterEffect(e2)
 	--To deck
 	local e3=Effect.CreateEffect(c)
@@ -82,7 +83,7 @@ end
 function s.operation2(e,tp,eg,ep,ev,re,r,rp)
 	local g=Duel.GetChainInfo(0,CHAININFO_TARGET_CARDS)
 	local tg=g:Filter(Card.IsRelateToEffect,nil,e)
-	if tg:GetCount()==2 and tg:IsExists(s.filter2,1,nil) then --return BOTH TARGETS
+	if tg:GetCount()>0 then
 		Duel.SendtoHand(tg,nil,REASON_EFFECT)
 	end
 end
@@ -99,7 +100,8 @@ end
 function s.target3(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingMatchingCard(s.filter3,tp,LOCATION_ONFIELD,LOCATION_ONFIELD,1,nil) end
 	local sg=Duel.GetMatchingGroup(s.filter3,tp,LOCATION_ONFIELD,LOCATION_ONFIELD,nil)
-	Duel.SetOperationInfo(0,CATEGORY_TODECK,sg,sg:GetCount(),0,0)
+	Duel.SetOperationInfo(0,CATEGORY_TODECK,sg,sg:GetCount(),0,0)	
+  Duel.SetChainLimit(aux.FALSE)
 end
 function s.operation3(e,tp,eg,ep,ev,re,r,rp)
 	local sg=Duel.GetMatchingGroup(s.filter3,tp,LOCATION_ONFIELD,LOCATION_ONFIELD,nil)
