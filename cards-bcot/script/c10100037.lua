@@ -30,12 +30,12 @@ function s.filter1(c)
 	return c:IsSetCard(0x1b01) and c:IsType(TYPE_MONSTER)
 end
 function s.target1(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.IsExistingMatchingCard(s.filter1,tp,LOCATION_HAND+LOCATION_DECK+LOCATION_GRAVE,0,1,nil) end
-  Duel.SetOperationInfo(0,CATEGORY_TODECK,nil,1,0,LOCATION_HAND+LOCATION_DECK+LOCATION_GRAVE)
+	if chk==0 then return Duel.IsExistingMatchingCard(s.filter1,tp,LOCATION_DECK+LOCATION_GRAVE+LOCATION_REMOVED,0,1,nil) end
+  Duel.SetOperationInfo(0,CATEGORY_TODECK,nil,1,0,LOCATION_DECK+LOCATION_GRAVE+LOCATION_REMOVED)
 end
 function s.operation1(e,tp,eg,ep,ev,re,r,rp)
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TODECK)
-	local g=Duel.SelectMatchingCard(tp,aux.NecroValleyFilter(s.filter1),tp,LOCATION_DECK+LOCATION_HAND+LOCATION_GRAVE,0,1,1,nil)
+	local g=Duel.SelectMatchingCard(tp,aux.NecroValleyFilter(s.filter1),tp,LOCATION_DECK+LOCATION_GRAVE+LOCATION_REMOVED,0,1,1,nil)
 	if g:GetCount()>0 then
     local tc=g:GetFirst()
     if tc:IsLocation(LOCATION_DECK) then
@@ -61,8 +61,11 @@ function s.operation1(e,tp,eg,ep,ev,re,r,rp)
     end
   end
 end
-function s.filter2(c,e,tp)
+function s.filter2a(c,e,tp)
 	return c:IsSetCard(0x1b01) and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
+end
+function s.filter2b(c)
+  return c:IsCode(10100038) and c:IsAbleToHand()
 end
 function s.cost2(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingMatchingCard(Card.IsDiscardable,tp,LOCATION_HAND,0,1,nil) end
@@ -75,11 +78,21 @@ end
 function s.operation2(e,tp,eg,ep,ev,re,r,rp,c)
 	if Duel.GetFieldGroupCount(tp,LOCATION_DECK,0)==0 then return end
 	Duel.ConfirmDecktop(tp,6)
-	local g=Duel.GetDecktopGroup(tp,6):Filter(s.filter2,nil,e,tp)
-	if Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and g:GetCount()>0 and Duel.SelectYesNo(tp,aux.Stringid(id,2)) then
+  local g=Duel.GetDecktopGroup(tp,6)
+	local g1=g:Filter(s.filter2a,nil,e,tp)
+  --Special Summon 1 excavated "C.C. Matoran" monster
+	if Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and g1:GetCount()>0 and Duel.SelectYesNo(tp,aux.Stringid(id,2)) then
 		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
-		local sg=g:Select(tp,1,1,nil)
+		local sg=g1:Select(tp,1,1,nil)
 		Duel.SpecialSummon(sg,0,tp,tp,false,false,POS_FACEUP)
 	end
+  --Add 1 excavated "The Chronicler's Company" to hand
+  local g2=g:Filter(s.filter2b,nil)
+  if g2:GetCount()>0 and Duel.SelectYesNo(tp,aux.Stringid(id,3)) then
+    Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_ATOHAND)
+		local ag=g2:Select(tp,1,1,nil)
+    Duel.SendtoHand(ag,nil,REASON_EFFECT)
+    Duel.ConfirmCards(1-tp,ag)
+  end
 	Duel.ShuffleDeck(tp)
 end
