@@ -9,7 +9,7 @@ function s.initial_effect(c)
 	e0:SetCode(EFFECT_SPSUMMON_CONDITION)
 	e0:SetValue(aux.FALSE)
 	c:RegisterEffect(e0)
-	--Special Summon as Warrior
+	--Special Summon Warrior
 	local e1=Effect.CreateEffect(c)
   e1:SetDescription(aux.Stringid(id,0))
   e1:SetCategory(CATEGORY_SPECIAL_SUMMON)
@@ -33,37 +33,36 @@ function s.initial_effect(c)
 	e2:SetCountLimit(1,id+1000000)
 	c:RegisterEffect(e2)
 end
-function s.filter1(c,tp)
-	return c:IsType(TYPE_MONSTER) and (c:IsControler(tp) or c:IsFaceup()) and (c:IsInMainMZone(tp) or Duel.GetLocationCount(tp,LOCATION_MZONE)>0)
+function s.filter1a(c)
+	return c:IsType(TYPE_SPELL+TYPE_EQUIP) and c:IsSetCard(0x2b04) and c:IsAbleToGraveAsCost()
+end
+function s.filter1b(c,e,tp)
+  return c:IsType(TYPE_LINK) and c:IsSetCard(0xb03) and c:IsFacedown() and Duel.IsExistingMatchingCard(s.filter1c,tp,LOCATION_HAND,0,1,nil,e,tp,c:GetAttribute())
+end
+function s.filter1c(c,e,tp,att)
+  return c:IsLevelBelow(4) and c:IsRace(RACE_WARRIOR) and c:IsAttribute(att) and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
 end
 function s.cost1(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.CheckReleaseGroupCost(tp,s.filter1,1,true,nil,e:GetHandler(),tp) end
-	local sg=Duel.SelectReleaseGroupCost(tp,s.filter1,1,1,true,nil,e:GetHandler(),tp)
-	Duel.Release(sg,REASON_COST)
-  e:SetLabel(sg:GetFirst():GetAttribute())
+  local c=e:GetHandler()
+	if chk==0 then return c:IsAbleToGraveAsCost() and Duel.IsExistingMatchingCard(s.filter1a,tp,LOCATION_DECK,0,1,nil) end
+	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TOGRAVE)
+  local g=Duel.SelectMatchingCard(tp,s.filter1a,tp,LOCATION_DECK,0,1,1,nil)
+  g:AddCard(c)
+  Duel.SendtoGrave(g,REASON_COST)
 end
 function s.target1(e,tp,eg,ep,ev,re,r,rp,chk)
-  local c=e:GetHandler()
-	if chk==0 then return c:IsCanBeSpecialSummoned(e,0,tp,true,true) end
-	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,c,1,0,LOCATION_HAND)
+	if chk==0 then return Duel.IsExistingMatchingCard(s.filter1b,tp,LOCATION_EXTRA,0,1,nil,e,tp) end
+	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,1,tp,LOCATION_HAND)
 end
 function s.operation1(e,tp,eg,ep,ev,re,r,rp)
-  local c=e:GetHandler()
-  if c:IsRelateToEffect(e) and Duel.SpecialSummon(c,0,tp,tp,true,true,POS_FACEUP)>0 then
-    local e1=Effect.CreateEffect(c)
-    e1:SetType(EFFECT_TYPE_SINGLE)
-    e1:SetCode(EFFECT_CHANGE_RACE)
-    e1:SetRange(LOCATION_MZONE)
-    e1:SetValue(RACE_WARRIOR)
-    e1:SetReset(RESET_EVENT+RESETS_STANDARD)
-    c:RegisterEffect(e1)
-    local e2=Effect.CreateEffect(c)
-    e2:SetType(EFFECT_TYPE_SINGLE)
-    e2:SetCode(EFFECT_CHANGE_ATTRIBUTE)
-    e2:SetRange(LOCATION_MZONE)
-    e2:SetValue(e:GetLabel())
-    e2:SetReset(RESET_EVENT+RESETS_STANDARD)
-    c:RegisterEffect(e2)
+  Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_CONFIRM)
+  local rg=Duel.SelectMatchingCard(tp,s.filter1b,tp,LOCATION_EXTRA,0,1,1,nil,e,tp)
+  if rg:GetCount()>0 then
+    Duel.ConfirmCards(1-tp,rg)
+    local att=rg:GetFirst():GetAttribute()
+    Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
+    local sg=Duel.SelectMatchingCard(tp,s.filter1c,tp,LOCATION_HAND,0,1,1,nil,e,tp,att)
+    Duel.SpecialSummon(sg,0,tp,tp,false,false,POS_FACEUP)
   end
 end
 function s.filter2(c)
