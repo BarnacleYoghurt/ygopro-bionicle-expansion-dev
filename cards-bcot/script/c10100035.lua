@@ -4,7 +4,7 @@ function s.initial_effect(c)
 	--Search
 	local e1=Effect.CreateEffect(c)
 	e1:SetDescription(aux.Stringid(id,0))
-	e1:SetCategory(CATEGORY_TOHAND+CATEGORY_SEARCH)
+	e1:SetCategory(CATEGORY_TOHAND+CATEGORY_SEARCH+CATEGORY_TODECK)
   e1:SetProperty(EFFECT_FLAG_DELAY)
 	e1:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
 	e1:SetCode(EVENT_SUMMON_SUCCESS)
@@ -49,8 +49,16 @@ function s.operation1(e,tp,eg,ep,ev,re,r,rp)
   
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SELECT)
 	local g=Duel.SelectMatchingCard(tp,aux.NecroValleyFilter(s.filter1),tp,LOCATION_DECK+LOCATION_GRAVE,0,1,1,nil)
-  if g:GetCount()>0 then
-    aux.ToHandOrElse(g:GetFirst(),tp,Card.IsAbleToDeck,OpToDecktop,aux.Stringid(id,1))
+  if g:GetCount()>0 and Duel.SendtoHand(g,nil,REASON_EFFECT)>0 then
+    Duel.ConfirmCards(1-tp,g)
+    local tc=g:GetFirst()
+    if not tc:IsAttribute(ATTRIBUTE_WATER) then
+      if tc:IsPreviousLocation(LOCATION_DECK) then Duel.ShuffleDeck(tp) end --Shuffle manually so card stays on top
+      Duel.BreakEffect()
+      Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TODECK)
+      local rg=Duel.SelectMatchingCard(tp,Card.IsAbleToDeck,tp,LOCATION_HAND,0,1,1,nil)
+      Duel.SendtoDeck(rg,nil,0,REASON_EFFECT)
+    end
   end
 end
 function s.filter2(c,tp)
