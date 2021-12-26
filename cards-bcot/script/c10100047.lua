@@ -27,7 +27,7 @@ function s.initial_effect(c)
 	e2:SetType(EFFECT_TYPE_IGNITION)
   e2:SetProperty(EFFECT_FLAG_CARD_TARGET)
 	e2:SetRange(LOCATION_GRAVE)
-	e2:SetCondition(s.condition2)
+	e2:SetCost(s.cost2)
 	e2:SetTarget(s.target2)
 	e2:SetOperation(s.operation2)
   e2:SetCountLimit(1,id+1000000)
@@ -65,11 +65,13 @@ function s.operation1(e,tp,eg,ep,ev,re,r,rp)
 	end
 end
 function s.filter2(c)
-	return c:IsSetCard(0xb01) and c:IsLevel(2)
+	return c:IsSetCard(0xb01) and c:IsLevel(2) and c:IsAbleToDeckOrExtraAsCost()
 end
-function s.condition2(e,tp,eg,ep,ev,re,r,rp)
+function s.cost2(e,tp,eg,ep,ev,re,r,rp,chk)
 	local g=Duel.GetMatchingGroup(s.filter2,tp,LOCATION_GRAVE,0,nil)
-	return g:GetClassCount(Card.GetCode)>=6
+	if chk==0 then return g:GetClassCount(Card.GetCode)>=6 end
+  local sg=aux.SelectUnselectGroup(g,e,tp,6,6,aux.dncheck,1,tp,HINTMSG_TODECK)
+  Duel.SendtoDeck(sg,tp,SEQ_DECKSHUFFLE,REASON_COST)
 end
 function s.target2(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
   if chkc then return chkc:IsLocation(LOCATION_MZONE) and chkc:IsControler(1-tp) end
