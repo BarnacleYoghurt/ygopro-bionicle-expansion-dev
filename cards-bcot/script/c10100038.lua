@@ -48,7 +48,8 @@ function s.filter(c)
 	return c:IsFaceup() and c:IsSetCard(0x1b01)
 end
 function s.filter1(c,e,tp)
-	return c:IsSetCard(0x1b01) and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
+	return c:IsSetCard(0x1b01) and c:IsCanBeSpecialSummoned(e,0,tp,false,false) 
+    and not Duel.IsExistingMatchingCard(aux.FilterFaceupFunction(Card.IsCode,c:GetCode()),tp,LOCATION_MZONE,0,1,nil) 
 end
 function s.condition1(e,tp,eg,ep,ev,re,r,rp)
 	return Duel.IsExistingMatchingCard(s.filter,tp,LOCATION_MZONE,0,1,nil)
