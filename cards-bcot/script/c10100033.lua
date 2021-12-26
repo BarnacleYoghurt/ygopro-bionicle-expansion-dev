@@ -7,6 +7,7 @@ function s.initial_effect(c)
   e1:SetProperty(EFFECT_FLAG_UNCOPYABLE)
   e1:SetCode(EFFECT_SPSUMMON_PROC)
   e1:SetRange(LOCATION_HAND)
+  e1:SetCondition(s.condition1)
   e1:SetOperation(s.operation1)
   e1:SetCountLimit(1,id,EFFECT_COUNT_CODE_OATH)
   c:RegisterEffect(e1)
@@ -24,6 +25,10 @@ function s.initial_effect(c)
 end
 function s.target1_1(e,c)
   return not c:IsSetCard(0x1b01)
+end
+function s.condition1(e,c)
+	if c==nil then return true end
+	return Duel.GetLocationCount(c:GetControler(),LOCATION_MZONE)>0
 end
 function s.operation1(e,tp,eg,ep,ev,re,r,rp,c)
 	local e1=Effect.CreateEffect(c)
