@@ -1,18 +1,20 @@
 --Matoran Pilot Kongu
 local s,id=GetID()
 function s.initial_effect(c)
-	--Equip
+	--To GY
 	local e1=Effect.CreateEffect(c)
 	e1:SetDescription(aux.Stringid(id,0))
-	e1:SetCategory(CATEGORY_EQUIP)
-	e1:SetType(EFFECT_TYPE_IGNITION)
-	e1:SetProperty(EFFECT_FLAG_CARD_TARGET)
-	e1:SetRange(LOCATION_MZONE)
-	e1:SetCountLimit(1)
-	e1:SetCondition(s.condition1)
+	e1:SetCategory(CATEGORY_TOGRAVE)
+	e1:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
+	e1:SetProperty(EFFECT_FLAG_DELAY)
+  e1:SetCode(EVENT_SUMMON_SUCCESS)
 	e1:SetTarget(s.target1)
 	e1:SetOperation(s.operation1)
+	e1:SetCountLimit(1,id)
 	c:RegisterEffect(e1)
+  local e1b=e1:Clone()
+  e1b:SetCode(EVENT_SPSUMMON_SUCCESS)
+  c:RegisterEffect(e1b)
 	--Destroy monster
 	local e2=Effect.CreateEffect(c)
 	e2:SetDescription(aux.Stringid(id,1))
@@ -20,100 +22,58 @@ function s.initial_effect(c)
 	e2:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
 	e2:SetCode(EVENT_BATTLE_DAMAGE)	
 	e2:SetProperty(EFFECT_FLAG_CARD_TARGET)
-	e2:SetCondition(s.condition2)
+	e2:SetCost(s.cost2)
 	e2:SetTarget(s.target2)
 	e2:SetOperation(s.operation2)
-	e2:SetLabelObject(e1)
 	c:RegisterEffect(e2)
-	--Special Summon
-	local e3=Effect.CreateEffect(c)
-	e3:SetDescription(aux.Stringid(id,2))
-	e3:SetCategory(CATEGORY_SPECIAL_SUMMON)
-	e3:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_F)
-	e3:SetCode(EVENT_TO_GRAVE)
-	e3:SetCondition(s.condition3)
-	e3:SetTarget(s.target3)
-	e3:SetOperation(s.operation3)
-	e3:SetLabelObject(e1)
-	c:RegisterEffect(e3)
 end
 function s.filter1(c)
-	return c:IsRace(RACE_BEAST+RACE_WINGEDBEAST)
-end
-function s.condition1(e,tp,eg,ep,ev,re,r,rp)
-	local ec=e:GetLabelObject()
-	return not (ec and ec:GetFlagEffect(id)~=0)
+	return c:IsRace(RACE_WINGEDBEAST) and c:IsSetCard(0xb06) and c:IsAbleToGrave()
 end
 function s.target1(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.GetLocationCount(tp,LOCATION_SZONE)>0 and Duel.IsExistingTarget(s.filter1,tp,LOCATION_MZONE,0,1,nil) end
-	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_EQUIP)
-	local g=Duel.SelectTarget(tp,s.filter1,tp,LOCATION_MZONE,0,1,1,nil)
-	Duel.SetOperationInfo(0,CATEGORY_EQUIP,g,1,0,0)
+	if chk==0 then return Duel.IsExistingMatchingCard(s.filter1,tp,LOCATION_HAND+LOCATION_DECK,0,1,nil) end
+	Duel.SetOperationInfo(0,CATEGORY_TOGRAVE,nil,1,tp,LOCATION_HAND+LOCATION_DECK)
 end
 function s.operation1(e,tp,eg,ep,ev,re,r,rp)
-	local c=e:GetHandler()
-	local tc=Duel.GetFirstTarget()
-	if tc:IsRelateToEffect(e) and tc:IsRace(RACE_BEAST+RACE_WINGEDBEAST) then
-		if c:IsFaceup() and c:IsRelateToEffect(e) then
-			if Duel.Equip(tp,tc,c,false) then
-				--Add Equip limit
-				tc:RegisterFlagEffect(id,RESET_EVENT+RESETS_STANDARD,0,0)
-				e:SetLabelObject(tc)
-				local e1=Effect.CreateEffect(c)
-				e1:SetType(EFFECT_TYPE_SINGLE)
-				e1:SetProperty(EFFECT_FLAG_COPY_INHERIT+EFFECT_FLAG_OWNER_RELATE)
-				e1:SetCode(EFFECT_EQUIP_LIMIT)
-				e1:SetReset(RESET_EVENT+RESETS_STANDARD)
-				e1:SetValue(s.limit1_1)
-				tc:RegisterEffect(e1)
-				local e2=Effect.CreateEffect(c)
-				e2:SetType(EFFECT_TYPE_EQUIP)
-				e2:SetProperty(EFFECT_FLAG_IGNORE_IMMUNE+EFFECT_FLAG_OWNER_RELATE+EFFECT_FLAG_SET_AVAILABLE)
-				e2:SetCode(EFFECT_DIRECT_ATTACK)
-				e2:SetReset(RESET_EVENT+RESETS_STANDARD)
-				e2:SetValue(1)
-				tc:RegisterEffect(e2)
-			end
-		else 
-			Duel.SendtoGrave(tc,REASON_EFFECT)
-		end
-	end
+  Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TOGRAVE)
+  local g=Duel.SelectMatchingCard(tp,s.filter1,tp,LOCATION_HAND+LOCATION_DECK,0,1,1,nil)
+  if Duel.SendtoGrave(g,REASON_EFFECT)>0 then
+    local c=e:GetHandler()
+    local e1=Effect.CreateEffect(c)
+		e1:SetDescription(3205)
+		e1:SetProperty(EFFECT_FLAG_CLIENT_HINT)
+		e1:SetType(EFFECT_TYPE_SINGLE)
+		e1:SetCode(EFFECT_DIRECT_ATTACK)
+		e1:SetReset(RESET_EVENT+RESETS_STANDARD+RESET_PHASE+PHASE_END)
+		c:RegisterEffect(e1)
+  end
 end
 function s.limit1_1(e,c)
 	return e:GetOwner()==c
 end
-function s.filter2(c,atk)
-	return c:IsFaceup() and c:IsDefenseBelow(atk) and c:IsDestructable()
+function s.filter2a(c,tp)
+  return c:IsAttribute(ATTRIBUTE_WIND) and c:IsAbleToRemoveAsCost() and Duel.IsExistingTarget(s.filter2b,1-tp,LOCATION_MZONE,0,1,nil,c:GetAttack())
 end
-function s.condition2(e,tp,eg,ep,ev,re,r,rp)
-	local ec=e:GetLabelObject():GetLabelObject()
-	return ec and ec:IsHasCardTarget(e:GetHandler()) and ec:GetFlagEffect(id)~=0
+function s.filter2b(c,atk)
+	return c:IsFaceup() and c:IsDefenseBelow(atk)
 end
-function s.target2(e,tp,eg,ep,ev,re,r,rp,chk)
-	local ec=e:GetLabelObject():GetLabelObject()
-	if chk==0 then return Duel.IsExistingTarget(s.filter2,tp,0,LOCATION_MZONE,1,nil,ec:GetAttack()) end
+function s.cost2(e,tp,eg,ep,ev,re,r,rp,chk)
+  if chk==0 then return Duel.IsExistingMatchingCard(s.filter2a,tp,LOCATION_GRAVE,0,1,nil,tp) end
+	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_REMOVE)
+  local g=Duel.SelectMatchingCard(tp,s.filter2a,tp,LOCATION_GRAVE,0,1,1,nil,tp)
+  Duel.Remove(g,POS_FACEUP,REASON_COST)
+  e:SetLabel(g:GetFirst():GetAttack())
+end
+function s.target2(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
+  if chkc then return chkc:IsControler(1-tp) and chkc:IsLocation(LOCATION_MZONE) and s.filter2b(chkc,e:GetLabel()) end
+	if chk==0 then return true end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_DESTROY)
-	local g=Duel.SelectTarget(tp,s.filter2,tp,0,LOCATION_MZONE,1,1,nil,ec:GetAttack())
+	local g=Duel.SelectTarget(tp,s.filter2b,tp,0,LOCATION_MZONE,1,1,nil,e:GetLabel())
 	Duel.SetOperationInfo(0,CATEGORY_DESTROY,g,1,0,0)
 end
 function s.operation2(e,tp,eg,ep,ev,re,r,rp)
 	local tc=Duel.GetFirstTarget()
 	if tc:IsRelateToEffect(e) then
 		Duel.Destroy(tc,REASON_EFFECT)
-	end
-end
-function s.condition3(e,tp,eg,ep,ev,re,r,rp)
-	local ec=e:GetLabelObject():GetLabelObject()
-	return ec and e:GetHandler():IsReason(REASON_DESTROY) and ec:IsLocation(LOCATION_SZONE) and ec:GetPreviousEquipTarget()==e:GetHandler()
-end
-function s.target3(e,tp,eg,ep,ev,re,r,rp,chk)
-	local ec=e:GetLabelObject():GetLabelObject()
-	if chk==0 then return Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and ec and ec:IsReason(REASON_LOST_TARGET) and ec:IsLocation(LOCATION_GRAVE) and ec:IsCanBeSpecialSummoned(e,0,tp,false,false,POS_FACEUP,tp) end
-	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,ec,1,tp,LOCATION_GRAVE)
-end
-function s.operation3(e,tp,eg,ep,ev,re,r,rp)
-	local ec=e:GetLabelObject():GetLabelObject()
-	if ec and ec:GetPreviousEquipTarget()==e:GetHandler() and ec:IsLocation(LOCATION_GRAVE) then
-		Duel.SpecialSummon(ec,0,tp,tp,false,false,POS_FACEUP)
 	end
 end
