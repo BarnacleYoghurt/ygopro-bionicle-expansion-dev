@@ -2,12 +2,15 @@
 local s,id=GetID()
 function s.initial_effect(c)
 	--Flag
-	local e0=Effect.CreateEffect(c)
-	e0:SetProperty(EFFECT_FLAG_CANNOT_DISABLE)
-	e0:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_CONTINUOUS)
-	e0:SetCode(EVENT_SUMMON_SUCCESS)
-	e0:SetOperation(s.operation0)
-	c:RegisterEffect(e0)
+	local e0a=Effect.CreateEffect(c)
+	e0a:SetProperty(EFFECT_FLAG_CANNOT_DISABLE)
+	e0a:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_CONTINUOUS)
+	e0a:SetCode(EVENT_SUMMON_SUCCESS)
+	e0a:SetOperation(s.operation0)
+	c:RegisterEffect(e0a)
+  local e0b=e0a:Clone()
+  e0b:SetCode(EVENT_FLIP)
+  c:RegisterEffect(e0b)
 	--Special Summon
 	local e1=Effect.CreateEffect(c)
 	e1:SetDescription(aux.Stringid(id,0))
@@ -22,7 +25,11 @@ function s.initial_effect(c)
 	c:RegisterEffect(e1)
 end
 function s.operation0(e,tp,eg,ep,ev,re,r,rp)
-	e:GetHandler():RegisterFlagEffect(id,RESET_EVENT+(RESETS_STANDARD&~(RESET_TURN_SET|RESET_TEMP_REMOVE))+RESET_PHASE+PHASE_END,0,1)
+  local rst=RESET_EVENT+RESETS_STANDARD+RESET_PHASE+PHASE_END
+  if e:GetCode()==EVENT_SUMMON_SUCCESS then
+    rst=rst-(RESET_TEMP_REMOVE+RESET_LEAVE)
+  end
+	e:GetHandler():RegisterFlagEffect(id,rst,0,1)
 end
 function s.filter1(c,e,tp)
 	return c:IsSetCard(0xb01) and c:GetLevel()==2 and c:IsCanBeSpecialSummoned(e,0,tp,false,false) and not c:IsCode(id)
