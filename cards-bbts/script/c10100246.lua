@@ -3,13 +3,13 @@ local s,id=GetID()
 function s.initial_effect(c)
   --ATK down
   local e1=Effect.CreateEffect(c)
-  e1:SetType(EFFECT_TYPE_FIELD)
+  e1:SetType(EFFECT_TYPE_QUICK_O)
   e1:SetRange(LOCATION_MZONE)
-  e1:SetTargetRange(0,LOCATION_MZONE)
-  e1:SetCode(EFFECT_UPDATE_ATTACK)
+  e1:SetCode(EVENT_FREE_CHAIN)
   e1:SetCondition(s.condition1)
   e1:SetTarget(s.target1)
-  e1:SetValue(-800)
+  e1:SetOperation(s.operation1)
+  e1:SetCountLimit(1,id)
   c:RegisterEffect(e1)
   --To hand
   local e2=Effect.CreateEffect(c)
@@ -20,19 +20,25 @@ function s.initial_effect(c)
   e2:SetCode(EVENT_SUMMON_SUCCESS)
   e2:SetTarget(s.target2)
   e2:SetOperation(s.operation2)
-  e2:SetCountLimit(1,id)
+  e2:SetCountLimit(1,id+1000000)
   c:RegisterEffect(e2)
 end
-function s.filter1(c,atk)
-  return c:GetBaseAttack()>atk
+function s.condition1(e,tp,eg,ep,ev,re,r,rp)
+	return Duel.IsMainPhase() or Duel.IsBattlePhase()
 end
-function s.condition1(e)
-  local ph=Duel.GetCurrentPhase()
-  return ph >= PHASE_BATTLE_START and ph <= PHASE_BATTLE
+function s.target1(e,tp,eg,ep,ev,re,r,rp,chk)
+  if chk==0 then return Duel.IsExistingMatchingCard(Card.IsFaceup,1-tp,LOCATION_MZONE,0,1,nil) end
 end
-function s.target1(e,c)
-  local tp=e:GetHandler():GetControler()
-  return not Duel.IsExistingMatchingCard(s.filter1,tp,0,LOCATION_MZONE,1,nil,c:GetBaseAttack())
+function s.operation1(e,tp,eg,ep,ev,re,r,rp)
+  local g=Duel.GetMatchingGroup(Card.IsFaceup,1-tp,LOCATION_MZONE,0,nil):GetMaxGroup(Card.GetAttack)
+  for tc in aux.Next(g) do
+    local e1=Effect.CreateEffect(e:GetHandler())
+    e1:SetType(EFFECT_TYPE_SINGLE)
+    e1:SetCode(EFFECT_UPDATE_ATTACK)
+    e1:SetValue(-800)
+    e1:SetReset(RESET_EVENT+RESETS_STANDARD+RESET_PHASE+PHASE_END)
+    tc:RegisterEffect(e1)
+  end
 end
 function s.filter2(c)
   return Duel.IsPlayerCanDraw(c:GetOwner(),1) and c:IsAbleToHand()
