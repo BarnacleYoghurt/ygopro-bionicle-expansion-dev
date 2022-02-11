@@ -25,13 +25,13 @@ function s.initial_effect(c)
   c:RegisterEffect(e2)
 end
 function s.filter1(c)
-  return c:IsType(TYPE_SPELL+TYPE_TRAP) and c:IsAbleToGraveAsCost()
+  return c:IsType(TYPE_SPELL+TYPE_TRAP) and c:IsAbleToRemoveAsCost()
 end
 function s.cost1(e,tp,eg,ep,ev,re,r,rp,chk)
   if chk==0 then return Duel.IsExistingMatchingCard(s.filter1,tp,LOCATION_HAND+LOCATION_ONFIELD,0,1,nil) end
   Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TOGRAVE)
   local g=Duel.SelectMatchingCard(tp,s.filter1,tp,LOCATION_HAND+LOCATION_ONFIELD,0,1,1,nil)
-  Duel.SendtoGrave(g,REASON_COST)
+  Duel.Remove(g,POS_FACEUP,REASON_COST)
 end
 function s.target1(e,tp,eg,ep,ev,re,r,rp,chk)
   local c=e:GetHandler()
@@ -45,15 +45,15 @@ function s.operation1(e,tp,eg,ep,ev,re,r,rp)
   end
 end
 function s.filter2a(c)
-  return c:IsType(TYPE_SPELL+TYPE_TRAP) and c:IsAbleToDeck()
+  return c:IsType(TYPE_SPELL+TYPE_TRAP) and c:IsFaceup() and c:IsAbleToDeck()
 end
 function s.filter2b(c,e,tp)
   return c:IsAttribute(ATTRIBUTE_WATER) and c:IsSetCard(0xb01) and not c:IsCode(id) and c:IsCanBeSpecialSummoned(e,0,tp,tp,false,false)
 end
 function s.target2(e,tp,eg,ep,ev,re,r,rp,chk)
-  if chk==0 then return Duel.IsExistingTarget(s.filter2a,tp,LOCATION_GRAVE,0,1,nil) end
+  if chk==0 then return Duel.IsExistingTarget(s.filter2a,tp,LOCATION_REMOVED,0,1,nil) end
   Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TODECK)
-  local g=Duel.SelectTarget(tp,s.filter2a,tp,LOCATION_GRAVE,0,1,1,nil)
+  local g=Duel.SelectTarget(tp,s.filter2a,tp,LOCATION_REMOVED,0,1,1,nil)
   Duel.SetOperationInfo(0,CATEGORY_TODECK,g,1,0,0)
   Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,1,tp,LOCATION_GRAVE)
 end
