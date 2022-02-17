@@ -1,59 +1,69 @@
---Matoran Champion Hewkii
+--Matoran Champion Huki
 local s,id=GetID()
 function s.initial_effect(c)
-	--Target Limit
-	local e1=Effect.CreateEffect(c)
+  --Special Summon
+  local e1=Effect.CreateEffect(c)
 	e1:SetType(EFFECT_TYPE_FIELD)
-	e1:SetRange(LOCATION_MZONE)
-	e1:SetTargetRange(0,LOCATION_MZONE)
-	e1:SetCode(EFFECT_CANNOT_SELECT_BATTLE_TARGET)
+	e1:SetCode(EFFECT_SPSUMMON_PROC)
+	e1:SetProperty(EFFECT_FLAG_UNCOPYABLE+EFFECT_FLAG_SPSUM_PARAM)
+	e1:SetTargetRange(POS_FACEUP_ATTACK,0)
+	e1:SetRange(LOCATION_HAND)
+  e1:SetCondition(s.condition1)
 	e1:SetValue(s.value1)
+	e1:SetCountLimit(1,id,EFFECT_COUNT_CODE_OATH)
 	c:RegisterEffect(e1)
-	--Not destroyed by battle
+	--Gain ATK
 	local e2=Effect.CreateEffect(c)
-	e2:SetType(EFFECT_TYPE_SINGLE)
-	e2:SetProperty(EFFECT_FLAG_SINGLE_RANGE)
-	e2:SetRange(LOCATION_MZONE)
-	e2:SetCode(EFFECT_INDESTRUCTABLE_COUNT)
-	e2:SetCountLimit(1)
-	e2:SetValue(s.value2)
+	e2:SetDescription(aux.Stringid(id,0))
+	e2:SetCategory(CATEGORY_ATKCHANGE)
+	e2:SetType(EFFECT_TYPE_IGNITION)
+	e2:SetProperty(EFFECT_FLAG_CARD_TARGET)
+  e2:SetRange(LOCATION_MZONE)
+	e2:SetTarget(s.target2)
+	e2:SetOperation(s.operation2)
+  e2:SetCountLimit(1)
 	c:RegisterEffect(e2)
-	--Murderize
-	local e3=Effect.CreateEffect(c)
-	e3:SetDescription(aux.Stringid(id,0))
-	e3:SetCategory(CATEGORY_DESTROY+CATEGORY_DAMAGE)
-	e3:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_F)
-	e3:SetCode(EVENT_DAMAGE_STEP_END)
-	e3:SetCondition(s.condition3)
-	e3:SetTarget(s.target3)
-	e3:SetOperation(s.operation3)
-	c:RegisterEffect(e3)
+end
+function s.condition1(e)
+  return Duel.GetFieldGroupCount(e:GetHandlerPlayer(),0,LOCATION_MZONE)>0
 end
 function s.value1(e,c)
-	return c:IsFaceup() and c:GetCode()~=id and c:IsSetCard(0xb01)
+	local tp=c:GetControler()
+	local zone=0x1f
+	local lg=Duel.GetFieldGroup(tp,LOCATION_MZONE,LOCATION_MZONE)
+	for tc in aux.Next(lg) do
+		zone=zone&(~tc:GetColumnZone(LOCATION_MZONE,0,0,tp))
+	end
+	return 0,zone
 end
-function s.filter2(c)
-	return c:IsFaceup() and c:IsSetCard(0xb01)
+function s.filter2a(c,tp)
+  local cg=c:GetColumnGroup()
+  return c:IsFaceup() and cg:IsExists(s.filter2b,1,nil,tp)
 end
-function s.value2(e,re,r,rp)
-	return Duel.IsExistingMatchingCard(s.filter2,tp,LOCATION_MZONE,0,1,e:GetHandler()) and bit.band(r,REASON_BATTLE)~=0
+function s.filter2b(c,tp)
+  return c:IsFaceup() and c:IsSetCard(0xb01) and c:IsType(TYPE_MONSTER) and c:IsControler(tp)
 end
-function s.condition3(e,tp,eg,ep,ev,re,r,rp)
-	return e:GetHandler():GetBattleTarget() and e:GetHandler():GetBattleTarget():IsAttackAbove(2000)
+function s.target2(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
+  if chkc then return chkc:IsControler() and chkc:IsLocation(LOCATION_MZONE) and s.filter2a(chkc,tp) end
+	if chk==0 then return Duel.IsExistingTarget(s.filter2a,1-tp,LOCATION_MZONE,0,1,nil,tp) end
+  Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TARGET)
+	local g=Duel.SelectTarget(tp,s.filter2a,1-tp,LOCATION_MZONE,0,1,1,nil,tp)
 end
-function s.target3(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return e:GetHandler():GetBattleTarget():IsRelateToBattle() and e:GetHandler():GetBattleTarget():IsDestructable() end
-	Duel.SetOperationInfo(0,CATEGORY_DESTROY,e:GetHandler():GetBattleTarget(),1,0,0)
-	local dam=e:GetHandler():GetBattleTarget():GetAttack()
-	if dam<0 then dam=0 end
-	Duel.SetTargetPlayer(1-tp)
-	Duel.SetTargetParam(dam)
-	Duel.SetOperationInfo(0,CATEGORY_DAMAGE,nil,0,1-tp,dam)
-end
-function s.operation3(e,tp,eg,ep,ev,re,r,rp)
-	local bt=e:GetHandler():GetBattleTarget()
-	if bt:IsRelateToBattle() and Duel.Destroy(bt,REASON_EFFECT)~=0 then
-		local p,d=Duel.GetChainInfo(0,CHAININFO_TARGET_PLAYER,CHAININFO_TARGET_PARAM)
-		Duel.Damage(p,d,REASON_EFFECT)
+function s.operation2(e,tp,eg,ep,ev,re,r,rp)
+	local tc=Duel.GetFirstTarget()
+	if tc:IsRelateToEffect(e) and s.filter2a(tc,tp) then
+		local e1=Effect.CreateEffect(e:GetHandler())
+    e1:SetType(EFFECT_TYPE_SINGLE)
+    e1:SetCode(EFFECT_UPDATE_ATTACK)
+    e1:SetValue(tc:GetAttack())
+    e1:SetReset(RESET_EVENT+RESETS_STANDARD+RESET_PHASE+PHASE_END)
+    e:GetHandler():RegisterEffect(e1)
+    local e2=Effect.CreateEffect(e:GetHandler())
+		e2:SetDescription(3207)
+		e2:SetType(EFFECT_TYPE_SINGLE)
+		e2:SetProperty(EFFECT_FLAG_CANNOT_DISABLE+EFFECT_FLAG_CLIENT_HINT)
+		e2:SetCode(EFFECT_CANNOT_DIRECT_ATTACK)
+		e2:SetReset(RESET_EVENT+RESETS_STANDARD+RESET_PHASE+PHASE_END)
+		e:GetHandler():RegisterEffect(e2)
 	end
 end
