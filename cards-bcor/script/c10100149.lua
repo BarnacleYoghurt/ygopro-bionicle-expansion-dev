@@ -34,6 +34,7 @@ function s.initial_effect(c)
   e2:SetCost(s.cost2)
   e2:SetTarget(s.target2)
   e2:SetOperation(s.operation2)
+	e2:SetCountLimit(1,id+1000000)
   c:RegisterEffect(e2)
 end
 function s.operation0(e,tp,eg,ep,ev,re,r,rp)
