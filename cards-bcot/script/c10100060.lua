@@ -24,11 +24,12 @@ function s.initial_effect(c)
   e2:SetOperation(s.operation2)
   e2:SetCountLimit(1,id)
   c:RegisterEffect(e2)
-	--Special Summon
+	--Special Summon Token
   local e3=Effect.CreateEffect(c)
   e3:SetDescription(aux.Stringid(id,1))
-  e3:SetCategory(CATEGORY_SPECIAL_SUMMON)
+  e3:SetCategory(CATEGORY_SPECIAL_SUMMON+CATEGORY_TOKEN)
   e3:SetType(EFFECT_TYPE_IGNITION)
+  e3:SetProperty(EFFECT_FLAG_CARD_TARGET)
   e3:SetRange(LOCATION_MZONE)
   e3:SetTarget(s.target3)
   e3:SetOperation(s.operation3)
@@ -67,25 +68,46 @@ function s.operation2(e,tp,eg,ep,ev,re,r,rp)
     Duel.SendtoGrave(g,REASON_EFFECT)
   end
 end
-function s.filter3(c,e,tp,att,zone)
-	return c:IsSetCard(0xb01) and c:IsLevelBelow(4) and c:IsAttribute(att) and c:IsCanBeSpecialSummoned(e,0,tp,false,false,POS_FACEUP,tp,zone)
+function s.filter3(c,tp,att)
+	return c:IsRace(RACE_WARRIOR) and c:IsAttribute(att) and c:HasLevel() and c:IsAbleToDeck()
+    and Duel.IsPlayerCanSpecialSummonMonster(tp,10110060,0,TYPES_TOKEN,0,0,c:GetLevel(),RACE_WARRIOR,c:GetAttribute())
 end
-function s.target3(e,tp,eg,ep,ev,re,r,rp,chk)
+function s.target3(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
   local att=e:GetHandler():GetAttribute()
-  local zone=e:GetHandler():GetLinkedZone(tp)
+  if chkc then return chkc:IsControler(tp) and chkc:IsLocation(LOCATION_GRAVE+LOCATION_REMOVED) and s.filter3(chkc,att) end
 	if chk==0 then 
-    return Duel.GetLocationCount(tp,LOCATION_MZONE,tp,LOCATION_REASON_TOFIELD,zone)>0 
-      and Duel.IsExistingTarget(s.filter3,tp,LOCATION_GRAVE+LOCATION_REMOVED,0,1,nil,e,tp,att,zone) 
+    return Duel.GetLocationCount(tp,LOCATION_MZONE)>0 
+      and Duel.IsExistingTarget(s.filter3,tp,LOCATION_GRAVE+LOCATION_REMOVED,0,1,nil,tp,att) 
   end
-  Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
-  local g=Duel.SelectTarget(tp,s.filter3,tp,LOCATION_GRAVE+LOCATION_REMOVED,0,1,1,nil,e,tp,att,zone)
-	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,g,1,tp,g:GetFirst():GetLocation())
+  Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TARGET)
+	local g=Duel.SelectTarget(tp,s.filter3,tp,LOCATION_GRAVE+LOCATION_REMOVED,0,1,1,nil,tp,att)
+	Duel.SetOperationInfo(0,CATEGORY_TOKEN,nil,1,0,0)
+	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,1,tp,0)
+  Duel.SetOperationInfo(0,CATEGORY_TODECK,g,1,0,0)
 end
 function s.operation3(e,tp,eg,ep,ev,re,r,rp)
-  local zone=e:GetHandler():GetLinkedZone(tp)
-  if Duel.GetLocationCount(tp,LOCATION_MZONE,tp,LOCATION_REASON_TOFIELD,zone)<=0 then return end
 	local tc=Duel.GetFirstTarget()
-	if tc:IsRelateToEffect(e) then
-		Duel.SpecialSummon(tc,0,tp,tp,false,false,POS_FACEUP,zone)
+	if tc:IsRelateToEffect(e) and Duel.GetLocationCount(tp,LOCATION_MZONE)>0 then
+		local token=Duel.CreateToken(tp,10110060)
+    local e1=Effect.CreateEffect(e:GetHandler())
+    e1:SetType(EFFECT_TYPE_SINGLE)
+    e1:SetCode(EFFECT_CHANGE_LEVEL)
+    e1:SetValue(tc:GetLevel())
+    e1:SetReset(RESET_EVENT+RESETS_STANDARD-RESET_TOFIELD)
+    token:RegisterEffect(e1)
+    local e2=e1:Clone()
+    e2:SetCode(EFFECT_CHANGE_ATTRIBUTE)
+    e2:SetValue(tc:GetAttribute())
+    token:RegisterEffect(e2)
+    
+    if Duel.SpecialSummon(token,0,tp,tp,false,false,POS_FACEUP)>0 then
+      Duel.BreakEffect()
+      
+      if tc:IsType(TYPE_FUSION+TYPE_SYNCHRO+TYPE_XYZ+TYPE_LINK) or Duel.SelectOption(tp,aux.Stringid(id,2),aux.Stringid(id,3))==0 then
+        Duel.SendtoDeck(tc,nil,0,REASON_EFFECT)
+      else
+        Duel.SendtoDeck(tc,nil,1,REASON_EFFECT)
+      end
+    end
 	end
 end
