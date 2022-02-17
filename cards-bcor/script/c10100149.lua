@@ -23,6 +23,18 @@ function s.initial_effect(c)
 	e1:SetOperation(s.operation1)
 	e1:SetCountLimit(1,id)
 	c:RegisterEffect(e1)
+  --Flip
+  local e2=Effect.CreateEffect(c)
+  e2:SetDescription(aux.Stringid(id,1))
+  e2:SetCategory(CATEGORY_POSITION)
+  e2:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O)
+  e2:SetCode(EVENT_CHANGE_POS)
+  e2:SetRange(LOCATION_GRAVE)
+  e2:SetCondition(s.condition2)
+  e2:SetCost(s.cost2)
+  e2:SetTarget(s.target2)
+  e2:SetOperation(s.operation2)
+  c:RegisterEffect(e2)
 end
 function s.operation0(e,tp,eg,ep,ev,re,r,rp)
   local rst=RESET_EVENT+RESETS_STANDARD+RESET_PHASE+PHASE_END
@@ -52,4 +64,24 @@ function s.operation1(e,tp,eg,ep,ev,re,r,rp)
 	if g:GetCount()>0 then
 		Duel.SpecialSummon(g,0,tp,tp,false,false,POS_FACEUP)	
 	end
+end
+function s.filter2a(c,tp)
+	return c:IsPreviousPosition(POS_FACEUP) and c:IsFacedown() and c:IsControler(tp)
+end
+function s.filter2b(c)
+	return c:IsFacedown() and c:IsLocation(LOCATION_MZONE) and c:IsCanChangePosition()
+end
+function s.condition2(e,tp,eg,ep,ev,re,r,rp)
+	return eg:IsExists(s.filter2a,1,nil,tp)
+end
+function s.cost2(e,tp,eg,ep,ev,re,r,rp,chk)
+	if chk==0 then return e:GetHandler():IsAbleToRemoveAsCost() end
+	Duel.Remove(e:GetHandler(),POS_FACEUP,REASON_COST)
+end
+function s.target2(e,tp,eg,ep,ev,re,r,rp,chk)
+  if chk==0 then return eg:IsExists(s.filter2b,1,nil) end
+	Duel.SetOperationInfo(0,CATEGORY_POSITION,eg,eg:FilterCount(s.filter2b,nil),0,0)
+end
+function s.operation2(e,tp,eg,ep,ev,re,r,rp)
+  Duel.ChangePosition(eg:Filter(s.filter2b,nil),POS_FACEUP_DEFENSE)
 end
