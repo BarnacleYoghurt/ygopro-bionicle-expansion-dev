@@ -68,26 +68,27 @@ function s.operation2(e,tp,eg,ep,ev,re,r,rp)
     Duel.SendtoGrave(g,REASON_EFFECT)
   end
 end
-function s.filter3(c,tp,att)
-	return c:IsRace(RACE_WARRIOR) and c:IsAttribute(att) and c:HasLevel() and c:IsAbleToDeck()
+function s.filter3(c,tp)
+	return c:IsRace(RACE_WARRIOR) and c:HasLevel() and c:IsAbleToDeck()
     and Duel.IsPlayerCanSpecialSummonMonster(tp,10110060,0,TYPES_TOKEN,0,0,c:GetLevel(),RACE_WARRIOR,c:GetAttribute())
 end
 function s.target3(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
-  local att=e:GetHandler():GetAttribute()
-  if chkc then return chkc:IsControler(tp) and chkc:IsLocation(LOCATION_GRAVE+LOCATION_REMOVED) and s.filter3(chkc,att) end
+  local zone=e:GetHandler():GetLinkedZone(tp)
+  if chkc then return chkc:IsControler(tp) and chkc:IsLocation(LOCATION_GRAVE+LOCATION_REMOVED) and s.filter3(chkc,tp) end
 	if chk==0 then 
-    return Duel.GetLocationCount(tp,LOCATION_MZONE)>0 
-      and Duel.IsExistingTarget(s.filter3,tp,LOCATION_GRAVE+LOCATION_REMOVED,0,1,nil,tp,att) 
+    return Duel.GetLocationCount(tp,LOCATION_MZONE,tp,LOCATION_REASON_TOFIELD,zone)>0 
+      and Duel.IsExistingTarget(s.filter3,tp,LOCATION_GRAVE+LOCATION_REMOVED,0,1,nil,tp) 
   end
   Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TARGET)
-	local g=Duel.SelectTarget(tp,s.filter3,tp,LOCATION_GRAVE+LOCATION_REMOVED,0,1,1,nil,tp,att)
+	local g=Duel.SelectTarget(tp,s.filter3,tp,LOCATION_GRAVE+LOCATION_REMOVED,0,1,1,nil,tp)
 	Duel.SetOperationInfo(0,CATEGORY_TOKEN,nil,1,0,0)
 	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,1,tp,0)
   Duel.SetOperationInfo(0,CATEGORY_TODECK,g,1,0,0)
 end
 function s.operation3(e,tp,eg,ep,ev,re,r,rp)
+  local zone=e:GetHandler():GetLinkedZone(tp)
 	local tc=Duel.GetFirstTarget()
-	if tc:IsRelateToEffect(e) and Duel.GetLocationCount(tp,LOCATION_MZONE)>0 then
+	if tc:IsRelateToEffect(e) and Duel.GetLocationCount(tp,LOCATION_MZONE,tp,LOCATION_REASON_TOFIELD,zone)>0 then
 		local token=Duel.CreateToken(tp,10110060)
     local e1=Effect.CreateEffect(e:GetHandler())
     e1:SetType(EFFECT_TYPE_SINGLE)
@@ -100,7 +101,7 @@ function s.operation3(e,tp,eg,ep,ev,re,r,rp)
     e2:SetValue(tc:GetAttribute())
     token:RegisterEffect(e2)
     
-    if Duel.SpecialSummon(token,0,tp,tp,false,false,POS_FACEUP)>0 then
+    if Duel.SpecialSummon(token,0,tp,tp,false,false,POS_FACEUP,zone)>0 then
       Duel.BreakEffect()
       
       if tc:IsType(TYPE_FUSION+TYPE_SYNCHRO+TYPE_XYZ+TYPE_LINK) or Duel.SelectOption(tp,aux.Stringid(id,2),aux.Stringid(id,3))==0 then
