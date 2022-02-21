@@ -1,6 +1,7 @@
 --Matoran Racer Onepu
 local s,id=GetID()
 function s.initial_effect(c)
+  --Brag
   local e1=Effect.CreateEffect(c)
   e1:SetDescription(aux.Stringid(id,0))
   e1:SetCategory(CATEGORY_TODECK+CATEGORY_DRAW+CATEGORY_RECOVER)
@@ -22,27 +23,29 @@ function s.initial_effect(c)
 	e2:SetCountLimit(1,id+1000000)
 	c:RegisterEffect(e2)
 end
-function s.filter1(c)
+function s.filter1a(c)
 	return c:IsFaceup() and c:IsAttribute(ATTRIBUTE_EARTH) and c:IsAbleToDeck()
 end
+function s.filter1b(c)
+  return c:IsType(TYPE_MONSTER) and c:IsSetCard(0xb01) and not c:IsPublic()
+end
 function s.target1(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
-  if chkc then return chkc:IsLocation(LOCATION_REMOVED) and chkc:IsControler(tp) and s.filter1(chkc) end
-	if chk==0 then return Duel.IsExistingTarget(s.filter1,tp,LOCATION_REMOVED,0,1,nil) end
+  if chkc then return chkc:IsLocation(LOCATION_REMOVED) and chkc:IsControler(tp) and s.filter1a(chkc) end
+	if chk==0 then return Duel.IsExistingTarget(s.filter1a,tp,LOCATION_REMOVED,0,1,nil) end
   Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TODECK)
-  local g=Duel.SelectTarget(tp,s.filter1,tp,LOCATION_REMOVED,0,1,1,nil)
+  local g=Duel.SelectTarget(tp,s.filter1a,tp,LOCATION_REMOVED,0,1,1,nil)
 	Duel.SetOperationInfo(0,CATEGORY_TODECK,g,1,0,0)
-  Duel.SetOperationInfo(0,CATEGORY_DRAW,nil,0,tp,1)
 end
 function s.operation1(e,tp,eg,ep,ev,re,r,rp)
   local tc=Duel.GetFirstTarget()
   if tc:IsRelateToEffect(e) and Duel.SendtoDeck(tc,nil,SEQ_DECKBOTTOM,REASON_EFFECT)>0 then
-    Duel.BreakEffect()
-    if Duel.Draw(tp,1,REASON_EFFECT)>0 then
-      local dc=Duel.GetOperatedGroup():GetFirst()
-      Duel.ConfirmCards(1-tp,dc)
-      if dc:IsType(TYPE_MONSTER) and dc:IsSetCard(0xb01) then
-        Duel.Recover(tp,1000,REASON_EFFECT)
-      end
+    local rg=Duel.GetMatchingGroup(s.filter1b,tp,LOCATION_HAND,0,nil)
+    if rg:GetCount()>0 and Duel.SelectYesNo(tp,aux.Stringid(id,2)) then
+      Duel.BreakEffect()
+      rg=rg:Select(tp,1,rg:GetCount(),nil)
+      Duel.ConfirmCards(1-tp,rg)
+      Duel.ShuffleHand(tp)
+      Duel.Recover(tp,rg:GetCount()*500,REASON_EFFECT)
     end
   end
 end
