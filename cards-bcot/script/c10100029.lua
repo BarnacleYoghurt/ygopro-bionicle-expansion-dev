@@ -138,5 +138,5 @@ function s.condition3(e)
   return s.condition(e) and Duel.GetCustomActivityCount(id,tp,ACTIVITY_CHAIN)==0
 end
 function s.target3(e,c)
-	return c:IsStatus(STATUS_SPSUMMON_TURN) and c:IsSummonType(SUMMON_TYPE_SPECIAL)
+	return c:IsSummonType(SUMMON_TYPE_SPECIAL)
 end
