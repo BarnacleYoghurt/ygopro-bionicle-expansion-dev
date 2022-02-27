@@ -51,7 +51,10 @@ function s.filter2b(c,e,tp)
   return c:IsAttribute(ATTRIBUTE_WATER) and c:IsSetCard(0xb01) and not c:IsCode(id) and c:IsCanBeSpecialSummoned(e,0,tp,tp,false,false)
 end
 function s.target2(e,tp,eg,ep,ev,re,r,rp,chk)
-  if chk==0 then return Duel.IsExistingTarget(s.filter2a,tp,LOCATION_REMOVED,0,1,nil) end
+  if chk==0 then 
+    return Duel.IsExistingTarget(s.filter2a,tp,LOCATION_REMOVED,0,1,nil) 
+      and Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and Duel.IsExistingMatchingCard(s.filter2b,tp,LOCATION_GRAVE,0,1,nil,e,tp) 
+  end
   Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TODECK)
   local g=Duel.SelectTarget(tp,s.filter2a,tp,LOCATION_REMOVED,0,1,1,nil)
   Duel.SetOperationInfo(0,CATEGORY_TODECK,g,1,0,0)
@@ -60,34 +63,30 @@ end
 function s.operation2(e,tp,eg,ep,ev,re,r,rp)
   local tc=Duel.GetFirstTarget()
   if tc:IsRelateToEffect(e) and Duel.SendtoDeck(tc,nil,SEQ_DECKTOP,REASON_EFFECT)>0 then
-    if Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and Duel.IsExistingMatchingCard(s.filter2b,tp,LOCATION_GRAVE,0,1,nil,e,tp) then
-      if Duel.SelectYesNo(tp,aux.Stringid(id,2)) then
-        Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
-        local g=Duel.SelectMatchingCard(tp,s.filter2b,tp,LOCATION_GRAVE,0,1,1,nil,e,tp)
-        if Duel.SpecialSummonStep(g:GetFirst(),0,tp,tp,false,false,POS_FACEUP) then
-          local e1=Effect.CreateEffect(e:GetHandler())
-          e1:SetType(EFFECT_TYPE_SINGLE)
-          e1:SetCode(EFFECT_DISABLE)
-          e1:SetReset(RESET_EVENT+RESETS_STANDARD)
-          g:GetFirst():RegisterEffect(e1)
-          local e2=Effect.CreateEffect(e:GetHandler())
-          e2:SetType(EFFECT_TYPE_SINGLE)
-          e2:SetCode(EFFECT_DISABLE_EFFECT)
-          e2:SetReset(RESET_EVENT+RESETS_STANDARD)
-          g:GetFirst():RegisterEffect(e2)
-          local e3=Effect.CreateEffect(e:GetHandler())
-          e3:SetType(EFFECT_TYPE_FIELD)
-          e3:SetRange(LOCATION_MZONE)
-          e3:SetCode(EFFECT_CANNOT_SPECIAL_SUMMON)
-          e3:SetProperty(EFFECT_FLAG_PLAYER_TARGET+EFFECT_FLAG_CANNOT_DISABLE)
-          e3:SetTargetRange(1,0)
-          e3:SetCondition(s.condition2_3)
-          e3:SetReset(RESET_EVENT+RESETS_STANDARD)
-          g:GetFirst():RegisterEffect(e3)
-        end
-        Duel.SpecialSummonComplete()
-      end
+    Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
+    local g=Duel.SelectMatchingCard(tp,s.filter2b,tp,LOCATION_GRAVE,0,1,1,nil,e,tp)
+    if Duel.SpecialSummonStep(g:GetFirst(),0,tp,tp,false,false,POS_FACEUP) then
+      local e1=Effect.CreateEffect(e:GetHandler())
+      e1:SetType(EFFECT_TYPE_SINGLE)
+      e1:SetCode(EFFECT_DISABLE)
+      e1:SetReset(RESET_EVENT+RESETS_STANDARD)
+      g:GetFirst():RegisterEffect(e1)
+      local e2=Effect.CreateEffect(e:GetHandler())
+      e2:SetType(EFFECT_TYPE_SINGLE)
+      e2:SetCode(EFFECT_DISABLE_EFFECT)
+      e2:SetReset(RESET_EVENT+RESETS_STANDARD)
+      g:GetFirst():RegisterEffect(e2)
+      local e3=Effect.CreateEffect(e:GetHandler())
+      e3:SetType(EFFECT_TYPE_FIELD)
+      e3:SetRange(LOCATION_MZONE)
+      e3:SetCode(EFFECT_CANNOT_SPECIAL_SUMMON)
+      e3:SetProperty(EFFECT_FLAG_PLAYER_TARGET+EFFECT_FLAG_CANNOT_DISABLE)
+      e3:SetTargetRange(1,0)
+      e3:SetCondition(s.condition2_3)
+      e3:SetReset(RESET_EVENT+RESETS_STANDARD)
+      g:GetFirst():RegisterEffect(e3)
     end
+    Duel.SpecialSummonComplete()
   end
 end
 function s.condition2_3(e)
