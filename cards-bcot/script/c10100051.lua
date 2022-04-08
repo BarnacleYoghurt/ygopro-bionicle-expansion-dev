@@ -1,4 +1,5 @@
 --Gift of the Shrine
+local s,id=GetID()
 function c10100051.initial_effect(c)
 	--Equip
 	local e1=Effect.CreateEffect(c)
@@ -6,45 +7,41 @@ function c10100051.initial_effect(c)
 	e1:SetProperty(EFFECT_FLAG_CARD_TARGET)
 	e1:SetType(EFFECT_TYPE_ACTIVATE)
 	e1:SetCode(EVENT_FREE_CHAIN)
-	e1:SetHintTiming(0,TIMING_DAMAGE_STEP)
-	e1:SetTarget(c10100051.target1)
-	e1:SetOperation(c10100051.operation1)
+	e1:SetTarget(s.target1)
+	e1:SetOperation(s.operation1)
 	c:RegisterEffect(e1)
+  if not GhostBelleTable then GhostBelleTable={} end
+	table.insert(GhostBelleTable,e1)
 end
---e1 - Equip
-function c10100051.filter1a(c)
-	return c:IsSetCard(0x155) and c:IsType(TYPE_MONSTER)
+function s.filter1a(c,tp)
+  return c:IsFaceup() and Duel.IsExistingMatchingCard(s.filter1b,tp,LOCATION_HAND+LOCATION_GRAVE,0,1,nil,c)
 end
-function c10100051.filter1b(c)
-	return c:IsCode(10100055) and c:IsType(TYPE_MONSTER) and c:IsAbleToRemove()
+function s.filter1b(c,ec)
+	return c:IsSetCard(0xb04) and c:IsType(TYPE_EQUIP) and c:CheckEquipTarget(ec)
 end
-function c10100051.filter1c(c,ec)
-	return c:IsSetCard(0x158) and c:IsType(TYPE_EQUIP) and c:CheckEquipTarget(ec)
+function s.filter1c(c,e,tp)
+  return c:IsLevel(1) and c:IsRace(RACE_ROCK) and (c:GetAttack()==0 and c:IsDefenseBelow(0)) and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
 end
-function c10100051.filter1d(c)
-	return c:IsSetCard(0x158) and c:IsType(TYPE_EQUIP)
+function s.target1(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
+	if chk==0 then return Duel.GetLocationCount(tp,LOCATION_SZONE)>0 and Duel.IsExistingTarget(s.filter1a,tp,LOCATION_MZONE,0,1,nil,tp) end
+  Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_EQUIP)
+  local tg=Duel.SelectTarget(tp,s.filter1a,tp,LOCATION_MZONE,0,1,1,nil,tp)
+  local eqg=Duel.GetMatchingGroup(s.filter1b,tp,LOCATION_GRAVE+LOCATION_HAND,0,nil,tg:GetFirst())
+	Duel.SetOperationInfo(0,CATEGORY_EQUIP,eqg,1,0,0)
 end
-function c10100051.target1(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
-	if chk==0 then return Duel.IsExistingTarget(c10100051.filter1a,tp,LOCATION_MZONE,0,1,nil) and Duel.IsExistingTarget(c10100051.filter1b,tp,LOCATION_MZONE+LOCATION_GRAVE,0,1,nil) end
-	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_EQUIP)
-	local g1=Duel.SelectTarget(tp,c10100051.filter1a,tp,LOCATION_MZONE,0,1,1,nil)
-	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_REMOVE)
-	local g2=Duel.SelectTarget(tp,c10100051.filter1b,tp,LOCATION_MZONE+LOCATION_GRAVE,0,1,1,nil)
-	Duel.SetOperationInfo(0,CATEGORY_EQUIP,g1,1,0,0)
-	Duel.SetOperationInfo(0,CATEGORY_REMOVE,g2,1,0,0)
-end
-function c10100051.operation1(e,tp,eg,ep,ev,re,r,rp)
-	local ex,g1=Duel.GetOperationInfo(0,CATEGORY_EQUIP)
-	local ex,g2=Duel.GetOperationInfo(0,CATEGORY_REMOVE)
-	if g2:GetFirst():IsRelateToEffect(e) and Duel.Remove(g2,POS_FACEUP,REASON_EFFECT) then
-		Duel.BreakEffect()
-		local tc=g1:GetFirst()
-		if Duel.Destroy(tc:GetEquipGroup(), REASON_EFFECT) then
-			local g3=Duel.SelectMatchingCard(tp,c10100051.filter1c,tp,LOCATION_DECK+LOCATION_HAND+LOCATION_GRAVE,0,1,1,nil,tc)
-			if g3:GetCount()> 0 then
-				Duel.Equip(tp,g3:GetFirst(),tc)
-			end
-		end
-	end
-	Duel.Recover(tp,Duel.GetMatchingGroupCount(c10100051.filter1d,tp,LOCATION_GRAVE,0,nil)*800,REASON_EFFECT)
+function s.operation1(e,tp,eg,ep,ev,re,r,rp)
+	local tc=Duel.GetFirstTarget()
+  if tc:IsRelateToEffect(e) and tc:IsFaceup() and Duel.GetLocationCount(tp,LOCATION_SZONE)>0 then
+    Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_EQUIP)
+    local g=Duel.SelectMatchingCard(tp,s.filter1b,tp,LOCATION_GRAVE+LOCATION_HAND,0,1,1,nil,tc)
+    if g:GetCount()>0 then
+      if Duel.Equip(tp,g:GetFirst(),tc) and tc:IsSetCard(0xb02) 
+        and Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and Duel.IsExistingMatchingCard(s.filter1c,tp,LOCATION_GRAVE+LOCATION_REMOVED,0,1,nil,e,tp) 
+        and Duel.SelectYesNo(tp,aux.Stringid(id,0)) then
+        Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
+        local sg=Duel.SelectMatchingCard(tp,s.filter1c,tp,LOCATION_GRAVE+LOCATION_REMOVED,0,1,1,nil,e,tp)
+        Duel.SpecialSummon(sg,0,tp,tp,false,false,POS_FACEUP)
+      end
+    end
+  end
 end
