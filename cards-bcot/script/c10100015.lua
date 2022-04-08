@@ -1,120 +1,154 @@
 --Coming of the Toa
-function c10100015.initial_effect(c)
+local s,id=GetID()
+function s.initial_effect(c)
 	--Activate
 	local e1=Effect.CreateEffect(c)
-	e1:SetDescription(aux.Stringid(10100015,0))
+	e1:SetDescription(aux.Stringid(id,0))
 	e1:SetType(EFFECT_TYPE_ACTIVATE)
 	e1:SetCategory(CATEGORY_SPECIAL_SUMMON)
-	e1:SetProperty(EFFECT_FLAG_DAMAGE_STEP)
 	e1:SetCode(EVENT_FREE_CHAIN)
-	e1:SetTarget(c10100015.target1)
-	e1:SetOperation(c10100015.operation1)
+  e1:SetCost(s.cost1)
+	e1:SetTarget(s.target1)
+	e1:SetOperation(s.operation1)
 	e1:SetCountLimit(1,10100015)
 	c:RegisterEffect(e1)
-	--On Destroy
-	local e2=Effect.CreateEffect(c)
-	e1:SetDescription(aux.Stringid(10100015,1))
-	e2:SetCategory(CATEGORY_SPECIAL_SUMMON)
-	e2:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
-	e2:SetCode(EVENT_DESTROYED)
-	e2:SetCost(c10100015.cost2)
-	e2:SetCondition(c10100015.condition2)
-	e2:SetTarget(c10100015.target2)
-	e2:SetOperation(c10100015.operation2)
-	e2:SetCountLimit(1,10100015)
-	c:RegisterEffect(e2)
+	Duel.AddCustomActivityCounter(id,ACTIVITY_SPSUMMON,s.spfilter)
 end
---e1 - Activate
-function c10100015.filter1a(c,tp,id)
-	return c:IsReason(REASON_DESTROY) and c:IsType(TYPE_MONSTER) and c:IsLevelBelow(4) and c:GetTurnID()==id
+--Cannot Special Summon monsters with 2000 or more ATK, except Toa
+function s.spfilter(c) --what the counter IGNORES
+	return not c:IsAttackAbove(2000) or c:IsSetCard(0xb02)
 end
-function c10100015.filter1b(c,e,tp,ec,g)
-	if g and g:IsContains(c) then
+function s.splimit(e,c,sump,sumtype,sumpos,targetp,se) --what you are not allowed to summon
+	return not s.spfilter(c)
+end
+
+function s.create_rescon(cg)
+  --Based on 67331360 (Doll House), but extended to account for 3+ targets and multi-Attribute effects
+  return function (sg,e,tp,mg)
+    if not aux.dncheck(sg,e,tp,mg) then return false end --Abort immediately if names not different
+    
+    local pools={}
+    local mpool = Group.CreateGroup()
+    local i=0
+    for sc in aux.Next(sg) do
+      local att=sc:GetAttribute()
+      local fg = cg:Filter(Card.IsAttribute,nil,att)
+      pools[i] = fg:Clone()
+      for j=0,i-1 do
+        for fc in aux.Next(fg) do
+          if (pools[j]-Group.FromCards(fc)):GetCount()<=0 then
+            pools[i]:RemoveCard(fc) --all choices that would empty a previous pool are discarded
+          end
+        end
+      end
+      if pools[i]:GetCount()<=0 then return false end --do we have any choices left?
+      mpool:Merge(pools[i])
+      i=i+1
+    end
+    return mpool:GetCount()>=sg:GetCount() --are there actually enough cards across all pools for all targets?
+	end
+end
+
+function s.filter1a(c,e)
+  return c:IsType(TYPE_MONSTER) and c:IsCanBeEffectTarget(e)
+end
+function s.filter1b(c,e,tp)
+  return c:IsSetCard(0xb02) and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
+end
+function s.filter1c(c,tid)
+  return c:IsLocation(LOCATION_GRAVE) and c:GetTurnID()==tid and not c:IsReason(REASON_RETURN)
+end
+function s.filter1d(c)
+  return c:IsCode(10100016) and not c:IsForbidden()
+end
+function s.cost1(e,tp,eg,ep,ev,re,r,rp,chk)
+  if chk==0 then return Duel.GetCustomActivityCount(id,tp,ACTIVITY_SPSUMMON)==0 end
+  local c=e:GetHandler()
+	local e1=Effect.CreateEffect(c)
+	e1:SetDescription(aux.Stringid(id,1))
+	e1:SetType(EFFECT_TYPE_FIELD)
+	e1:SetProperty(EFFECT_FLAG_PLAYER_TARGET+EFFECT_FLAG_OATH+EFFECT_FLAG_CLIENT_HINT)
+	e1:SetCode(EFFECT_CANNOT_SPECIAL_SUMMON)
+	e1:SetTargetRange(1,0)
+	e1:SetTarget(s.splimit)
+	e1:SetReset(RESET_PHASE+PHASE_END)
+	Duel.RegisterEffect(e1,tp)
+end
+function s.target1(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
+  if chkc then return false end
+  local ft=math.min(Duel.GetLocationCount(tp,LOCATION_MZONE),3)
+  local tg=Duel.GetMatchingGroup(s.filter1a,tp,LOCATION_GRAVE,0,nil,e)
+  local cg=Duel.GetMatchingGroup(s.filter1b,tp,LOCATION_DECK,0,nil,e,tp)
+  local rescon=s.create_rescon(cg)
+  if chk==0 then return ft>0 and aux.SelectUnselectGroup(tg,e,tp,1,1,rescon,0) end
+  
+  if Duel.IsPlayerAffectedByEffect(tp,CARD_BLUEEYES_SPIRIT) then ft=1 end
+  local g=aux.SelectUnselectGroup(tg,e,tp,1,ft,rescon,1,tp,HINTMSG_TARGET)
+	Duel.SetTargetCard(g)
+	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,g:GetCount(),0,LOCATION_DECK)
+end
+function s.operation1(e,tp,eg,ep,ev,re,r,rp)
+  local c=e:GetHandler()
+  local tg=Duel.GetTargetCards(e) --Note: This seems to automatically check IsRelateToEffect, so if something got banished the target group shrinks silently
+  local ct=tg:GetCount()
+	if ct>0 then
+    local rescon=s.create_rescon(tg)
+    local sg=Duel.GetMatchingGroup(s.filter1b,tp,LOCATION_DECK,0,nil,e,tp)
+    if Duel.GetLocationCount(tp,LOCATION_MZONE)<ct
+      or (ct>1 and Duel.IsPlayerAffectedByEffect(tp,CARD_BLUEEYES_SPIRIT))
+      or not aux.SelectUnselectGroup(sg,e,tp,ct,ct,rescon,0) then return end
+    local ssg=aux.SelectUnselectGroup(sg,e,tp,ct,ct,rescon,1,tp,HINTMSG_SPSUMMON)
+    if ssg:GetCount()==ct then
+      for sc in aux.Next(ssg) do
+        if Duel.SpecialSummonStep(sc,0,tp,tp,false,false,POS_FACEUP) then
+          local e1=Effect.CreateEffect(c)
+          e1:SetType(EFFECT_TYPE_SINGLE)
+          e1:SetCode(EFFECT_CANNOT_ATTACK)
+          sc:RegisterEffect(e1,true)
+          sc:RegisterFlagEffect(id,RESET_EVENT+RESETS_STANDARD,0,1,c:GetFieldID())
+        end
+      end
+      if Duel.SpecialSummonComplete()>0 then
+        ssg:KeepAlive()
+        --Return them to the hand during the End Phase
+        local e2=Effect.CreateEffect(c)
+        e2:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
+        e2:SetCode(EVENT_PHASE+PHASE_END)
+        e2:SetProperty(EFFECT_FLAG_IGNORE_IMMUNE)
+        e2:SetCountLimit(1)
+        e2:SetLabel(c:GetFieldID())
+        e2:SetLabelObject(ssg)
+        e2:SetCondition(s.condition1_2)
+        e2:SetOperation(s.operation1_2)
+        Duel.RegisterEffect(e2,tp)
+        
+        --Place Quest for the Masks in S/T zone
+        if Duel.GetLocationCount(tp,LOCATION_SZONE)>0 and tg:FilterCount(s.filter1c,nil,Duel.GetTurnCount())==ct 
+          and Duel.IsExistingMatchingCard(s.filter1d,tp,LOCATION_DECK,0,1,nil) and Duel.SelectYesNo(tp,aux.Stringid(id,2)) then
+          Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TOFIELD)
+          local qg=Duel.SelectMatchingCard(tp,s.filter1d,tp,LOCATION_DECK,0,1,1,nil)
+          if qg:GetCount()>0 then
+            Duel.BreakEffect()
+            Duel.MoveToField(qg:GetFirst(),tp,tp,LOCATION_SZONE,POS_FACEUP,true)
+          end
+        end
+      end
+    end
+  end
+end
+function s.filter1_2(c,fid)
+	return c:GetFlagEffectLabel(id)==fid
+end
+function s.condition1_2(e,tp,eg,ep,ev,re,r,rp)
+	local g=e:GetLabelObject()
+	if not g:IsExists(s.filter1_2,1,nil,e:GetLabel()) then
+		g:DeleteGroup()
+		e:Reset()
 		return false
-	end
-	return c10100015.filter1a(ec,tp,Duel.GetTurnCount()) and c:IsSetCard(0x155) and c:IsCanBeSpecialSummoned(e,0,tp,false,false) and c:IsAttribute(ec:GetAttribute())
+	else return true end
 end
-function c10100015.target1(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chkc then return chkc:IsLocation(LOCATION_GRAVE) and chkc:IsControler(tp) and chkc:IsCanBeSpecialSummoned(e,0,tp,false,false) end
-	if chk==0 then 
-		local g=Duel.GetMatchingGroup(c10100015.filter1a,tp,LOCATION_GRAVE,0,nil,tp,Duel.GetTurnCount())
-		local ec=g:GetFirst()
-		local sscount=0
-		while ec do
-			if Duel.IsExistingMatchingCard(c10100015.filter1b,tp,LOCATION_HAND+LOCATION_DECK,0,1,nil,e,tp,ec,nil) then
-				sscount=sscount+1
-			end
-			ec=g:GetNext()
-		end
-		return sscount>0 and Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and g:GetCount()>0
-	end
-	local g=Duel.GetMatchingGroup(c10100015.filter1a,tp,LOCATION_GRAVE,0,nil,tp,Duel.GetTurnCount())
-	local ft=Duel.GetLocationCount(tp,LOCATION_MZONE)
-	local sscount=0
-	local ec=g:GetFirst()
-	while ec do
-		if Duel.IsExistingMatchingCard(c10100015.filter1b,tp,LOCATION_HAND+LOCATION_DECK,0,1,nil,e,tp,ec,nil) then
-			sscount=sscount+1
-		end
-		ec=g:GetNext()
-	end
-	if ft>3 then ft=3 end
-	if ft>sscount then ft=sscount end
-	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
-	local trg=Duel.SelectTarget(tp,c10100015.filter1a,tp,LOCATION_GRAVE,0,1,ft,nil,tp,Duel.GetTurnCount())
-	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,trg,trg:GetCount(),0,0)
-end
-function c10100015.operation1(e,tp,eg,ep,ev,re,r,rp)
-	if Duel.GetLocationCount(tp,LOCATION_MZONE)<=0 then return end
-	local g=Duel.GetChainInfo(0,CHAININFO_TARGET_CARDS)
-	local ssg=Group.FromCards()
-	local ec=g:GetFirst()
-	while ec do
-		if ec:GetPreviousControler()==tp then
-			Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
-			local gt=Duel.SelectMatchingCard(tp,c10100015.filter1b,tp,LOCATION_HAND+LOCATION_DECK,0,1,1,nil,e,tp,ec,ssg)
-			ssg:Merge(gt)
-		end
-		ec=g:GetNext()
-	end
-	if ssg:GetCount()~=0 then
-		Duel.SpecialSummon(ssg,0,tp,tp,false,false,POS_FACEUP)
-		local tc=ssg:GetFirst()
-		while tc do
-			local e1=Effect.CreateEffect(tc)
-			e1:SetType(EFFECT_TYPE_SINGLE)
-			e1:SetCode(EFFECT_CANNOT_ATTACK)
-			e1:SetReset(RESET_EVENT+0xff0000+RESET_PHASE+PHASE_END)
-			tc:RegisterEffect(e1)
-			tc:CompleteProcedure()
-			tc=ssg:GetNext()
-		end
-	end
-end
---e2 - On Destroy
-function c10100015.filter2(c,e)
-	return c:IsType(TYPE_MONSTER) and c:IsSetCard(0x155) and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
-end
-function c10100015.condition2(e,tp,eg,ep,ev,re,r,rp)
-	local c=e:GetHandler()
-	return c:IsReason(REASON_EFFECT) and rp==1-tp and c:GetPreviousControler()==tp and c:GetPreviousPosition()==POS_FACEDOWN and c:GetLocation()==LOCATION_GRAVE
-end
-function c10100015.cost2(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.GetMatchingGroupCount(Card.IsDestructable,tp,LOCATION_MZONE,0,nil)>0 end
-	local g=Duel.GetMatchingGroup(Card.IsDestructable,tp,LOCATION_MZONE,0,nil)
-	Duel.Destroy(g,REASON_COST)
-end
-function c10100015.target2(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
-	if chk==0 then return Duel.IsExistingMatchingCard(c10100015.filter2,tp,LOCATION_HAND+LOCATION_DECK,0,1,nil,e) end
-	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,1,0,0)
-end
-function c10100015.operation2(e,tp,eg,ep,ev,re,r,rp)
-	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPECIAL_SUMMON)
-	local g=Duel.SelectMatchingCard(tp,c10100015.filter2,tp,LOCATION_HAND+LOCATION_DECK,0,1,1,nil,e)
-	if g then
-		local tc=g:GetFirst()
-		if tc then
-			Duel.SpecialSummon(tc,0,tp,tp,false,false,POS_FACEUP)
-		end
-	end
+function s.operation1_2(e,tp,eg,ep,ev,re,r,rp)
+	local g=e:GetLabelObject()
+	local tg=g:Filter(s.filter1_2,nil,e:GetLabel())
+	Duel.SendtoHand(tg,nil,REASON_EFFECT)
 end
