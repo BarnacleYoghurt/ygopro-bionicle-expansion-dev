@@ -1,67 +1,77 @@
 --Quest for the Masks
-function c10100016.initial_effect(c)
+local s,id=GetID()
+function s.initial_effect(c)
 	--Activate
 	local e0=Effect.CreateEffect(c)
 	e0:SetType(EFFECT_TYPE_ACTIVATE)
 	e0:SetCode(EVENT_FREE_CHAIN)
 	c:RegisterEffect(e0)
-	--Deck->Grave
+	--Equip
 	local e1=Effect.CreateEffect(c)
-	e1:SetDescription(aux.Stringid(10100016,0))
+	e1:SetDescription(aux.Stringid(id,0))
+  e1:SetCategory(CATEGORY_EQUIP)
 	e1:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O)
-	e1:SetCode(EVENT_BATTLE_DESTROYED)
+	e1:SetCode(EVENT_SUMMON_SUCCESS)
 	e1:SetRange(LOCATION_SZONE)
-	e1:SetCondition(c10100016.condition1)
-	e1:SetTarget(c10100016.target1)
-	e1:SetOperation(c10100016.operation1)
+	e1:SetCondition(s.condition1)
+	e1:SetTarget(s.target1)
+	e1:SetOperation(s.operation1)
 	c:RegisterEffect(e1)
-	--Grave->Hand
+	--Draw
 	local e2=Effect.CreateEffect(c)
-	e2:SetDescription(aux.Stringid(10100016,1))
+  e2:SetCategory(CATEGORY_TOGRAVE+CATEGORY_DRAW+CATEGORY_DESTROY)
+	e2:SetDescription(aux.Stringid(id,1))
 	e2:SetType(EFFECT_TYPE_IGNITION)
 	e2:SetRange(LOCATION_SZONE)
-	e2:SetCost(c10100016.cost2)
-	e2:SetTarget(c10100016.target2)
-	e2:SetOperation(c10100016.operation2)
+	e2:SetTarget(s.target2)
+	e2:SetOperation(s.operation2)
+  e2:SetCountLimit(1,id)
 	c:RegisterEffect(e2)
 end
---e1 - Deck->Grave
-function c10100016.filter1a(c,tp)
-	return c:GetPreviousControler()~=tp
+function s.filter1(c,ec)
+	return (c:IsSetCard(0x1b04) or c:IsSetCard(0x2b04)) and c:IsType(TYPE_EQUIP) and c:CheckEquipTarget(ec)
 end
-function c10100016.filter1b(c)
-	return c:IsType(TYPE_EQUIP) and c:IsSetCard(0x158) and c:IsAbleToGrave()
+function s.condition1(e,tp,eg,ep,ev,re,r,rp)
+	local ec=eg:GetFirst()
+  return ec:IsSetCard(0xb02)
 end
-function c10100016.condition1(e,tp,eg,ep,ev,re,r,rp)
-	return eg:GetCount()==1 and eg:IsExists(c10100016.filter1a,1,nil,tp)
+function s.target1(e,tp,eg,ep,ev,re,r,rp,chk)
+	local ec=eg:GetFirst()
+	if chk==0 then return Duel.GetLocationCount(tp,LOCATION_SZONE)>0 and Duel.IsExistingMatchingCard(s.filter1,tp,LOCATION_DECK,0,1,nil,ec) end
+	local eqg=Duel.GetMatchingGroup(s.filter1,tp,LOCATION_DECK,0,nil,ec)
+  Duel.SetOperationInfo(0,CATEGORY_EQUIP,eqg,1,0,0)
+  Duel.SetTargetCard(ec)
 end
-function c10100016.target1(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.IsExistingMatchingCard(c10100016.filter1b,tp,LOCATION_DECK,0,1,nil) end
-	Duel.SetOperationInfo(0,CATEGORY_TOGRAVE,nil,1,tp,LOCATION_DECK)
+function s.operation1(e,tp,eg,ep,ev,re,r,rp)
+	local c=e:GetHandler()
+  local ec=Duel.GetFirstTarget()
+  if c:IsRelateToEffect(e) and ec:IsRelateToEffect(e) and ec:IsFaceup() and Duel.GetLocationCount(tp,LOCATION_SZONE)>0 then
+    Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_EQUIP)
+    local g=Duel.SelectMatchingCard(tp,s.filter1,tp,LOCATION_DECK,0,1,1,nil,ec)
+    if g:GetCount()>0 then
+      Duel.Equip(tp,g:GetFirst(),ec)
+    end
+  end
 end
-function c10100016.operation1(e,tp,eg,ep,ev,re,r,rp)
-	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TOGRAVE)
-	local g=Duel.SelectMatchingCard(tp,c10100016.filter1b,tp,LOCATION_DECK,0,1,1,nil)
-	if g:GetCount()>0 then
-		Duel.SendtoGrave(g,REASON_EFFECT)
-	end
+function s.filter2a(c)
+	return c:IsType(TYPE_EQUIP) and c:IsSetCard(0xb04) and c:IsAbleToGrave()
 end
---e2 - Grave->Hand
-function c10100016.filter2(c)
-	return c:IsType(TYPE_EQUIP) and c:IsSetCard(0x158) and c:IsAbleToHand()
+function s.target2(e,tp,eg,ep,ev,re,r,rp,chk)
+	if chk==0 then return Duel.IsExistingMatchingCard(s.filter2a,tp,LOCATION_HAND+LOCATION_ONFIELD,0,1,nil) end
+	Duel.SetOperationInfo(0,CATEGORY_TOGRAVE,nil,1,tp,LOCATION_HAND+LOCATION_ONFIELD)
 end
-function c10100016.cost2(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return e:GetHandler():IsAbleToGraveAsCost() end
-	Duel.SendtoGrave(e:GetHandler(),REASON_COST)
-end
-function c10100016.target2(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.IsExistingMatchingCard(c10100016.filter2,tp,LOCATION_GRAVE,0,1,nil) end
-	Duel.SetOperationInfo(0,CATEGORY_TOHAND,nil,1,tp,LOCATION_GRAVE)
-end
-function c10100016.operation2(e,tp,eg,ep,ev,re,r,rp)
-	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TOHAND)
-	local g=Duel.SelectMatchingCard(tp,c10100016.filter2,tp,LOCATION_GRAVE,0,1,1,nil)
-	if g:GetCount()>0 then
-		Duel.SendtoHand(g,nil,REASON_EFFECT)
-	end
+function s.operation2(e,tp,eg,ep,ev,re,r,rp)
+  local c=e:GetHandler()
+  if c:IsRelateToEffect(e) then
+    Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TOGRAVE)
+    local g=Duel.SelectMatchingCard(tp,s.filter2a,tp,LOCATION_HAND+LOCATION_ONFIELD,0,1,99,nil)
+    if Duel.SendtoGrave(g,REASON_EFFECT)>0 then
+      Duel.BreakEffect()
+      local ct=math.floor(Duel.GetMatchingGroupCount(s.filter2,tp,LOCATION_GRAVE,0,nil) / 3)
+      if ct>0 and Duel.Draw(tp,ct,REASON_EFFECT)>0 then
+        Duel.BreakEffect()
+        Duel.Destroy(c,REASON_EFFECT)
+      end
+    end
+  end
 end

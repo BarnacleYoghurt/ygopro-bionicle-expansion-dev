@@ -10,7 +10,7 @@ function s.initial_effect(c)
   e1:SetCost(s.cost1)
 	e1:SetTarget(s.target1)
 	e1:SetOperation(s.operation1)
-	e1:SetCountLimit(1,10100015)
+	e1:SetCountLimit(1,id)
 	c:RegisterEffect(e1)
 	Duel.AddCustomActivityCounter(id,ACTIVITY_SPSUMMON,s.spfilter)
 end
