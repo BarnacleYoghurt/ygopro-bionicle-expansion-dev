@@ -67,7 +67,7 @@ function s.operation2(e,tp,eg,ep,ev,re,r,rp)
     local g=Duel.SelectMatchingCard(tp,s.filter2a,tp,LOCATION_HAND+LOCATION_ONFIELD,0,1,99,nil)
     if Duel.SendtoGrave(g,REASON_EFFECT)>0 then
       Duel.BreakEffect()
-      local ct=math.floor(Duel.GetMatchingGroupCount(s.filter2,tp,LOCATION_GRAVE,0,nil) / 3)
+      local ct=math.floor(Duel.GetMatchingGroup(Card.IsSetCard,tp,LOCATION_GRAVE,0,nil,0xb04):GetClassCount(Card.GetCode) / 3)
       if ct>0 and Duel.Draw(tp,ct,REASON_EFFECT)>0 then
         Duel.BreakEffect()
         Duel.Destroy(c,REASON_EFFECT)
