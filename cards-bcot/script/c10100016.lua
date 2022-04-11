@@ -19,7 +19,7 @@ function s.initial_effect(c)
 	c:RegisterEffect(e1)
 	--Draw
 	local e2=Effect.CreateEffect(c)
-  e2:SetCategory(CATEGORY_TOGRAVE+CATEGORY_DRAW+CATEGORY_DESTROY)
+  e2:SetCategory(CATEGORY_TOGRAVE+CATEGORY_SPECIAL_SUMMON+CATEGORY_DESTROY)
 	e2:SetDescription(aux.Stringid(id,1))
 	e2:SetType(EFFECT_TYPE_IGNITION)
 	e2:SetRange(LOCATION_SZONE)
@@ -56,6 +56,9 @@ end
 function s.filter2a(c)
 	return c:IsType(TYPE_EQUIP) and c:IsSetCard(0xb04) and c:IsAbleToGrave()
 end
+function s.filter2b(c,e,tp,ct)
+  return c:IsLevelBelow(ct) and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
+end
 function s.target2(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingMatchingCard(s.filter2a,tp,LOCATION_HAND+LOCATION_ONFIELD,0,1,nil) end
 	Duel.SetOperationInfo(0,CATEGORY_TOGRAVE,nil,1,tp,LOCATION_HAND+LOCATION_ONFIELD)
@@ -64,13 +67,16 @@ function s.operation2(e,tp,eg,ep,ev,re,r,rp)
   local c=e:GetHandler()
   if c:IsRelateToEffect(e) then
     Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TOGRAVE)
-    local g=Duel.SelectMatchingCard(tp,s.filter2a,tp,LOCATION_HAND+LOCATION_ONFIELD,0,1,99,nil)
-    if Duel.SendtoGrave(g,REASON_EFFECT)>0 then
-      Duel.BreakEffect()
-      local ct=math.floor(Duel.GetMatchingGroup(Card.IsSetCard,tp,LOCATION_GRAVE,0,nil,0xb04):GetClassCount(Card.GetCode) / 3)
-      if ct>0 and Duel.Draw(tp,ct,REASON_EFFECT)>0 then
-        Duel.BreakEffect()
-        Duel.Destroy(c,REASON_EFFECT)
+    local g1=Duel.SelectMatchingCard(tp,s.filter2a,tp,LOCATION_HAND+LOCATION_ONFIELD,0,1,99,nil)
+    if Duel.SendtoGrave(g1,REASON_EFFECT)>0 then
+      local ct=Duel.GetMatchingGroup(Card.IsSetCard,tp,LOCATION_GRAVE,0,nil,0xb04):GetClassCount(Card.GetCode)
+      if Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and Duel.IsExistingMatchingCard(s.filter2b,tp,LOCATION_REMOVED,0,1,nil,e,tp,ct) then
+        Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
+        local g2=Duel.SelectMatchingCard(tp,s.filter2b,tp,LOCATION_REMOVED,0,1,1,nil,e,tp,ct)
+        if Duel.SpecialSummon(g2,0,tp,tp,false,false,POS_FACEUP)>0 then
+          Duel.BreakEffect()
+          Duel.Destroy(c,REASON_EFFECT)
+        end
       end
     end
   end
