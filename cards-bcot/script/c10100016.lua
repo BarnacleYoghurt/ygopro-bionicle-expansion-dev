@@ -70,7 +70,8 @@ function s.operation2(e,tp,eg,ep,ev,re,r,rp)
     local g1=Duel.SelectMatchingCard(tp,s.filter2a,tp,LOCATION_HAND+LOCATION_ONFIELD,0,1,99,nil)
     if Duel.SendtoGrave(g1,REASON_EFFECT)>0 then
       local ct=Duel.GetMatchingGroup(Card.IsSetCard,tp,LOCATION_GRAVE,0,nil,0xb04):GetClassCount(Card.GetCode)
-      if Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and Duel.IsExistingMatchingCard(s.filter2b,tp,LOCATION_REMOVED,0,1,nil,e,tp,ct) then
+      if Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and Duel.IsExistingMatchingCard(s.filter2b,tp,LOCATION_REMOVED,0,1,nil,e,tp,ct) 
+        and Duel.SelectYesNo(tp,aux.Stringid(id,2)) then
         Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
         local g2=Duel.SelectMatchingCard(tp,s.filter2b,tp,LOCATION_REMOVED,0,1,1,nil,e,tp,ct)
         if Duel.SpecialSummon(g2,0,tp,tp,false,false,POS_FACEUP)>0 then
