@@ -3,7 +3,6 @@ local s,id=GetID()
 function s.initial_effect(c)
 	--Activate
 	local e1=Effect.CreateEffect(c)
-	e1:SetDescription(aux.Stringid(id,0))
 	e1:SetType(EFFECT_TYPE_ACTIVATE)
 	e1:SetCategory(CATEGORY_SPECIAL_SUMMON)
 	e1:SetCode(EVENT_FREE_CHAIN)
@@ -53,7 +52,7 @@ function s.filter1a(c,e)
   return c:IsType(TYPE_MONSTER) and c:IsCanBeEffectTarget(e)
 end
 function s.filter1b(c,e,tp)
-  return c:IsSetCard(0xb02) and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
+  return c:IsSetCard(0x1b02) and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
 end
 function s.filter1c(c,tid)
   return c:IsLocation(LOCATION_GRAVE) and c:GetTurnID()==tid and not c:IsReason(REASON_RETURN)
@@ -65,7 +64,7 @@ function s.cost1(e,tp,eg,ep,ev,re,r,rp,chk)
   if chk==0 then return Duel.GetCustomActivityCount(id,tp,ACTIVITY_SPSUMMON)==0 end
   local c=e:GetHandler()
 	local e1=Effect.CreateEffect(c)
-	e1:SetDescription(aux.Stringid(id,1))
+	e1:SetDescription(aux.Stringid(id,0))
 	e1:SetType(EFFECT_TYPE_FIELD)
 	e1:SetProperty(EFFECT_FLAG_PLAYER_TARGET+EFFECT_FLAG_OATH+EFFECT_FLAG_CLIENT_HINT)
 	e1:SetCode(EFFECT_CANNOT_SPECIAL_SUMMON)
@@ -124,7 +123,7 @@ function s.operation1(e,tp,eg,ep,ev,re,r,rp)
         
         --Place Quest for the Masks in S/T zone
         if Duel.GetLocationCount(tp,LOCATION_SZONE)>0 and tg:FilterCount(s.filter1c,nil,Duel.GetTurnCount())==ct 
-          and Duel.IsExistingMatchingCard(s.filter1d,tp,LOCATION_DECK,0,1,nil) and Duel.SelectYesNo(tp,aux.Stringid(id,2)) then
+          and Duel.IsExistingMatchingCard(s.filter1d,tp,LOCATION_DECK,0,1,nil) and Duel.SelectYesNo(tp,aux.Stringid(id,1)) then
           Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TOFIELD)
           local qg=Duel.SelectMatchingCard(tp,s.filter1d,tp,LOCATION_DECK,0,1,1,nil)
           if qg:GetCount()>0 then
