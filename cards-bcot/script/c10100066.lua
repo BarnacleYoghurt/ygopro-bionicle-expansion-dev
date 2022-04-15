@@ -8,6 +8,7 @@ function s.initial_effect(c)
   e1:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
   e1:SetProperty(EFFECT_FLAG_DELAY)
   e1:SetCode(EVENT_SUMMON_SUCCESS)
+  e1:SetCondition(s.condition1)
   e1:SetTarget(s.target1)
   e1:SetOperation(s.operation1)
   e1:SetCountLimit(1,id)
@@ -30,6 +31,9 @@ function s.initial_effect(c)
 end
 function s.filter1(c,e,tp)
   return c:IsLevelBelow(4) and c:IsSetCard(0xb01) and c:IsCanBeSpecialSummoned(e,tp,tp,false,false)
+end
+function s.condition1(e,tp,eg,ep,ev,re,r,rp)
+  return e:GetHandler():IsPreviousLocation(LOCATION_HAND)
 end
 function s.target1(e,tp,eg,ep,ev,re,r,rp,chk)
   if chk==0 then return Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and Duel.IsExistingMatchingCard(s.filter1,tp,LOCATION_HAND,0,1,nil,e,tp) end
