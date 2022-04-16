@@ -2,6 +2,7 @@
 local s,id=GetID()
 function s.initial_effect(c)
 	c:SetUniqueOnField(1,0,id)
+  c:SetCounterLimit(0x10b1,6)
 	--Activate
 	local e0=Effect.CreateEffect(c)
   e0:SetCategory(CATEGORY_REMOVE)
@@ -56,7 +57,7 @@ function s.operation1(e,tp,eg,ep,ev,re,r,rp)
 end
 function s.cost2(e,tp,eg,ep,ev,re,r,rp,chk)
   local c=e:GetHandler()
-	if chk==0 then return c:IsStatus(STATUS_EFFECT_ENABLED) and c:IsAbleToGraveAsCost() and c:GetCounter(0x10b1)>=6 end
+	if chk==0 then return c:IsStatus(STATUS_EFFECT_ENABLED) and c:IsAbleToGraveAsCost() and c:GetCounter(0x10b1)==6 end
 	Duel.SendtoGrave(c,REASON_COST)
 end
 function s.target2(e,tp,eg,ep,ev,re,r,rp,chk)
@@ -68,20 +69,5 @@ function s.operation2(e,tp,eg,ep,ev,re,r,rp)
 	local tc=e:GetLabelObject():GetLabelObject()
 	if tc and tc:GetFlagEffect(id)~=0 then
     Duel.SendtoHand(tc,nil,REASON_EFFECT)
-    if tc:IsLocation(LOCATION_HAND) then
-      local e1=Effect.CreateEffect(e:GetHandler())
-			e1:SetType(EFFECT_TYPE_FIELD)
-			e1:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
-			e1:SetCode(EFFECT_CANNOT_ACTIVATE)
-			e1:SetTargetRange(1,0)
-			e1:SetValue(s.value2_1)
-			e1:SetLabelObject(tc)
-			e1:SetReset(RESET_PHASE+PHASE_END)
-			Duel.RegisterEffect(e1,tp)
-    end
   end
-end
-function s.value2_1(e,re,tp)
-	local tc=e:GetLabelObject()
-	return re:GetHandler():IsCode(tc:GetCode())
 end
