@@ -19,14 +19,27 @@ function s.initial_effect(c)
 	c:RegisterEffect(e1)
 	--Draw
 	local e2=Effect.CreateEffect(c)
-  e2:SetCategory(CATEGORY_TOGRAVE+CATEGORY_SPECIAL_SUMMON+CATEGORY_DESTROY)
+  e2:SetCategory(CATEGORY_DRAW)
 	e2:SetDescription(aux.Stringid(id,1))
 	e2:SetType(EFFECT_TYPE_IGNITION)
 	e2:SetRange(LOCATION_SZONE)
+  e2:SetCost(s.cost2)
 	e2:SetTarget(s.target2)
 	e2:SetOperation(s.operation2)
   e2:SetCountLimit(1,id)
 	c:RegisterEffect(e2)
+  --Special Summon
+  local e3=Effect.CreateEffect(c)
+  e3:SetCategory(CATEGORY_SPECIAL_SUMMON+CATEGORY_DESTROY)
+	e3:SetDescription(aux.Stringid(id,2))
+	e3:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O)
+  e3:SetProperty(EFFECT_FLAG_CARD_TARGET)
+  e3:SetCode(EVENT_PHASE+PHASE_END)
+	e3:SetRange(LOCATION_SZONE)
+	e3:SetTarget(s.target3)
+	e3:SetOperation(s.operation3)
+  e3:SetCountLimit(1)
+	c:RegisterEffect(e3)
 end
 function s.filter1(c,ec)
 	return (c:IsSetCard(0x1b04) or c:IsSetCard(0x2b04)) and c:IsType(TYPE_EQUIP) and c:CheckEquipTarget(ec)
@@ -53,32 +66,43 @@ function s.operation1(e,tp,eg,ep,ev,re,r,rp)
     end
   end
 end
-function s.filter2a(c)
-	return c:IsType(TYPE_EQUIP) and c:IsSetCard(0xb04) and c:IsAbleToGrave()
+function s.filter2(c)
+	return c:IsType(TYPE_EQUIP) and c:IsSetCard(0xb04) and c:IsAbleToGraveAsCost()
 end
-function s.filter2b(c,e,tp,ct)
-  return c:IsLevelBelow(ct) and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
+function s.cost2(e,tp,eg,ep,ev,re,r,rp,chk)
+  if chk==0 then return Duel.IsExistingMatchingCard(s.filter2,tp,LOCATION_HAND,0,1,nil) end
+	local g=Duel.GetMatchingGroup(s.filter2,tp,LOCATION_HAND,0,nil)
+	local ct=math.min(Duel.GetFieldGroupCount(tp,LOCATION_DECK,0),g:GetCount())
+	local sg=g:Select(tp,1,ct,nil)
+	e:SetLabel(sg:GetCount())
+	Duel.SendtoGrave(sg,REASON_COST)
 end
 function s.target2(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.IsExistingMatchingCard(s.filter2a,tp,LOCATION_HAND+LOCATION_ONFIELD,0,1,nil) end
-	Duel.SetOperationInfo(0,CATEGORY_TOGRAVE,nil,1,tp,LOCATION_HAND+LOCATION_ONFIELD)
+	if chk==0 then return Duel.IsPlayerCanDraw(tp,1) end
+	Duel.SetTargetPlayer(tp)
+	Duel.SetTargetParam(e:GetLabel())
+	Duel.SetOperationInfo(0,CATEGORY_DRAW,nil,0,tp,e:GetLabel())
 end
 function s.operation2(e,tp,eg,ep,ev,re,r,rp)
+	local p,d=Duel.GetChainInfo(0,CHAININFO_TARGET_PLAYER,CHAININFO_TARGET_PARAM)
+	Duel.Draw(p,d,REASON_EFFECT)
+end
+function s.filter3(c,e,tp,ct)
+  return c:IsLevelBelow(ct) and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
+end
+function s.target3(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
+  local ct=Duel.GetMatchingGroup(Card.IsSetCard,tp,LOCATION_GRAVE,0,nil,0xb04):GetClassCount(Card.GetCode)
+  if chkc then return chkc:IsControler(tp) and chkc:IsLocation(LOCATION_REMOVED) and s.filter3(chkc,e,tp,ct) end
+	if chk==0 then return Duel.IsExistingTarget(s.filter3,tp,LOCATION_REMOVED,0,1,nil,e,tp,ct) end
+  local g=Duel.SelectTarget(tp,s.filter3,tp,LOCATION_REMOVED,0,1,1,nil,e,tp,ct)
+	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,g,1,0,0)
+  Duel.SetOperationInfo(0,CATEGORY_DESTROY,e:GetHandler(),1,0,0)
+end
+function s.operation3(e,tp,eg,ep,ev,re,r,rp)
   local c=e:GetHandler()
-  if c:IsRelateToEffect(e) then
-    Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TOGRAVE)
-    local g1=Duel.SelectMatchingCard(tp,s.filter2a,tp,LOCATION_HAND+LOCATION_ONFIELD,0,1,99,nil)
-    if Duel.SendtoGrave(g1,REASON_EFFECT)>0 then
-      local ct=Duel.GetMatchingGroup(Card.IsSetCard,tp,LOCATION_GRAVE,0,nil,0xb04):GetClassCount(Card.GetCode)
-      if Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and Duel.IsExistingMatchingCard(s.filter2b,tp,LOCATION_REMOVED,0,1,nil,e,tp,ct) 
-        and Duel.SelectYesNo(tp,aux.Stringid(id,2)) then
-        Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
-        local g2=Duel.SelectMatchingCard(tp,s.filter2b,tp,LOCATION_REMOVED,0,1,1,nil,e,tp,ct)
-        if Duel.SpecialSummon(g2,0,tp,tp,false,false,POS_FACEUP)>0 then
-          Duel.BreakEffect()
-          Duel.Destroy(c,REASON_EFFECT)
-        end
-      end
-    end
+  local tc=Duel.GetFirstTarget()
+  if c:IsRelateToEffect(e) and tc:IsRelateToEffect(e) and Duel.SpecialSummon(tc,0,tp,tp,false,false,POS_FACEUP)>0 then
+    Duel.BreakEffect()
+    Duel.Destroy(c,REASON_EFFECT)
   end
 end
