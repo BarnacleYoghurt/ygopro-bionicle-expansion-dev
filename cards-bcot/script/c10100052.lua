@@ -32,7 +32,7 @@ function s.initial_effect(c)
   c:RegisterEffect(e3)
 end
 function s.filter2(c)
-	return c:IsType(TYPE_EQUIP) and (c:IsSetCard(0x1b04) or c:IsSetCard(0x2b04)) and c:IsAbleToRemove()
+	return c:IsType(TYPE_EQUIP) and c:IsSetCard(0x1b04) and c:IsAbleToRemove()
 end
 function s.condition2(e,tp,eg,ep,ev,re,r,rp)
   local ec=e:GetHandler():GetEquipTarget()
