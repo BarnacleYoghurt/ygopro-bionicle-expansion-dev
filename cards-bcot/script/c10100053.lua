@@ -13,6 +13,8 @@ function s.initial_effect(c)
 	c:RegisterEffect(e1)
 end
 s.roll_dice=true
+s.listed_series={0x1b02}
+s.listed_names={10100015}
 function s.filter1a(c)
   return c:IsSetCard(0x1b02) and c:IsType(TYPE_MONSTER) and c:IsAbleToHand()
 end
@@ -71,9 +73,9 @@ function s.operation1(e,tp,eg,ep,ev,re,r,rp)
           Duel.ConfirmCards(1-tp,g)
         end
       end
-    else
+    elseif ac==2 then
       Duel.BreakEffect()
-      Duel.Recover(tp,2000,REASON_EFFECT)
+      Duel.Recover(tp,1800,REASON_EFFECT)
     end
   end
 end
