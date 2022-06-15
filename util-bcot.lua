@@ -85,8 +85,8 @@ function BCOT.toa_mata_tribute(baseC)
 	e:SetProperty(EFFECT_FLAG_CANNOT_DISABLE+EFFECT_FLAG_UNCOPYABLE)
 	e:SetCode(EFFECT_SUMMON_PROC)
 	e:SetCondition(condition)
-	e:SetOperation(operation)
 	e:SetValue(SUMMON_TYPE_TRIBUTE)
+	e:SetOperation(operation)
 	return e
 end
 function BCOT.toa_mata_swapkanohi(baseC)

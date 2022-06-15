@@ -1,5 +1,5 @@
 if not bcot then
-	dofile "expansions/util-bcot.lua"
+	Duel.LoadScript("../util-bcot.lua")
 end
 --Toa Mata Tahu
 local s,id=GetID()
@@ -12,17 +12,18 @@ function s.initial_effect(c)
 	local e2=Effect.CreateEffect(c)
 	e2:SetDescription(aux.Stringid(id,1))
 	e2:SetCategory(CATEGORY_ATKCHANGE)
-	e2:SetProperty(EFFECT_FLAG_CARD_TARGET)
 	e2:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O)
-	e2:SetCode(EVENT_BATTLED)
+	e2:SetProperty(EFFECT_FLAG_DELAY+EFFECT_FLAG_CARD_TARGET)
 	e2:SetRange(LOCATION_MZONE)
+	e2:SetCode(EVENT_BATTLED)
 	e2:SetTarget(s.target2)
 	e2:SetOperation(s.operation2)
   e2:SetCountLimit(1)
 	c:RegisterEffect(e2)
 end
+s.listed_series={0x1b02}
 function s.target2(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
-  if chkc then return chkc:IsLocation(LOCATION_MZONE) and chkc:IsControler(1-tp) end
+  if chkc then return chkc:IsFaceup() and chkc:IsLocation(LOCATION_MZONE) and chkc:IsControler(1-tp) end
 	if chk==0 then return Duel.IsExistingTarget(Card.IsFaceup,tp,0,LOCATION_MZONE,1,nil) end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_FACEUP)
 	Duel.SelectTarget(tp,Card.IsFaceup,tp,0,LOCATION_MZONE,1,1,nil)
@@ -30,7 +31,7 @@ end
 function s.operation2(e,tp,eg,ep,ev,re,r,rp)
   local c=e:GetHandler()
 	local tc=Duel.GetFirstTarget()
-	if tc:IsRelateToEffect(e) then
+	if tc:IsFaceup() and tc:IsRelateToEffect(e) then
 		local e1=Effect.CreateEffect(e:GetHandler())
 		e1:SetType(EFFECT_TYPE_SINGLE)
 		e1:SetCode(EFFECT_SET_ATTACK_FINAL)
@@ -38,17 +39,16 @@ function s.operation2(e,tp,eg,ep,ev,re,r,rp)
 		e1:SetReset(RESET_EVENT+RESETS_STANDARD)
 		tc:RegisterEffect(e1)
     local fid=c:GetFieldID()
-    tc:RegisterFlagEffect(id,RESET_EVENT+RESET_TURN_SET+RESET_OVERLAY+RESET_MSCHANGE+RESET_TOFIELD+RESET_PHASE+PHASE_END,EFFECT_FLAG_CLIENT_HINT,1,fid,aux.Stringid(id,3))
-    --TODO: See https://github.com/Fluorohydride/ygopro-scripts/blob/b820812a1ffb14eeb0022b2336c0c8c93d856d5c/c52038441.lua#
-    --Basically we need to track when the card loses its identity other than through battle destruction and silently reset the effect in that case
-    --Normal Resets unfortunately don't work here because they turn the effect off before it is applied
+    --Slight flaw: This doesn't reset when leaving the field by ways other than battle destruction, because in that case the reset would happen before the effect triggers
+    --However, RESET_TOFIELD means it can only ever be a problem if you manage to destroy a card outside the field by battle 
+    tc:RegisterFlagEffect(id,RESET_EVENT+RESET_TURN_SET+RESET_OVERLAY+RESET_MSCHANGE+RESET_TOFIELD+RESET_PHASE+PHASE_END,EFFECT_FLAG_CLIENT_HINT,1,fid,aux.Stringid(id,2))
     local e2=Effect.CreateEffect(e:GetHandler())
     e2:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_CONTINUOUS)
     e2:SetCode(EVENT_BATTLE_DESTROYED)
-		e2:SetReset(RESET_PHASE+PHASE_END)
+    e2:SetOperation(s.operation2_2)
     e2:SetLabel(fid)
     e2:SetLabelObject(tc)
-    e2:SetOperation(s.operation2_2)
+		e2:SetReset(RESET_PHASE+PHASE_END)
     Duel.RegisterEffect(e2,tp)
 	end
 end
