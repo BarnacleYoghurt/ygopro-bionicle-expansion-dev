@@ -223,12 +223,11 @@ function BCOT.kanohi_equip_great(baseC)
 end
 function BCOT.kanohi_selfdestruct(baseC)
   local function filter(c,ec)
-    return c:GetEquipTarget()==ec and c:IsSetCard(0xb04) and c:IsDestructable()
+    return c:GetEquipTarget()==ec and c:IsSetCard(0xb04)
   end
   local function target(e,tp,eg,ep,ev,re,r,rp,chk)
     local c=e:GetHandler()
     if chk==0 then return eg:IsExists(filter,1,c,c:GetEquipTarget()) end
-    Duel.SetOperationInfo(0,CATEGORY_DESTROY,c,1,0,0)
     c:CreateEffectRelation(e)
   end
   local function operation(e,tp,eg,ep,ev,re,r,rp)
@@ -261,8 +260,7 @@ function BCOT.kanohi_search(baseC, targetCode)
   end
   local function target(e,tp,eg,ep,ev,re,r,rp,chk)
     if chk==0 then return Duel.IsExistingMatchingCard(filterB,tp,LOCATION_DECK,0,1,nil) end
-    local tc=Duel.GetFirstMatchingCard(filterB,tp,LOCATION_DECK,0,nil)
-    Duel.SetOperationInfo(0,CATEGORY_SEARCH+CATEGORY_TOHAND,tc,1,0,0)
+    Duel.SetOperationInfo(0,CATEGORY_TOHAND,nil,1,tp,LOCATION_DECK)
   end
   local function operation(e,tp,eg,ep,ev,re,r,rp)
     local tc=Duel.GetFirstMatchingCard(filterB,tp,LOCATION_DECK,0,nil)
