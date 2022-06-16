@@ -1,5 +1,5 @@
 if not bcot then
-	dofile "expansions/util-bcot.lua"
+	Duel.LoadScript("../util-bcot.lua")
 end
 --Great Kanohi Hau
 local s,id=GetID()
@@ -28,3 +28,5 @@ function s.initial_effect(c)
   e4:SetCountLimit(1,id)
 	c:RegisterEffect(e4)
 end
+s.listed_names={10100001}
+s.listed_series={0xb04,0xb02,0xb07}

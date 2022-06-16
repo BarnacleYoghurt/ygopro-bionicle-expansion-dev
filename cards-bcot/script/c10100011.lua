@@ -1,5 +1,5 @@
 if not bcot then
-	dofile "expansions/util-bcot.lua"
+	Duel.LoadScript("../util-bcot.lua")
 end
 --Great Kanohi Akaku
 local s,id=GetID()
@@ -11,9 +11,9 @@ function s.initial_effect(c)
   --Hand Reveal
 	local e2=Effect.CreateEffect(c)
 	e2:SetType(EFFECT_TYPE_FIELD)
-	e2:SetCode(EFFECT_PUBLIC)
 	e2:SetRange(LOCATION_SZONE)
 	e2:SetTargetRange(0,LOCATION_HAND)
+	e2:SetCode(EFFECT_PUBLIC)
   e2:SetCondition(s.condition2)
 	c:RegisterEffect(e2)
 	--Banish Spell/Trap
@@ -22,8 +22,8 @@ function s.initial_effect(c)
   e3:SetCategory(CATEGORY_REMOVE)
 	e3:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O)
 	e3:SetProperty(EFFECT_FLAG_DELAY)
-	e3:SetCode(EVENT_TO_HAND)
   e3:SetRange(LOCATION_SZONE)
+	e3:SetCode(EVENT_TO_HAND)
   e3:SetCondition(s.condition3)
   e3:SetTarget(s.target3)
 	e3:SetOperation(s.operation3)
@@ -35,6 +35,8 @@ function s.initial_effect(c)
   e4:SetCountLimit(1,id)
 	c:RegisterEffect(e4)
 end
+s.listed_names={10100005}
+s.listed_series={0xb04,0xb02,0xb07}
 function s.condition2(e)
   local ec=e:GetHandler():GetEquipTarget()
 	return bcot.greatkanohi_con(e) and ec:IsControler(e:GetOwnerPlayer())
@@ -62,10 +64,10 @@ function s.operation3(e,tp,eg,ep,ev,re,r,rp)
     local e1=Effect.CreateEffect(e:GetHandler())
     e1:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
     e1:SetCode(EVENT_PHASE+PHASE_END)
-    e1:SetCountLimit(1)
-    e1:SetLabelObject(rg)
     e1:SetCondition(s.condition3_1)
     e1:SetOperation(s.operation3_1)
+    e1:SetLabelObject(rg)
+    e1:SetCountLimit(1)
     e1:SetReset(RESET_PHASE+PHASE_END)
     Duel.RegisterEffect(e1,tp)
   end

@@ -1,5 +1,5 @@
 if not bcot then
-	dofile "expansions/util-bcot.lua"
+	Duel.LoadScript("../util-bcot.lua")
 end
 --Great Kanohi Kaukau
 local s,id=GetID()
@@ -21,6 +21,8 @@ function s.initial_effect(c)
   e3:SetCountLimit(1,id)
 	c:RegisterEffect(e3)
 end
+s.listed_names={10100002}
+s.listed_series={0xb04,0xb02,0xb07}
 function s.value2(e,re)
   if e:GetOwnerPlayer()==re:GetOwnerPlayer() then return false end
 	if not re:IsHasProperty(EFFECT_FLAG_CARD_TARGET) then return true end
