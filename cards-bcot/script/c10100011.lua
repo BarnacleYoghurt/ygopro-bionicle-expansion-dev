@@ -14,7 +14,7 @@ function s.initial_effect(c)
 	e2:SetRange(LOCATION_SZONE)
 	e2:SetTargetRange(0,LOCATION_HAND)
 	e2:SetCode(EFFECT_PUBLIC)
-  e2:SetCondition(s.condition2)
+  e2:SetCondition(s.condition)
 	c:RegisterEffect(e2)
 	--Banish Spell/Trap
 	local e3=Effect.CreateEffect(c)
@@ -24,7 +24,7 @@ function s.initial_effect(c)
 	e3:SetProperty(EFFECT_FLAG_DELAY)
   e3:SetRange(LOCATION_SZONE)
 	e3:SetCode(EVENT_TO_HAND)
-  e3:SetCondition(s.condition3)
+  e3:SetCondition(s.condition)
   e3:SetTarget(s.target3)
 	e3:SetOperation(s.operation3)
   e3:SetCountLimit(1)
@@ -37,15 +37,12 @@ function s.initial_effect(c)
 end
 s.listed_names={10100005}
 s.listed_series={0xb04,0xb02,0xb07}
-function s.condition2(e)
+function s.condition(e)
   local ec=e:GetHandler():GetEquipTarget()
 	return bcot.greatkanohi_con(e) and ec:IsControler(e:GetOwnerPlayer())
 end
 function s.filter3(c,tp)
   return c:IsType(TYPE_SPELL+TYPE_TRAP) and c:IsControler(1-tp) and c:IsAbleToRemove()
-end
-function s.condition3(e,tp,eg,ep,ev,re,r,rp)
-  return s.condition2(e) and eg:IsExists(Card.IsControler,1,nil,1-tp)
 end
 function s.target3(e,tp,eg,ep,ev,re,r,rp,chk)
   if chk==0 then return eg:IsExists(s.filter3,1,nil,tp) end
@@ -54,7 +51,7 @@ function s.target3(e,tp,eg,ep,ev,re,r,rp,chk)
 end
 function s.operation3(e,tp,eg,ep,ev,re,r,rp)
   local rg=eg:Filter(s.filter3,nil,tp):Filter(Card.IsRelateToEffect,nil,e)
-  if rg:GetCount()>0 then
+  if e:GetHandler():IsRelateToEffect(e) and rg:GetCount()>0 then
     Duel.Remove(rg,POS_FACEUP,REASON_EFFECT+REASON_TEMPORARY)
     local tc=rg:GetFirst()
     for tc in aux.Next(rg) do
