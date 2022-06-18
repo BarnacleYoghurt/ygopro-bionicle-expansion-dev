@@ -1,5 +1,5 @@
 if not bcot then
-	dofile "expansions/util-bcot.lua"
+	Duel.LoadScript("../util-bcot.lua")
 end
 --Noble Kanohi Matatu
 local s,id=GetID()
@@ -10,6 +10,7 @@ function s.initial_effect(c)
   c:RegisterEffect(e1)
   --Change Position
   local e2=Effect.CreateEffect(c)
+  e2:SetDescription(aux.Stringid(id,0))
   e2:SetType(EFFECT_TYPE_IGNITION)
   e2:SetRange(LOCATION_SZONE)
   e2:SetCondition(bcot.noblekanohi_con)
@@ -24,6 +25,8 @@ function s.initial_effect(c)
   e4:SetCountLimit(1,id)
   c:RegisterEffect(e4)
 end
+s.listed_names={10100021}
+s.listed_series={0xb04,0xb03,0xb02,0xb07}
 function s.cost2(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return e:GetHandler():GetEquipTarget():GetAttackAnnouncedCount()==0 end
 	local e1=Effect.CreateEffect(e:GetHandler())

@@ -1,5 +1,5 @@
 if not bcot then
-	dofile "expansions/util-bcot.lua"
+	Duel.LoadScript("../util-bcot.lua")
 end
 --Noble Kanohi Ruru
 local s,id=GetID()
@@ -10,10 +10,10 @@ function s.initial_effect(c)
   c:RegisterEffect(e1)
 	--Confirm
 	local e2=Effect.CreateEffect(c)
-  e2:SetCategory(CATEGORY_DAMAGE)
   e2:SetDescription(aux.Stringid(id,0))
-  e2:SetProperty(EFFECT_FLAG_CARD_TARGET)
+  e2:SetCategory(CATEGORY_DAMAGE)
 	e2:SetType(EFFECT_TYPE_IGNITION)
+  e2:SetProperty(EFFECT_FLAG_CARD_TARGET)
   e2:SetRange(LOCATION_SZONE)
   e2:SetCondition(bcot.noblekanohi_con)
   e2:SetTarget(s.target2)
@@ -26,6 +26,8 @@ function s.initial_effect(c)
   e3:SetCountLimit(1,id+1000000)
   c:RegisterEffect(e3)
 end
+s.listed_names={10100019}
+s.listed_series={0xb04,0xb03,0xb02,0xb07}
 function s.target2(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
   if chkc then return chkc:IsCanBeEffectTarget(e) and chkc:IsFacedown() and chkc:IsLocation(LOCATION_ONFIELD) and chkc:IsControler(1-tp) end 
 	if chk==0 then return Duel.IsExistingTarget(Card.IsFacedown,tp,0,LOCATION_ONFIELD,1,nil) end

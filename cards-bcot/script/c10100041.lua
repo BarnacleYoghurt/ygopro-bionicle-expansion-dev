@@ -1,5 +1,5 @@
 if not bcot then
-	dofile "expansions/util-bcot.lua"
+	Duel.LoadScript("../util-bcot.lua")
 end
 --Noble Kanohi Rau
 local s,id=GetID()
@@ -11,19 +11,19 @@ function s.initial_effect(c)
   --Translate 
 	local e2a=Effect.CreateEffect(c)
 	e2a:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
-	e2a:SetCode(EVENT_CHAINING)
 	e2a:SetRange(LOCATION_SZONE)
-	e2a:SetCountLimit(1)
+	e2a:SetCode(EVENT_CHAINING)
 	e2a:SetCondition(s.condition2a)
 	e2a:SetOperation(s.operation2a)
+	e2a:SetCountLimit(1)
 	c:RegisterEffect(e2a)
 	local e2b=Effect.CreateEffect(c)
 	e2b:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
-	e2b:SetCode(EVENT_CHAIN_SOLVING)
 	e2b:SetRange(LOCATION_SZONE)
-	e2b:SetCountLimit(1)
+	e2b:SetCode(EVENT_CHAIN_SOLVING)
   e2b:SetCondition(s.condition2b)
 	e2b:SetOperation(s.operation2b)
+	e2b:SetCountLimit(1)
 	c:RegisterEffect(e2b)
   --Recycle
   local e3=bcot.kanohi_revive(c,10100018)
@@ -31,6 +31,8 @@ function s.initial_effect(c)
   e3:SetCountLimit(1,id)
   c:RegisterEffect(e3)
 end
+s.listed_names={10100018}
+s.listed_series={0xb04,0xb03,0xb02,0xb07}
 function s.condition2a(e,tp,eg,ep,ev,re,r,rp)
   local ec=e:GetHandler():GetEquipTarget()
   local tg=Duel.GetChainInfo(ev,CHAININFO_TARGET_CARDS)

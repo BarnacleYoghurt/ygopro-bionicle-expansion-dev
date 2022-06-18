@@ -1,5 +1,5 @@
 if not bcot then
-	dofile "expansions/util-bcot.lua"
+	Duel.LoadScript("../util-bcot.lua")
 end
 --Noble Kanohi Huna
 local s,id=GetID()
@@ -21,6 +21,8 @@ function s.initial_effect(c)
   e3:SetCountLimit(1,id)
   c:RegisterEffect(e3)
 end
+s.listed_names={10100017}
+s.listed_series={0xb04,0xb03,0xb02,0xb07}
 function s.condition2(e)
   local tp=e:GetHandlerPlayer()
 	return bcot.noblekanohi_con(e) and Duel.GetFieldGroupCount(tp,LOCATION_MZONE,0)>1
