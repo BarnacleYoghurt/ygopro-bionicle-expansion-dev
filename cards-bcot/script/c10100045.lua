@@ -35,7 +35,9 @@ s.listed_names={10100022,id+10000}
 s.listed_series={0xb04,0xb03,0xb02,0xb07}
 function s.condition2(e)
 	local tp=e:GetHandlerPlayer()
-	return bcot.noblekanohi_con(e) and Duel.GetFieldGroup(tp,LOCATION_MZONE,0,nil):GetCount()==1
+  local ec=e:GetHandler():GetEquipTarget()
+  local ct=1-math.abs(tp-ec:GetControler()) --1 if on own field, 0 if on opponent's
+	return bcot.noblekanohi_con(e) and Duel.GetFieldGroupCount(tp,LOCATION_MZONE,0,nil)==ct
 end
 function s.target2(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and Duel.IsPlayerCanSpecialSummonMonster(tp,id+10000,0,0x4011,0,0,3,RACE_SPELLCASTER,ATTRIBUTE_WIND) end
