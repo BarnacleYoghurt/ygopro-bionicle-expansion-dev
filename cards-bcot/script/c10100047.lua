@@ -30,22 +30,26 @@ function s.initial_effect(c)
 	e2:SetCost(s.cost2)
 	e2:SetTarget(s.target2)
 	e2:SetOperation(s.operation2)
-  e2:SetCountLimit(1,id+1000000)
+  e2:SetCountLimit(1,{id,1})
 	c:RegisterEffect(e2)
 end
-function s.filter1(c)
-  return c:IsLevel(2) and c:IsSetCard(0xb01) and c:IsAbleToHand()
+s.listed_series={0xb01}
+function s.filter1a(c)
+  return c:IsLevel(2) and c:IsSetCard(0xb01)
+end
+function s.filter1b(c)
+  return s.filter1a(c) and c:IsAbleToHand()
 end
 function s.cost1(e,tp,eg,ep,ev,re,r,rp,chk)
   if chk==0 then return e:GetHandler():IsDiscardable() end
 	Duel.SendtoGrave(e:GetHandler(),REASON_COST+REASON_DISCARD)
 end
 function s.target1(e,tp,eg,ep,ev,re,r,rp,chk)
-  if chk==0 then return Duel.GetMatchingGroup(s.filter1,tp,LOCATION_DECK,0,nil):GetClassCount(Card.GetAttribute)>=3 end
+  if chk==0 then return Duel.GetMatchingGroup(s.filter1b,tp,LOCATION_DECK,0,nil):GetClassCount(Card.GetAttribute)>=3 end
   Duel.SetOperationInfo(0,CATEGORY_TOHAND,nil,1,0,LOCATION_DECK)
 end
 function s.operation1(e,tp,eg,ep,ev,re,r,rp)
-  local g=Duel.GetMatchingGroup(s.filter1,tp,LOCATION_DECK,0,nil)
+  local g=Duel.GetMatchingGroup(s.filter1a,tp,LOCATION_DECK,0,nil)
 	if g:GetClassCount(Card.GetAttribute)>=3 then
 		local cg=Group.CreateGroup()
 		for i=1,3 do
@@ -59,8 +63,11 @@ function s.operation1(e,tp,eg,ep,ev,re,r,rp)
 		Duel.Hint(HINT_SELECTMSG,1-tp,HINTMSG_ATOHAND)
 		local tg=cg:Select(1-tp,1,1,nil)
 		local tc=tg:GetFirst()
-		Duel.SendtoHand(tc,nil,REASON_EFFECT)
-		cg:RemoveCard(tc)
+    if tc:IsAbleToHand() then
+      Duel.SendtoHand(tc,nil,REASON_EFFECT)
+      Duel.ConfirmCards(1-tp,tc)
+      cg:RemoveCard(tc)
+    end
 		Duel.SendtoGrave(cg,REASON_EFFECT)
 	end
 end
@@ -81,13 +88,14 @@ function s.target2(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
   end
   Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_DESTROY)
   local g=Duel.SelectTarget(tp,aux.TRUE,tp,0,LOCATION_MZONE,1,1,nil)
+  Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,e:GetHandler(),1,0,LOCATION_GRAVE)
   Duel.SetOperationInfo(0,CATEGORY_DESTROY,g,1,0,0)
 end
 function s.operation2(e,tp,eg,ep,ev,re,r,rp)
   local c=e:GetHandler()
   if c:IsRelateToEffect(e) and Duel.SpecialSummon(c,0,tp,tp,true,true,POS_FACEUP)>0 then
     local tc=Duel.GetFirstTarget()
-    if tc:IsRelateToEffect(e) then
+    if tc:IsRelateToEffect(e) and tc:IsControler(1-tp) then
       Duel.Destroy(tc,REASON_EFFECT)
     end
   end
