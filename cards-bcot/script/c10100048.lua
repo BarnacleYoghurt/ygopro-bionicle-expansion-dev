@@ -1,5 +1,5 @@
 if not bcot then
-	dofile "expansions/util-bcot.lua"
+	Duel.LoadScript("../util-bcot.lua")
 end
 --Great Kanohi Aki
 local s,id=GetID()
@@ -49,6 +49,7 @@ function s.initial_effect(c)
   e6:SetCountLimit(1)
 	c:RegisterEffect(e6)
 end
+s.listed_series={0xb04,0x1b02,0x2b02,0xb02}
 function s.condition(e)
   return bcot.kanohi_con(e,{0x2b02})
 end

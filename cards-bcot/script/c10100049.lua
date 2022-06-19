@@ -1,5 +1,5 @@
 if not bcot then
-	dofile "expansions/util-bcot.lua"
+	Duel.LoadScript("../util-bcot.lua")
 end
 --Great Kanohi Rua
 local s,id=GetID()
@@ -18,9 +18,9 @@ function s.initial_effect(c)
 	--Hand Reveal
 	local e3=Effect.CreateEffect(c)
 	e3:SetType(EFFECT_TYPE_FIELD)
-	e3:SetCode(EFFECT_PUBLIC)
 	e3:SetRange(LOCATION_SZONE)
 	e3:SetTargetRange(0,LOCATION_HAND)
+	e3:SetCode(EFFECT_PUBLIC)
   e3:SetCondition(s.condition)
 	c:RegisterEffect(e3)
 	--Xyz
@@ -34,6 +34,7 @@ function s.initial_effect(c)
 	e4:SetOperation(s.operation4)
 	c:RegisterEffect(e4)
 end
+s.listed_series={0xb04,0x1b02,0x2b02,0xb02}
 function s.condition(e)
   return bcot.kanohi_con(e,{0x2b02})
 end
