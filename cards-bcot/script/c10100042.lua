@@ -37,7 +37,7 @@ end
 function s.operation2(e,tp,eg,ep,ev,re,r,rp)
 	local tc=Duel.GetFirstTarget()
   local ec=e:GetHandler():GetEquipTarget()
-	if tc:IsRelateToEffect(e) and tc:IsFacedown() then
+	if e:GetHandler():IsRelateToEffect(e) and tc:IsRelateToEffect(e) and tc:IsFacedown() then
     Duel.ConfirmCards(tp,tc)
     if tc:IsType(TYPE_SPELL+TYPE_TRAP) then
       Duel.Damage(1-tp,500,REASON_EFFECT)
