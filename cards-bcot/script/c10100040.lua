@@ -13,7 +13,7 @@ function s.initial_effect(c)
 	e2:SetType(EFFECT_TYPE_EQUIP)
 	e2:SetCode(EFFECT_CANNOT_BE_BATTLE_TARGET)
 	e2:SetCondition(s.condition2)
-	e2:SetValue(1)
+	e2:SetValue(aux.imval2)
 	c:RegisterEffect(e2)
   --Recycle
   local e3=bcot.kanohi_revive(c,10100017)

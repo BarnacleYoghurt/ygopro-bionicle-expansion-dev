@@ -291,8 +291,11 @@ function BCOT.kanohi_revive(baseC, targetCode)
   end
   local function target(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
     local c=e:GetHandler()
-    if chkc then return filter(chkc) and chkc:IsLocation(LOCATION_GRAVE) and chkc:IsControler(tp) end
-    if chk==0 then return Duel.IsExistingTarget(filter,tp,LOCATION_GRAVE,0,1,nil,e,tp,c) end
+    if chkc then return filter(chkc,e,tp,c) and chkc:IsLocation(LOCATION_GRAVE) and chkc:IsControler(tp) end
+    if chk==0 then 
+      return Duel.IsExistingTarget(filter,tp,LOCATION_GRAVE,0,1,nil,e,tp,c) 
+        and Duel.GetLocationCount(tp,LOCATION_MZONE)>-1 and Duel.GetLocationCount(tp,LOCATION_SZONE)>0 
+    end
     Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
     local g=Duel.SelectTarget(tp,filter,tp,LOCATION_GRAVE,0,1,1,nil,e,tp,c)
     Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,g,1,0,0)
@@ -301,7 +304,7 @@ function BCOT.kanohi_revive(baseC, targetCode)
   local function operation(e,tp,eg,ep,ev,re,r,rp)
     local c=e:GetHandler()
     local tc=Duel.GetFirstTarget()
-    if c:IsRelateToEffect(e) and tc:IsRelateToEffect(e) then
+    if c:IsRelateToEffect(e) and tc:IsRelateToEffect(e) and Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and Duel.GetLocationCount(tp,LOCATION_SZONE)>0 then
       if Duel.SpecialSummon(tc,SUMMON_TYPE_SPECIAL,tp,tp,false,false,POS_FACEUP) then
         Duel.Equip(tp,c,tc)
       end
