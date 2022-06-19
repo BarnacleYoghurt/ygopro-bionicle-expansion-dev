@@ -1,5 +1,5 @@
 if not bcot then
-	dofile "expansions/util-bcot.lua"
+	Duel.LoadScript("../util-bcot.lua")
 end
 --Golden Great Kanohi
 local s,id=GetID()
@@ -31,6 +31,7 @@ function s.initial_effect(c)
   e3:SetCountLimit(1,id)
   c:RegisterEffect(e3)
 end
+s.listed_series={0xb04,0xb02,0x1b04}
 function s.filter2(c)
 	return c:IsType(TYPE_EQUIP) and c:IsSetCard(0x1b04) and c:IsAbleToRemove()
 end

@@ -4,13 +4,14 @@ function c10100051.initial_effect(c)
 	--Equip
 	local e1=Effect.CreateEffect(c)
 	e1:SetCategory(CATEGORY_EQUIP)
-	e1:SetProperty(EFFECT_FLAG_CARD_TARGET)
 	e1:SetType(EFFECT_TYPE_ACTIVATE)
+	e1:SetProperty(EFFECT_FLAG_CARD_TARGET)
 	e1:SetCode(EVENT_FREE_CHAIN)
 	e1:SetTarget(s.target1)
 	e1:SetOperation(s.operation1)
 	c:RegisterEffect(e1)
 end
+s.listed_series={0xb04,0x2b04,0x1b04}
 function s.filter1a(c,tp)
   return c:IsFaceup() and (
     Duel.IsExistingMatchingCard(s.filter1b,tp,LOCATION_HAND+LOCATION_GRAVE,0,1,nil,c) or
