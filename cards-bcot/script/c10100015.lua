@@ -3,8 +3,8 @@ local s,id=GetID()
 function s.initial_effect(c)
 	--Activate
 	local e1=Effect.CreateEffect(c)
-	e1:SetType(EFFECT_TYPE_ACTIVATE)
 	e1:SetCategory(CATEGORY_SPECIAL_SUMMON)
+	e1:SetType(EFFECT_TYPE_ACTIVATE)
 	e1:SetCode(EVENT_FREE_CHAIN)
   e1:SetCost(s.cost1)
 	e1:SetTarget(s.target1)
@@ -13,6 +13,8 @@ function s.initial_effect(c)
 	c:RegisterEffect(e1)
 	Duel.AddCustomActivityCounter(id,ACTIVITY_SPSUMMON,s.spfilter)
 end
+s.listed_names={10100016}
+s.listed_series={0x1b02,0xb02}
 --Cannot Special Summon monsters with 2000 or more ATK, except Toa
 function s.spfilter(c) --what the counter IGNORES
 	return not c:IsAttackAbove(2000) or c:IsSetCard(0xb02)
@@ -67,8 +69,8 @@ function s.cost1(e,tp,eg,ep,ev,re,r,rp,chk)
 	e1:SetDescription(aux.Stringid(id,0))
 	e1:SetType(EFFECT_TYPE_FIELD)
 	e1:SetProperty(EFFECT_FLAG_PLAYER_TARGET+EFFECT_FLAG_OATH+EFFECT_FLAG_CLIENT_HINT)
-	e1:SetCode(EFFECT_CANNOT_SPECIAL_SUMMON)
 	e1:SetTargetRange(1,0)
+	e1:SetCode(EFFECT_CANNOT_SPECIAL_SUMMON)
 	e1:SetTarget(s.splimit)
 	e1:SetReset(RESET_PHASE+PHASE_END)
 	Duel.RegisterEffect(e1,tp)
@@ -112,13 +114,13 @@ function s.operation1(e,tp,eg,ep,ev,re,r,rp)
         --Return them to the hand during the End Phase
         local e2=Effect.CreateEffect(c)
         e2:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
-        e2:SetCode(EVENT_PHASE+PHASE_END)
         e2:SetProperty(EFFECT_FLAG_IGNORE_IMMUNE)
-        e2:SetCountLimit(1)
-        e2:SetLabel(c:GetFieldID())
-        e2:SetLabelObject(ssg)
+        e2:SetCode(EVENT_PHASE+PHASE_END)
         e2:SetCondition(s.condition1_2)
         e2:SetOperation(s.operation1_2)
+        e2:SetLabel(c:GetFieldID())
+        e2:SetLabelObject(ssg)
+        e2:SetCountLimit(1)
         Duel.RegisterEffect(e2,tp)
         
         --Place Quest for the Masks in S/T zone
