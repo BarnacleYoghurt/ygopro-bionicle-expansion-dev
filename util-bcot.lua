@@ -320,6 +320,52 @@ function BCOT.kanohi_revive(baseC, targetCode)
   e:SetOperation(operation)
   return e
 end
+function BCOT.kanohi_xyz(baseC)
+  local function filterA(c,e,tp,lv)
+    return c:IsSetCard(0x1b02) and c:IsLevel(lv) and c:IsCanBeSpecialSummoned(e,0,tp,tp,false,false)
+  end
+  local function filterB(c,tp,sg)
+    local g=Duel.GetFieldGroup(tp,LOCATION_MZONE,0)
+    return c:IsSetCard(0xb02) and c:IsXyzSummonable(sg:GetFirst(),Group.Merge(g,sg)) and Duel.GetLocationCountFromEx(tp,tp,Group.Merge(g,sg),c)>0
+  end
+  local function filterC(c,e,tp,lv)
+    return filterA(c,e,tp,lv) and Duel.IsExistingMatchingCard(filterB,tp,LOCATION_EXTRA,0,1,nil,tp,Group.FromCards(c))
+  end
+  local function condition(e,tp,eg,ep,ev,re,r,rp)
+    return bcot.kanohi_con(e,{0x1b02}) and e:GetHandler():GetEquipTarget():IsControler(tp)
+  end
+  local function target(e,tp,eg,ep,ev,re,r,rp,chk)
+    local ec=e:GetHandler():GetEquipTarget()
+    if chk==0 then
+      return Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and ec and ec:HasLevel()
+        and Duel.IsExistingMatchingCard(filterC,tp,LOCATION_HAND,0,1,nil,e,tp,ec:GetLevel())
+    end
+    Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,1,tp,LOCATION_HAND)
+  end
+  local function operation(e,tp,eg,ep,ev,re,r,rp)
+    local ec=e:GetHandler():GetEquipTarget()
+    if Duel.GetLocationCount(tp,LOCATION_MZONE)<=0 or not (ec and ec:HasLevel() and e:GetHandler():IsRelateToEffect(e)) then return end
+    Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
+    local g=Duel.SelectMatchingCard(tp,filterA,tp,LOCATION_HAND,0,1,1,nil,e,tp,ec:GetLevel())
+    if g:GetCount()>0 and Duel.SpecialSummon(g,0,tp,tp,false,false,POS_FACEUP)>0 then
+      Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
+      local xyzg=Duel.SelectMatchingCard(tp,filterB,tp,LOCATION_EXTRA,0,1,1,nil,tp,g)
+      if xyzg:GetCount()>0 then
+        Duel.BreakEffect()
+        Duel.XyzSummon(tp,xyzg:GetFirst(),g:GetFirst())
+      end
+    end
+  end
+  
+  local e=Effect.CreateEffect(baseC)
+	e:SetCategory(CATEGORY_SPECIAL_SUMMON)
+	e:SetType(EFFECT_TYPE_IGNITION)
+	e:SetRange(LOCATION_SZONE)
+	e:SetCondition(condition)
+	e:SetTarget(target)
+	e:SetOperation(operation)
+	return e
+end
 function BCOT.greatkanohi_con(e)
   return bcot.kanohi_con(e,{0xb02,0xb07})
 end
