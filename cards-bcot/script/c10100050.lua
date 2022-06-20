@@ -7,7 +7,7 @@ function s.initial_effect(c)
 	e1:SetProperty(EFFECT_FLAG_SINGLE_RANGE)
 	e1:SetRange(LOCATION_HAND+LOCATION_GRAVE)
 	e1:SetCode(EFFECT_ADD_ATTRIBUTE)
-	e1:SetValue(ATTRIBUTE_WIND+ATTRIBUTE_WATER+ATTRIBUTE_FIRE+ATTRIBUTE_EARTH)
+	e1:SetValue(ATTRIBUTE_EARTH+ATTRIBUTE_WATER+ATTRIBUTE_FIRE+ATTRIBUTE_WIND)
 	c:RegisterEffect(e1)
 	--Special Summon from GY
 	local e2=Effect.CreateEffect(c)
@@ -31,12 +31,12 @@ function s.initial_effect(c)
 	e3:SetCost(s.cost3)
 	e3:SetTarget(s.target3)
 	e3:SetOperation(s.operation3)
-	e3:SetCountLimit(1,id+1000000)
+	e3:SetCountLimit(1,{id,1})
 	c:RegisterEffect(e3)
 end
 s.listed_series={0xb02}
 function s.filter2(c,e,tp)
-	return c:IsType(TYPE_MONSTER) and c:IsSetCard(0xb02) and c:IsLevel(6) and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
+	return c:IsSetCard(0xb02) and c:IsLevel(6) and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
 end
 function s.cost2(e,tp,eg,ep,ev,re,r,rp,chk)
   if chk==0 then return e:GetHandler():IsReleasable() end
@@ -61,7 +61,7 @@ function s.target2_1(e,c,sump,sumtype,sumpos,targetp,se)
 	return c:IsLocation(LOCATION_EXTRA) and not (c:IsSetCard(0xb02))
 end
 function s.filter3(c,e,tp)
-	return c:IsType(TYPE_MONSTER) and c:IsSetCard(0xb02) and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
+	return c:IsSetCard(0xb02) and c:IsCanBeSpecialSummoned(e,0,tp,false,false,POS_FACEUP_DEFENSE)
 end
 function s.cost3(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return e:GetHandler():IsAbleToRemoveAsCost() end
@@ -88,7 +88,7 @@ function s.operation3(e,tp,eg,ep,ev,re,r,rp)
 	aux.RegisterClientHint(c,nil,tp,1,0,aux.Stringid(id,2),nil)
   
   local tc=Duel.GetFirstTarget()
-	if tc:IsRelateToEffect(e) and s.filter3(tc,e,tp) then
+	if tc:IsRelateToEffect(e) then
 		Duel.SpecialSummon(tc,0,tp,tp,false,false,POS_FACEUP_DEFENSE)
 	end
 end
