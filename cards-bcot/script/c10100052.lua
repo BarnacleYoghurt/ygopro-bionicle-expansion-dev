@@ -23,7 +23,7 @@ function s.initial_effect(c)
   e3:SetDescription(aux.Stringid(id,1))
   e3:SetCategory(CATEGORY_TOHAND+CATEGORY_TODECK)
   e3:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
-  e3:SetProperty(EFFECT_FLAG_DELAY)
+  e3:SetProperty(EFFECT_FLAG_DELAY+EFFECT_FLAG_DAMAGE_STEP)
   e3:SetCode(EVENT_TO_GRAVE)
   e3:SetCost(s.cost3)
   e3:SetTarget(s.target3)
@@ -37,7 +37,7 @@ function s.filter2(c)
 end
 function s.condition2(e,tp,eg,ep,ev,re,r,rp)
   local ec=e:GetHandler():GetEquipTarget()
-  return ec and ec:IsFaceup() and ec:IsSetCard(0xb02) and e:GetHandler():GetFlagEffect(id)==0
+  return ec and ec:IsSetCard(0xb02) and e:GetHandler():GetFlagEffect(id)==0
 end
 function s.target2(e,tp,eg,ep,ev,re,r,rp,chk)
   local g=Duel.GetMatchingGroup(s.filter2,tp,LOCATION_GRAVE,0,nil)
@@ -50,13 +50,10 @@ function s.operation2(e,tp,eg,ep,ev,re,r,rp)
   if c:IsRelateToEffect(e) and g:GetClassCount(Card.GetCode)>=6 then
     local rg=aux.SelectUnselectGroup(g,e,tp,6,6,aux.dncheck,1,tp,HINTMSG_REMOVE)
     if Duel.Remove(rg,POS_FACEUP,REASON_EFFECT)>0 then
-      rg=rg:Filter(aux.FilterFaceupFunction(Card.IsLocation,LOCATION_REMOVED),nil)
-      if rg:GetCount()>0 then
-        for rc in aux.Next(rg) do
-          c:CopyEffect(rc:GetOriginalCode(),RESET_EVENT+RESETS_STANDARD,1)
-        end
-        c:RegisterFlagEffect(id,RESET_EVENT+RESETS_STANDARD,0,1) --Mark effect as replaced
+      for rc in aux.Next(rg) do
+        c:CopyEffect(rc:GetOriginalCode(),RESET_EVENT+RESETS_STANDARD,1)
       end
+      c:RegisterFlagEffect(id,RESET_EVENT+RESETS_STANDARD,0,1) --Mark effect as replaced
     end
   end
 end
@@ -78,7 +75,6 @@ end
 function s.operation3(e,tp,eg,ep,ev,re,r,rp)
   local c=e:GetHandler()
   if c:IsRelateToEffect(e) and Duel.SendtoHand(c,nil,REASON_EFFECT)>0 and c:IsLocation(LOCATION_HAND) then
-    Duel.BreakEffect()
     Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TODECK)
     local hg=Duel.SelectMatchingCard(tp,Card.IsAbleToDeck,tp,LOCATION_HAND,0,1,1,nil)
     if hg:GetCount()>0 then
