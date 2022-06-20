@@ -49,7 +49,7 @@ function s.filter2a(c,tp)
   return c:IsFaceup() and c:IsSetCard(0xb02) and Duel.IsExistingMatchingCard(s.filter2b,tp,LOCATION_GRAVE+LOCATION_HAND,0,1,nil,c)
 end
 function s.filter2b(c,ec)
-  return c:IsSetCard(0xb04) and c:CheckEquipTarget(ec) 
+  return not c:IsForbidden() and c:IsSetCard(0xb04) and c:IsType(TYPE_EQUIP) and c:CheckEquipTarget(ec) 
     and not (c:IsLocation(LOCATION_GRAVE) and c:IsReason(REASON_DESTROY) and c:IsPreviousLocation(LOCATION_ONFIELD) and c:IsPreviousPosition(POS_FACEUP) and c:GetTurnID()==Duel.GetTurnCount())
 end
 function s.cost2(e,tp,eg,ep,ev,re,r,rp,chk)
