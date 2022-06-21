@@ -1,19 +1,19 @@
 if not bcot then
-	dofile "expansions/util-bcot.lua"
+	Duel.LoadScript("../util-bcot.lua")
 end
 --Toa Mata Combination - Crystal
 local s,id=GetID()
 function s.initial_effect(c)
 	--Xyz Summon
-	Xyz.AddProcedure(c,aux.FilterBoolFunctionEx(Card.IsSetCard,0xb02),6,2)
+	Xyz.AddProcedure(c,aux.FilterBoolFunctionEx(Card.IsSetCard,0x1b02),6,2)
 	c:EnableReviveLimit()
 	--Negate/Banish
 	local e1=Effect.CreateEffect(c)
 	e1:SetDescription(aux.Stringid(id,0))
 	e1:SetCategory(CATEGORY_DISABLE+CATEGORY_REMOVE)
 	e1:SetType(EFFECT_TYPE_QUICK_O)
-	e1:SetCode(EVENT_CHAINING)
 	e1:SetRange(LOCATION_MZONE)
+	e1:SetCode(EVENT_CHAINING)
 	e1:SetCondition(s.condition1)
 	e1:SetCost(s.cost1)
 	e1:SetTarget(s.target1)
@@ -26,6 +26,7 @@ function s.initial_effect(c)
   e2:SetCountLimit(1,id)
   c:RegisterEffect(e2)
 end
+s.listed_series={0x1b02}
 function s.condition1(e,tp,eg,ep,ev,re,r,rp)
   return re:IsActiveType(TYPE_SPELL+TYPE_TRAP) and (Duel.IsChainDisablable(ev) or eg:IsExists(Card.IsAbleToRemove,1,nil,tp))
 end

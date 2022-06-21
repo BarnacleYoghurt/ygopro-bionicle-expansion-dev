@@ -1,13 +1,13 @@
 if not bcot then
-	dofile "expansions/util-bcot.lua"
+	Duel.LoadScript("../util-bcot.lua")
 end
 --Toa Mata Combination - Magma
 local s,id=GetID()
 function s.initial_effect(c)
 	--Xyz Summon
-	Xyz.AddProcedure(c,aux.FilterBoolFunctionEx(Card.IsSetCard,0xb02),6,2)
+	Xyz.AddProcedure(c,aux.FilterBoolFunctionEx(Card.IsSetCard,0x1b02),6,2)
 	c:EnableReviveLimit()
-	--Dump'n'search
+	--Dump'n'nerf
 	local e1=Effect.CreateEffect(c)
 	e1:SetDescription(aux.Stringid(id,0))
 	e1:SetCategory(CATEGORY_TOGRAVE+CATEGORY_ATKCHANGE+CATEGORY_DEFCHANGE)
@@ -24,6 +24,7 @@ function s.initial_effect(c)
   e2:SetCountLimit(1,id)
   c:RegisterEffect(e2)
 end
+s.listed_series={0x1b02}
 function s.filter1(c)
 	return c:GetLevel()==1 and c:IsRace(RACE_ROCK) and (c:GetAttack()==0 and c:IsDefenseBelow(0)) and c:IsAbleToGrave()
 end
@@ -47,14 +48,14 @@ function s.operation1(e,tp,eg,ep,ev,re,r,rp)
 			local e1=Effect.CreateEffect(e:GetHandler())
       e1:SetType(EFFECT_TYPE_SINGLE)
       e1:SetCode(EFFECT_SET_ATTACK_FINAL)
-      e1:SetReset(RESET_EVENT+RESETS_STANDARD)
       e1:SetValue(tc:GetAttack()/2)
+      e1:SetReset(RESET_EVENT+RESETS_STANDARD)
       tc:RegisterEffect(e1)
       local e2=Effect.CreateEffect(e:GetHandler())
       e2:SetType(EFFECT_TYPE_SINGLE)
       e2:SetCode(EFFECT_SET_DEFENSE_FINAL)
-      e2:SetReset(RESET_EVENT+RESETS_STANDARD)
       e2:SetValue(tc:GetDefense()/2)
+      e2:SetReset(RESET_EVENT+RESETS_STANDARD)
       tc:RegisterEffect(e2)
 		end
 	end
