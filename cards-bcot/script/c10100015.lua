@@ -23,10 +23,10 @@ function s.splimit(e,c,sump,sumtype,sumpos,targetp,se) --what you are not allowe
 	return not s.spfilter(c)
 end
 
-function s.create_rescon(cg)
+function s.create_rescon(cg,dn)
   --Based on 67331360 (Doll House), but extended to account for 3+ targets and multi-Attribute effects
   return function (sg,e,tp,mg)
-    if not aux.dncheck(sg,e,tp,mg) then return false end --Abort immediately if names not different
+    if dn and not aux.dncheck(sg,e,tp,mg) then return false end --Abort immediately if dn flag set and names not different
     
     local pools={}
     local mpool = Group.CreateGroup()
@@ -80,7 +80,7 @@ function s.target1(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
   local ft=math.min(Duel.GetLocationCount(tp,LOCATION_MZONE),3)
   local tg=Duel.GetMatchingGroup(s.filter1a,tp,LOCATION_GRAVE,0,nil,e)
   local cg=Duel.GetMatchingGroup(s.filter1b,tp,LOCATION_DECK,0,nil,e,tp)
-  local rescon=s.create_rescon(cg)
+  local rescon=s.create_rescon(cg,true)
   if chk==0 then return ft>0 and aux.SelectUnselectGroup(tg,e,tp,1,1,rescon,0) end
   
   if Duel.IsPlayerAffectedByEffect(tp,CARD_BLUEEYES_SPIRIT) then ft=1 end
@@ -93,7 +93,7 @@ function s.operation1(e,tp,eg,ep,ev,re,r,rp)
   local tg=Duel.GetTargetCards(e) --Note: This seems to automatically check IsRelateToEffect, so if something got banished the target group shrinks silently
   local ct=tg:GetCount()
 	if ct>0 then
-    local rescon=s.create_rescon(tg)
+    local rescon=s.create_rescon(tg,false)
     local sg=Duel.GetMatchingGroup(s.filter1b,tp,LOCATION_DECK,0,nil,e,tp)
     if Duel.GetLocationCount(tp,LOCATION_MZONE)<ct
       or (ct>1 and Duel.IsPlayerAffectedByEffect(tp,CARD_BLUEEYES_SPIRIT))
