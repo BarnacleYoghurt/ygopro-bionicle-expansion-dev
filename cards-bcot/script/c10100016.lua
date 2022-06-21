@@ -22,6 +22,7 @@ function s.initial_effect(c)
 	e2:SetDescription(aux.Stringid(id,1))
   e2:SetCategory(CATEGORY_DRAW)
 	e2:SetType(EFFECT_TYPE_IGNITION)
+  e2:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
 	e2:SetRange(LOCATION_SZONE)
   e2:SetCost(s.cost2)
 	e2:SetTarget(s.target2)
@@ -54,11 +55,11 @@ function s.target1(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.GetLocationCount(tp,LOCATION_SZONE)>0 and Duel.IsExistingMatchingCard(s.filter1,tp,LOCATION_DECK,0,1,nil,ec) end
 	local eqg=Duel.GetMatchingGroup(s.filter1,tp,LOCATION_DECK,0,nil,ec)
   Duel.SetOperationInfo(0,CATEGORY_EQUIP,eqg,1,0,0)
-  Duel.SetTargetCard(ec)
+  ec:CreateEffectRelation(e)
 end
 function s.operation1(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
-  local ec=Duel.GetFirstTarget()
+  local ec=eg:GetFirst()
   if c:IsRelateToEffect(e) and ec:IsRelateToEffect(e) and ec:IsFaceup() and Duel.GetLocationCount(tp,LOCATION_SZONE)>0 then
     Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_EQUIP)
     local g=Duel.SelectMatchingCard(tp,s.filter1,tp,LOCATION_DECK,0,1,1,nil,ec)
@@ -94,7 +95,7 @@ end
 function s.target3(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
   local ct=Duel.GetMatchingGroup(Card.IsSetCard,tp,LOCATION_GRAVE,0,nil,0xb04):GetClassCount(Card.GetCode)
   if chkc then return chkc:IsControler(tp) and chkc:IsLocation(LOCATION_REMOVED) and s.filter3(chkc,e,tp,ct) end
-	if chk==0 then return Duel.IsExistingTarget(s.filter3,tp,LOCATION_REMOVED,0,1,nil,e,tp,ct) end
+	if chk==0 then return Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and Duel.IsExistingTarget(s.filter3,tp,LOCATION_REMOVED,0,1,nil,e,tp,ct) end
   local g=Duel.SelectTarget(tp,s.filter3,tp,LOCATION_REMOVED,0,1,1,nil,e,tp,ct)
 	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,g,1,0,0)
   Duel.SetOperationInfo(0,CATEGORY_DESTROY,e:GetHandler(),1,0,0)
@@ -102,7 +103,7 @@ end
 function s.operation3(e,tp,eg,ep,ev,re,r,rp)
   local c=e:GetHandler()
   local tc=Duel.GetFirstTarget()
-  if c:IsRelateToEffect(e) and tc:IsRelateToEffect(e) and Duel.SpecialSummon(tc,0,tp,tp,false,false,POS_FACEUP)>0 then
+  if c:IsRelateToEffect(e) and tc:IsRelateToEffect(e) and Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and Duel.SpecialSummon(tc,0,tp,tp,false,false,POS_FACEUP)>0 then
     Duel.BreakEffect()
     Duel.Destroy(c,REASON_EFFECT)
   end
