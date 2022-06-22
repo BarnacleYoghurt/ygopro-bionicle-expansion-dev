@@ -39,7 +39,7 @@ end
 function s.operation1(e,tp,eg,ep,ev,re,r,rp)
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TOGRAVE)
 	local g1=Duel.SelectMatchingCard(tp,s.filter1,tp,LOCATION_DECK,0,1,1,nil)
-	if g1:GetCount()>0 and Duel.SendtoGrave(g1,REASON_EFFECT)>0 
+	if g1:GetCount()>0 and Duel.SendtoGrave(g1,REASON_EFFECT)>0 and g1:GetFirst():IsLocation(LOCATION_GRAVE)
     and Duel.IsExistingMatchingCard(Card.IsFaceup,1-tp,LOCATION_MZONE,0,1,nil) and Duel.SelectYesNo(tp,aux.Stringid(id,2)) then
 		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_FACEUP)
 		local g2=Duel.SelectMatchingCard(tp,Card.IsFaceup,1-tp,LOCATION_MZONE,0,1,1,nil)

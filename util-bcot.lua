@@ -120,12 +120,12 @@ function BCOT.toa_mata_swapkanohi(baseC)
 	return e
 end
 function BCOT.toa_mata_combination_tagout(baseC,attr1,attr2)
-  local function filter2(c,e,tp)
-    return c:IsLevel(6) and c:IsSetCard(0xb02) and c:IsAttribute(attr2) and c:IsCanBeSpecialSummoned(e,0,tp,false,false) 
-  end
   local function filter1(c,e,tp)
-    return c:IsLevel(6) and c:IsSetCard(0xb02) and c:IsAttribute(attr1) and c:IsCanBeSpecialSummoned(e,0,tp,false,false) 
+    return c:IsLevel(6) and c:IsSetCard(0x1b02) and c:IsAttribute(attr1) and c:IsCanBeSpecialSummoned(e,0,tp,false,false) 
       and Duel.IsExistingTarget(filter2,tp,LOCATION_GRAVE,0,1,c,e,tp)
+  end
+  local function filter2(c,e,tp)
+    return c:IsLevel(6) and c:IsSetCard(0x1b02) and c:IsAttribute(attr2) and c:IsCanBeSpecialSummoned(e,0,tp,false,false) 
   end
   local function condition(e,tp,eg,ep,ev,re,r,rp)
     return e:GetHandler():GetOverlayCount()==0
