@@ -8,8 +8,8 @@ function s.initial_effect(c)
   local e1=Effect.CreateEffect(c)
 	e1:SetType(EFFECT_TYPE_SINGLE)
 	e1:SetProperty(EFFECT_FLAG_SINGLE_RANGE)
-	e1:SetCode(EFFECT_ADD_ATTRIBUTE)
 	e1:SetRange(LOCATION_MZONE)
+	e1:SetCode(EFFECT_ADD_ATTRIBUTE)
 	e1:SetValue(s.value1)
 	c:RegisterEffect(e1)
 	--To GY
@@ -17,8 +17,8 @@ function s.initial_effect(c)
   e2:SetDescription(aux.Stringid(id,0))
   e2:SetCategory(CATEGORY_TOGRAVE)
   e2:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
-  e2:SetCode(EVENT_SPSUMMON_SUCCESS)
   e2:SetProperty(EFFECT_FLAG_DELAY)
+  e2:SetCode(EVENT_SPSUMMON_SUCCESS)
   e2:SetCondition(s.condition2)
   e2:SetTarget(s.target2)
   e2:SetOperation(s.operation2)
@@ -36,6 +36,8 @@ function s.initial_effect(c)
   e3:SetCountLimit(1,id+1000000)
   c:RegisterEffect(e3)
 end
+s.listed_names={10110060}
+s.listed_series={0xb03}
 function s.check0(g,lc)
   return g:IsExists(Card.IsSetCard,1,nil,0xb03)
 end
