@@ -25,22 +25,28 @@ function s.initial_effect(c)
   e2:SetDescription(aux.Stringid(id,1))
   e2:SetCountLimit(1,id)
   c:RegisterEffect(e2)
+  aux.DoubleSnareValidity(c,LOCATION_MZONE)
 end
 s.listed_series={0x1b02}
 function s.condition1(e,tp,eg,ep,ev,re,r,rp)
-  return re:IsActiveType(TYPE_SPELL+TYPE_TRAP) and (Duel.IsChainDisablable(ev) or eg:IsExists(Card.IsAbleToRemove,1,nil,tp))
+  return re:IsActiveType(TYPE_SPELL+TYPE_TRAP) and Duel.IsChainDisablable(ev)
 end
 function s.cost1(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return e:GetHandler():CheckRemoveOverlayCard(tp,2,REASON_COST) end
 	e:GetHandler():RemoveOverlayCard(tp,2,2,REASON_COST)
 end
 function s.target1(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return re:GetHandler():IsAbleToRemove() end
-  Duel.SetOperationInfo(0,CATEGORY_NEGATE,eg,1,0,0)
-  if re:GetHandler():IsRelateToEffect(re) then
-		Duel.SetOperationInfo(0,CATEGORY_REMOVE,eg,1,0,re:GetHandler():GetLocation())
+  local rc=re:GetHandler()
+  local rel=rc:IsRelateToEffect(re)
+	if chk==0 then 
+    return rc:IsAbleToRemove()
+      or (not rel and Duel.IsPlayerCanRemove(tp)) --In case the card banished itself for cost
+  end
+  Duel.SetOperationInfo(0,CATEGORY_DISABLE,eg,1,0,0)
+  if rel then
+		Duel.SetOperationInfo(0,CATEGORY_REMOVE,rc,1,rc:GetControler(),rc:GetLocation())
 	else
-		Duel.SetOperationInfo(0,CATEGORY_REMOVE,eg,1,0,re:GetHandler():GetPreviousLocation())
+		Duel.SetOperationInfo(0,CATEGORY_REMOVE,nil,0,0,rc:GetPreviousLocation())
 	end
 end
 function s.operation1(e,tp,eg,ep,ev,re,r,rp)
