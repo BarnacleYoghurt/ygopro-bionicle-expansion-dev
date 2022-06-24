@@ -18,6 +18,7 @@ function c10100024.initial_effect(c)
   --Recycle
   local e2=Effect.CreateEffect(c)
   e2:SetDescription(aux.Stringid(id,1))
+  e2:SetCategory(CATEGORY_SPECIAL_SUMMON)
 	e2:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O)
   e2:SetProperty(EFFECT_FLAG_CARD_TARGET+EFFECT_FLAG_DELAY)
   e2:SetRange(LOCATION_FZONE)
@@ -35,7 +36,7 @@ function c10100024.initial_effect(c)
   e3:SetCode(EVENT_PHASE+PHASE_END)
   e3:SetTarget(s.target3)
   e3:SetOperation(s.operation3)
-  e3:SetCountLimit(1,id+1000000)
+  e3:SetCountLimit(1,{id,1})
   c:RegisterEffect(e3)
 end
 s.listed_series={0x1b02,0xb02}
@@ -71,7 +72,7 @@ end
 function s.filter3(c,e,tp)
   return c:GetLevel()==1 and c:IsRace(RACE_ROCK) and (c:GetAttack()==0 and c:IsDefenseBelow(0)) and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
 end
-function s.target3(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
+function s.target3(e,tp,eg,ep,ev,re,r,rp,chk)
   if chk==0 then return Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and Duel.IsExistingMatchingCard(s.filter3,tp,LOCATION_DECK,0,1,nil,e,tp) end
   Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,1,tp,LOCATION_DECK)
 end
