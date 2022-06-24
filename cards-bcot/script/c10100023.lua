@@ -36,8 +36,9 @@ function s.initial_effect(c)
 	e3:SetRange(LOCATION_GRAVE)
 	e3:SetCode(EVENT_DESTROYED)
 	e3:SetCondition(s.condition3)
+  e3:SetTarget(s.target3)
 	e3:SetOperation(s.operation3)
-  e3:SetCountLimit(1,id+1000000)
+  e3:SetCountLimit(1,{id,1})
 	c:RegisterEffect(e3)
 end
 s.listed_names={10100024}
@@ -54,7 +55,7 @@ function s.filter2b(c,rc)
   if not (c:IsType(TYPE_FIELD) and c:IsSetCard(0xb05) and c.listed_attributes) then return false end
   
   for _,attr in ipairs(c.listed_attributes) do
-    if (rc:GetAttribute()&attr)~=0 then return true end
+    if rc:IsAttribute(attr) then return true end
   end
   return false
 end
@@ -63,6 +64,7 @@ function s.target2(e,tp,eg,ep,ev,re,r,rp,chk)
 	Duel.SetOperationInfo(0,CATEGORY_TOHAND,nil,1,tp,LOCATION_DECK)
 end
 function s.operation2(e,tp,eg,ep,ev,re,r,rp)
+  if not e:GetHandler():IsRelateToEffect(e) then return end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_CONFIRM)
   local rg=Duel.SelectMatchingCard(tp,s.filter2a,tp,LOCATION_HAND,0,1,1,nil,tp)
   if rg:GetCount()>0 then
@@ -81,9 +83,12 @@ end
 function s.condition3(e,tp,eg,ep,ev,re,r,rp)
 	return eg:IsExists(s.filter3,1,nil,tp)
 end
+function s.target3(e,tp,eg,ep,ev,re,r,rp,chk)
+  if chk==0 then return e:GetHandler():GetActivateEffect():IsActivatable(tp,true,true) end
+end
 function s.operation3(e,tp,eg,ep,ev,re,r,rp)
   local c=e:GetHandler()
-  if c:IsRelateToEffect(e) then
+  if c:IsRelateToEffect(e) and c:GetActivateEffect():IsActivatable(tp,true,true) then
     if aux.PlayFieldSpell(c,e,tp,eg,ep,ev,re,r,rp) then
       local e1=Effect.CreateEffect(c)
       e1:SetDescription(3300)
