@@ -21,9 +21,10 @@ function s.initial_effect(c)
 	e2:SetRange(LOCATION_MZONE)
 	e2:SetTarget(s.target2)
 	e2:SetOperation(s.operation2)
-	e2:SetCountLimit(1,id+1000000)
+	e2:SetCountLimit(1,{id,1})
 	c:RegisterEffect(e2)
 end
+s.listed_series={0x1b01}
 function s.filter1(c)
   return c:IsFaceup() and c:IsRace(RACE_WARRIOR) and c:IsAttackBelow(1000)
 end
@@ -43,31 +44,32 @@ function s.target1(e,tp,eg,ep,ev,re,r,rp,chk)
 end
 function s.operation1(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
-	if c:IsRelateToEffect(e) then
-		Duel.SpecialSummon(c,0,tp,tp,false,false,POS_FACEUP)    
+	if c:IsRelateToEffect(e) and Duel.SpecialSummon(c,0,tp,tp,false,false,POS_FACEUP)>0 then
     local e1=Effect.CreateEffect(c)
     e1:SetDescription(3301)
     e1:SetType(EFFECT_TYPE_SINGLE)
-    e1:SetCode(EFFECT_LEAVE_FIELD_REDIRECT)
     e1:SetProperty(EFFECT_FLAG_CANNOT_DISABLE+EFFECT_FLAG_CLIENT_HINT)
-    e1:SetReset(RESET_EVENT+RESETS_REDIRECT)
+    e1:SetCode(EFFECT_LEAVE_FIELD_REDIRECT)
     e1:SetValue(LOCATION_DECKBOT)
+    e1:SetReset(RESET_EVENT+RESETS_REDIRECT)
     c:RegisterEffect(e1)
 	end
 end
 function s.target2(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.IsAbleToEnterBP() end
+	if chk==0 then return Duel.IsAbleToEnterBP() and e:GetHandler():IsAbleToHand() end
 	Duel.SetOperationInfo(0,CATEGORY_TOHAND,e:GetHandler(),1,0,0)
 end
 function s.operation2(e,tp,eg,ep,ev,re,r,rp,c)
   local c=e:GetHandler()
   local e1=Effect.CreateEffect(c)
   e1:SetType(EFFECT_TYPE_FIELD)
-  e1:SetCode(EFFECT_DIRECT_ATTACK)
   e1:SetTargetRange(LOCATION_MZONE,0)
+  e1:SetCode(EFFECT_DIRECT_ATTACK)
   e1:SetTarget(aux.TargetBoolFunction(Card.IsSetCard,0x1b01))
   e1:SetReset(RESET_PHASE+PHASE_END)
   Duel.RegisterEffect(e1,tp)
   
-  Duel.SendtoHand(c,nil,REASON_EFFECT)
+  if c:IsRelateToEffect(e) then
+    Duel.SendtoHand(c,nil,REASON_EFFECT)
+  end
 end
