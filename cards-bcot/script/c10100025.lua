@@ -30,9 +30,6 @@ function s.initial_effect(c)
 	c:RegisterEffect(e2)
 end
 s.listed_attributes={ATTRIBUTE_FIRE}
-function s.filter1(c)
-  return c:IsFaceup() and c:IsAttribute(ATTRIBUTE_FIRE)
-end
 function s.condition1(e)
   local tp=e:GetHandlerPlayer()
   local g=Duel.GetMatchingGroup(Card.IsFaceup,tp,LOCATION_MZONE,0,nil)

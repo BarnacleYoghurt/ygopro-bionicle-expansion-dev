@@ -9,7 +9,7 @@ function s.initial_effect(c)
 	--Attack prevention
   local e1=Effect.CreateEffect(c)
   e1:SetType(EFFECT_TYPE_FIELD)
-  e1:SetRange(LOCATION_SZONE)
+  e1:SetRange(LOCATION_FZONE)
   e1:SetTargetRange(0,LOCATION_MZONE)
   e1:SetCode(EFFECT_CANNOT_ATTACK)
   e1:SetCondition(s.condition1)
@@ -19,7 +19,7 @@ function s.initial_effect(c)
 	local e2a=Effect.CreateEffect(c)
 	e2a:SetType(EFFECT_TYPE_FIELD)
   e2a:SetProperty(EFFECT_FLAG_SET_AVAILABLE)
-	e2a:SetRange(LOCATION_SZONE)
+	e2a:SetRange(LOCATION_FZONE)
 	e2a:SetTargetRange(LOCATION_MZONE,0)
   e2a:SetCode(EFFECT_INDESTRUCTABLE_EFFECT)
   e2a:SetCondition(s.condition2)
@@ -32,7 +32,7 @@ function s.initial_effect(c)
   --Negate
 	local e3=Effect.CreateEffect(c)
 	e3:SetType(EFFECT_TYPE_FIELD)
-	e3:SetRange(LOCATION_SZONE)
+	e3:SetRange(LOCATION_FZONE)
 	e3:SetTargetRange(0,LOCATION_MZONE)
 	e3:SetCode(EFFECT_DISABLE)
   e3:SetCondition(s.condition3)
@@ -71,6 +71,7 @@ function s.initial_effect(c)
     ge3:SetCode(EVENT_REMOVE)
     ge3:SetOperation(s.checkop_leave)
     Duel.RegisterEffect(ge3,0)
+    --Resets/shifts the counters at the end of each turn
 		aux.AddValuesReset(function()
 			for p=0,1 do
         s[p+2]=s[p]
@@ -103,13 +104,10 @@ function s.checkop_leave(e,tp,eg,ep,ev,re,r,rp)
   end
 end
 
-function s.filter(c)
-  return c:IsFaceup() and c:IsAttribute(ATTRIBUTE_WATER)
-end
 function s.condition(e)
   local tp=e:GetHandlerPlayer()
   local g=Duel.GetMatchingGroup(Card.IsFaceup,tp,LOCATION_MZONE,0,nil)
-  return g:GetCount()>0 and g:GetCount()==g:FilterCount(s.filter,nil)
+  return g:GetCount()>0 and g:GetCount()==g:FilterCount(Card.IsAttribute,nil,ATTRIBUTE_WATER)
 end
 function s.condition1(e)
   local tp=e:GetHandlerPlayer()
@@ -122,14 +120,14 @@ function s.condition2(e)
   local tp=e:GetHandlerPlayer()
   local sum
   if Duel.GetTurnPlayer()~=tp then
-    sum=s[4+tp]+s[4+tp+2]
+    sum=s[4+tp]+s[4+tp+2] --since this turn's SP + since last (=your) turn's SP until this turn's DP
     if Duel.GetTurnCount()==1 then
       sum=1 --No last Standby Phase on turn 1 when going second!
     end
   elseif Duel.GetCurrentPhase()==PHASE_DRAW then
-    sum=s[4+tp]+s[4+tp+2]+s[4+tp+4]
+    sum=s[4+tp+2]+s[4+tp+4] --since last (=opponent's) turn's SP until this turn's DP + since your last turn's SP until last turn's DP
   else
-    sum=s[4+tp]
+    sum=s[4+tp] --since this turn's SP
   end
   return s.condition(e) and sum==0
 end
