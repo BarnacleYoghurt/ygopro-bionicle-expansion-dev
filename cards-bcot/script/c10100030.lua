@@ -38,7 +38,7 @@ function s.value1(e,c)
 	return c:IsFaceup() and c:IsAttribute(ATTRIBUTE_WIND) and Duel.IsExistingMatchingCard(s.filter1,c:GetControler(),LOCATION_MZONE,0,1,nil,c:GetAttack())
 end
 function s.filter2a(c,e,tp)
-  return c:IsSummonPlayer(tp) and c:HasLevel() and c:IsCanBeEffectTarget(e) and Duel.IsExistingMatchingCard(s.filter2b,tp,LOCATION_DECK,0,1,nil,c)
+  return c:IsSummonPlayer(tp) and c:HasLevel() and c:IsCanBeEffectTarget(e) and c:GetAttack()~=0 and Duel.IsExistingMatchingCard(s.filter2b,tp,LOCATION_DECK,0,1,nil,c)
 end
 function s.filter2b(c,tc)
   return c:IsAttribute(ATTRIBUTE_WIND) and c:IsRace(RACE_WARRIOR) and not c:IsCode(tc:GetCode()) and c:IsLevelBelow(tc:GetLevel())
@@ -55,7 +55,7 @@ end
 function s.operation2(e,tp,eg,ep,ev,re,r,rp)
   local c=e:GetHandler()
   local tc=Duel.GetFirstTarget()
-  if c:IsRelateToEffect(e) and tc:IsRelateToEffect(e) and tc:IsFaceup() then
+  if c:IsRelateToEffect(e) and tc:IsRelateToEffect(e) and tc:IsFaceup() and not tc:IsImmuneToEffect(e) and tc:GetAttack()~=0 then
     local e1=Effect.CreateEffect(c)
 		e1:SetType(EFFECT_TYPE_SINGLE)
 		e1:SetProperty(EFFECT_FLAG_CANNOT_DISABLE)
@@ -95,8 +95,10 @@ function s.operation2(e,tp,eg,ep,ev,re,r,rp)
     
     Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_ATOHAND)
     local g=Duel.SelectMatchingCard(tp,s.filter2b,tp,LOCATION_DECK,0,1,1,nil,tc)
-    Duel.SendtoHand(g,nil,REASON_EFFECT)
-    Duel.ConfirmCards(1-tp,g)
+    if g:GetCount()>0 then
+      Duel.SendtoHand(g,nil,REASON_EFFECT)
+      Duel.ConfirmCards(1-tp,g)
+    end
   end
 end
 function s.target2_5(e,c)
