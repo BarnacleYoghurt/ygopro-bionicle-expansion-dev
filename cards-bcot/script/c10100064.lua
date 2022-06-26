@@ -16,13 +16,14 @@ function s.initial_effect(c)
   e2:SetDescription(aux.Stringid(id,1))
   e2:SetCategory(CATEGORY_CONTROL)
   e2:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_F)
-  e2:SetCode(EVENT_CHAIN_SOLVED)
   e2:SetRange(LOCATION_MZONE)
+  e2:SetCode(EVENT_CHAIN_SOLVED)
   e2:SetCondition(s.condition2)
   e2:SetTarget(s.target2)
   e2:SetOperation(s.operation2)
   c:RegisterEffect(e2)
 end
+s.listed_series={0xb01}
 function s.filter1(c,e,tp)
   return c:IsLevelBelow(4) and c:IsSetCard(0xb01) and c:IsCanBeSpecialSummoned(e,tp,tp,false,false)
 end
@@ -40,7 +41,7 @@ end
 function s.operation1(e,tp,eg,ep,ev,re,r,rp)
   local c=e:GetHandler()
   if c:IsRelateToEffect(e) then
-    if Duel.SpecialSummon(c,0,tp,1-tp,false,false,POS_FACEUP)>0 then
+    if Duel.SpecialSummon(c,0,tp,1-tp,false,false,POS_FACEUP)>0 and Duel.GetLocationCount(tp,LOCATION_MZONE)>0 then
       Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
       local g=Duel.SelectMatchingCard(tp,s.filter1,tp,LOCATION_HAND,0,1,1,nil,e,tp)
       Duel.SpecialSummon(g,0,tp,tp,false,false,POS_FACEUP)
@@ -48,7 +49,7 @@ function s.operation1(e,tp,eg,ep,ev,re,r,rp)
   end
 end
 function s.condition2(e,tp,eg,ep,ev,re,r,rp)
-	return rp==tp and re:IsActiveType(TYPE_MONSTER)
+	return rp==tp and re:IsActiveType(TYPE_MONSTER) and not re:GetHandler():IsCode(id)
 end
 function s.target2(e,tp,eg,ep,ev,re,r,rp,chk)
 	local c=e:GetHandler()
