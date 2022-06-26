@@ -17,19 +17,20 @@ function s.initial_effect(c)
   e2:SetDescription(aux.Stringid(id,1))
   e2:SetCategory(CATEGORY_TODECK+CATEGORY_SPECIAL_SUMMON)
   e2:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
-  e2:SetProperty(EFFECT_FLAG_DELAY+EFFECT_FLAG_DAMAGE_STEP)
+  e2:SetProperty(EFFECT_FLAG_DELAY+EFFECT_FLAG_CARD_TARGET)
   e2:SetCode(EVENT_TO_GRAVE)
   e2:SetTarget(s.target2)
   e2:SetOperation(s.operation2)
-  e2:SetCountLimit(1,id+1000000)
+  e2:SetCountLimit(1,{id,1})
   c:RegisterEffect(e2)
 end
+s.listed_series={0xb01}
 function s.filter1(c)
   return c:IsType(TYPE_SPELL+TYPE_TRAP) and c:IsAbleToRemoveAsCost()
 end
 function s.cost1(e,tp,eg,ep,ev,re,r,rp,chk)
   if chk==0 then return Duel.IsExistingMatchingCard(s.filter1,tp,LOCATION_HAND+LOCATION_ONFIELD,0,1,nil) end
-  Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TOGRAVE)
+  Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_REMOVE)
   local g=Duel.SelectMatchingCard(tp,s.filter1,tp,LOCATION_HAND+LOCATION_ONFIELD,0,1,1,nil)
   Duel.Remove(g,POS_FACEUP,REASON_COST)
 end
@@ -50,7 +51,8 @@ end
 function s.filter2b(c,e,tp)
   return c:IsAttribute(ATTRIBUTE_WATER) and c:IsSetCard(0xb01) and not c:IsCode(id) and c:IsCanBeSpecialSummoned(e,0,tp,tp,false,false)
 end
-function s.target2(e,tp,eg,ep,ev,re,r,rp,chk)
+function s.target2(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
+  if chkc then return s.filter2a(chkc) and chkc:IsLocation(LOCATION_REMOVED) and chkc:IsControler(tp) end
   if chk==0 then 
     return Duel.IsExistingTarget(s.filter2a,tp,LOCATION_REMOVED,0,1,nil) 
       and Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and Duel.IsExistingMatchingCard(s.filter2b,tp,LOCATION_GRAVE,0,1,nil,e,tp) 
@@ -62,7 +64,7 @@ function s.target2(e,tp,eg,ep,ev,re,r,rp,chk)
 end
 function s.operation2(e,tp,eg,ep,ev,re,r,rp)
   local tc=Duel.GetFirstTarget()
-  if tc:IsRelateToEffect(e) and Duel.SendtoDeck(tc,nil,SEQ_DECKTOP,REASON_EFFECT)>0 then
+  if tc:IsRelateToEffect(e) and Duel.SendtoDeck(tc,nil,SEQ_DECKTOP,REASON_EFFECT)>0 and Duel.GetLocationCount(tp,LOCATION_MZONE)>0 then
     Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
     local g=Duel.SelectMatchingCard(tp,s.filter2b,tp,LOCATION_GRAVE,0,1,1,nil,e,tp)
     if Duel.SpecialSummonStep(g:GetFirst(),0,tp,tp,false,false,POS_FACEUP) then
@@ -78,10 +80,10 @@ function s.operation2(e,tp,eg,ep,ev,re,r,rp)
       g:GetFirst():RegisterEffect(e2)
       local e3=Effect.CreateEffect(e:GetHandler())
       e3:SetType(EFFECT_TYPE_FIELD)
-      e3:SetRange(LOCATION_MZONE)
-      e3:SetCode(EFFECT_CANNOT_SPECIAL_SUMMON)
       e3:SetProperty(EFFECT_FLAG_PLAYER_TARGET+EFFECT_FLAG_CANNOT_DISABLE)
+      e3:SetRange(LOCATION_MZONE)
       e3:SetTargetRange(1,0)
+      e3:SetCode(EFFECT_CANNOT_SPECIAL_SUMMON)
       e3:SetCondition(s.condition2_3)
       e3:SetReset(RESET_EVENT+RESETS_STANDARD)
       g:GetFirst():RegisterEffect(e3)
