@@ -25,16 +25,17 @@ function s.initial_effect(c)
 	e2:SetDescription(aux.Stringid(id,1))
   e2:SetCategory(CATEGORY_SPECIAL_SUMMON+CATEGORY_DISABLE)
 	e2:SetType(EFFECT_TYPE_QUICK_O)
-  e2:SetCode(EVENT_CHAINING)
 	e2:SetRange(LOCATION_GRAVE)
+  e2:SetCode(EVENT_CHAINING)
   e2:SetCondition(s.condition2)
 	e2:SetTarget(s.target2)
 	e2:SetOperation(s.operation2)
-	e2:SetCountLimit(1,id+1000000)
+	e2:SetCountLimit(1,{id,1})
 	c:RegisterEffect(e2)
 end
+s.listed_series={0x2b04,0xb03}
 function s.filter1a(c)
-	return c:IsType(TYPE_SPELL+TYPE_EQUIP) and c:IsSetCard(0x2b04) and c:IsAbleToGraveAsCost()
+	return c:IsType(TYPE_EQUIP) and c:IsSetCard(0x2b04) and c:IsAbleToGraveAsCost()
 end
 function s.filter1b(c,e,tp)
   return c:IsType(TYPE_LINK) and c:IsSetCard(0xb03) and c:IsFacedown() and Duel.IsExistingMatchingCard(s.filter1c,tp,LOCATION_HAND,0,1,nil,e,tp,c:GetAttribute())
@@ -51,7 +52,7 @@ function s.cost1(e,tp,eg,ep,ev,re,r,rp,chk)
   Duel.SendtoGrave(g,REASON_COST)
 end
 function s.target1(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.IsExistingMatchingCard(s.filter1b,tp,LOCATION_EXTRA,0,1,nil,e,tp) end
+	if chk==0 then return Duel.IsExistingMatchingCard(s.filter1b,tp,LOCATION_EXTRA,0,1,nil,e,tp) and Duel.GetLocationCount(tp,LOCATION_MZONE)>0 end
 	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,1,tp,LOCATION_HAND)
 end
 function s.operation1(e,tp,eg,ep,ev,re,r,rp)
@@ -59,10 +60,12 @@ function s.operation1(e,tp,eg,ep,ev,re,r,rp)
   local rg=Duel.SelectMatchingCard(tp,s.filter1b,tp,LOCATION_EXTRA,0,1,1,nil,e,tp)
   if rg:GetCount()>0 then
     Duel.ConfirmCards(1-tp,rg)
-    local att=rg:GetFirst():GetAttribute()
-    Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
-    local sg=Duel.SelectMatchingCard(tp,s.filter1c,tp,LOCATION_HAND,0,1,1,nil,e,tp,att)
-    Duel.SpecialSummon(sg,0,tp,tp,false,false,POS_FACEUP)
+    if Duel.GetLocationCount(tp,LOCATION_MZONE)>0 then
+      local att=rg:GetFirst():GetAttribute()
+      Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
+      local sg=Duel.SelectMatchingCard(tp,s.filter1c,tp,LOCATION_HAND,0,1,1,nil,e,tp,att)
+      Duel.SpecialSummon(sg,0,tp,tp,false,false,POS_FACEUP)
+    end
   end
 end
 function s.filter2(c)
