@@ -56,14 +56,14 @@ function s.operation2(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
 	if not c:IsRelateToEffect(e) then return end
 	local g=c:GetOverlayGroup()
-	local avAtt=0
-  if c:IsFaceup() then avAtt=avAtt | ATTRIBUTE_WATER | ATTRIBUTE_FIRE end
+	local avAtt=ATTRIBUTE_WATER
+  if c:IsFaceup() then avAtt=avAtt | ATTRIBUTE_FIRE end
   if Duel.IsExistingMatchingCard(s.filter2WIND,tp,LOCATION_DECK,0,1,nil) then avAtt=avAtt | ATTRIBUTE_WIND end
   if Duel.IsPlayerCanDraw(tp,1) then avAtt=avAtt | ATTRIBUTE_EARTH end
   if Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and Duel.IsExistingMatchingCard(s.filter2LIGHTDARK,tp,LOCATION_HAND+LOCATION_GRAVE,0,1,nil,e,tp) then 
     avAtt=avAtt | ATTRIBUTE_LIGHT | ATTRIBUTE_DARK
   end
-	if avAtt==0 then return end
+	if avAtt==0 then return end --technically redundant, but eh
 	local sg=aux.SelectUnselectGroup(g:Filter(Card.IsAttribute,nil,avAtt),e,tp,1,3,
     function(sg,e,tp,mg) return sg:GetClassCount(Card.GetAttribute)==sg:GetCount() end,1,tp,HINTMSG_REMOVEXYZ)
 	local att=0
@@ -109,7 +109,7 @@ function s.operation2(e,tp,eg,ep,ev,re,r,rp)
 	end
 	if att & (ATTRIBUTE_LIGHT | ATTRIBUTE_DARK) ~= 0 then
 		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
-    local g=Duel.SelectMatchingCard(tp,s.filter2LIGHTDARK,tp,LOCATION_HAND+LOCATION_GRAVE,0,1,1,nil,e,tp)
+    local g=Duel.SelectMatchingCard(tp,aux.NecroValleyFilter(s.filter2LIGHTDARK),tp,LOCATION_HAND+LOCATION_GRAVE,0,1,1,nil,e,tp)
     if g:GetCount()>0 then
       Duel.BreakEffect()
       Duel.SpecialSummon(g,0,tp,tp,false,false,POS_FACEUP)
