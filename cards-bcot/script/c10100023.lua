@@ -85,6 +85,7 @@ function s.condition3(e,tp,eg,ep,ev,re,r,rp)
 end
 function s.target3(e,tp,eg,ep,ev,re,r,rp,chk)
   if chk==0 then return e:GetHandler():GetActivateEffect():IsActivatable(tp,true,true) end
+  Duel.SetOperationInfo(0,CATEGORY_LEAVE_GRAVE,e:GetHandler(),1,0,0)
 end
 function s.operation3(e,tp,eg,ep,ev,re,r,rp)
   local c=e:GetHandler()

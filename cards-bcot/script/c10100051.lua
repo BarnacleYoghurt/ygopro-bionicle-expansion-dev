@@ -61,7 +61,7 @@ function s.operation1(e,tp,eg,ep,ev,re,r,rp)
   
   local sg=Group.CreateGroup()
   if e:GetLabel()==0 then
-    sg=Duel.GetMatchingGroup(s.filter1b,tp,LOCATION_HAND+LOCATION_GRAVE,0,nil,tc)
+    sg=Duel.GetMatchingGroup(aux.NecroValleyFilter(s.filter1b),tp,LOCATION_HAND+LOCATION_GRAVE,0,nil,tc)
   elseif e:GetLabel()==1 then
     Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_REMOVE)
     local rg=Duel.SelectMatchingCard(tp,s.filter1c,tp,LOCATION_MZONE+LOCATION_GRAVE,0,1,1,nil)

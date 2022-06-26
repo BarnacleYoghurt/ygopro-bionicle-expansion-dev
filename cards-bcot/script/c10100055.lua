@@ -69,7 +69,7 @@ function s.operation2(e,tp,eg,ep,ev,re,r,rp)
   local tc=Duel.GetFirstTarget()
   if Duel.GetLocationCount(tp,LOCATION_SZONE)>0 and tc:IsRelateToEffect(e) and tc:IsFaceup() and tc:IsControler(tp) then
     Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_EQUIP)
-    local g=Duel.SelectMatchingCard(tp,s.filter2b,tp,LOCATION_GRAVE+LOCATION_HAND,0,1,1,nil,tc)
+    local g=Duel.SelectMatchingCard(tp,aux.NecroValleyFilter(s.filter2b),tp,LOCATION_GRAVE+LOCATION_HAND,0,1,1,nil,tc)
     if g:GetCount()>0 then
       Duel.Equip(tp,g:GetFirst(),tc)
     end
