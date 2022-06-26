@@ -6,7 +6,7 @@ function s.initial_effect(c)
   e1:SetDescription(aux.Stringid(id,0))
   e1:SetCategory(CATEGORY_SPECIAL_SUMMON)
   e1:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
-  e1:SetProperty(EFFECT_FLAG_DELAY)
+  e1:SetProperty(EFFECT_FLAG_DELAY+EFFECT_FLAG_DAMAGE_STEP)
   e1:SetCode(EVENT_SUMMON_SUCCESS)
   e1:SetCondition(s.condition1)
   e1:SetTarget(s.target1)
@@ -21,14 +21,16 @@ function s.initial_effect(c)
   e2:SetDescription(aux.Stringid(id,1))
   e2:SetCategory(CATEGORY_TOHAND)
   e2:SetType(EFFECT_TYPE_IGNITION)
+  e2:SetProperty(EFFECT_FLAG_CARD_TARGET)
   e2:SetRange(LOCATION_GRAVE)
   e2:SetCondition(aux.exccon)
   e2:SetCost(s.cost2)
   e2:SetTarget(s.target2)
   e2:SetOperation(s.operation2)
-  e2:SetCountLimit(1,id+1000000)
+  e2:SetCountLimit(1,{id,1})
   c:RegisterEffect(e2)
 end
+s.listed_series={0xb01}
 function s.filter1(c,e,tp)
   return c:IsLevelBelow(4) and c:IsSetCard(0xb01) and c:IsCanBeSpecialSummoned(e,tp,tp,false,false)
 end
@@ -45,15 +47,16 @@ function s.operation1(e,tp,eg,ep,ev,re,r,rp)
   local g=Duel.SelectMatchingCard(tp,s.filter1,tp,LOCATION_HAND,0,1,1,nil,e,tp)
   Duel.SpecialSummon(g,0,tp,tp,false,false,POS_FACEUP)
 end
+function s.filter2(c)
+  return c:IsAttribute(ATTRIBUTE_WIND) and c:IsRace(RACE_WARRIOR) and not c:IsCode(id) and c:IsAbleToHand()
+end
 function s.cost2(e,tp,eg,ep,ev,re,r,rp,chk)
   local c=e:GetHandler()
   if chk==0 then return c:IsAbleToRemoveAsCost() end
   Duel.Remove(c,POS_FACEUP,REASON_COST)
 end
-function s.filter2(c)
-  return c:IsAttribute(ATTRIBUTE_WIND) and c:IsRace(RACE_WARRIOR) and not c:IsCode(id) and c:IsAbleToHand()
-end
-function s.target2(e,tp,eg,ep,ev,re,r,rp,chk)
+function s.target2(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
+  if chkc then return s.filter2(chkc) and chkc:IsLocation(LOCATION_GRAVE) and chkc:IsControler(tp) end
   if chk==0 then return Duel.IsExistingTarget(s.filter2,tp,LOCATION_GRAVE,0,1,nil) end
   local g=Duel.SelectTarget(tp,s.filter2,tp,LOCATION_GRAVE,0,1,1,nil)
   Duel.SetOperationInfo(0,CATEGORY_TOHAND,g,1,0,0)
