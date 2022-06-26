@@ -89,36 +89,6 @@ function BCOT.toa_mata_tribute(baseC)
 	e:SetOperation(operation)
 	return e
 end
-function BCOT.toa_mata_swapkanohi(baseC)
-  local id=baseC:GetOriginalCode()
-  local function filter(c,ec)
-    return c:IsSetCard(0xb04) and c:CheckEquipTarget(ec) 
-      and not (c:IsLocation(LOCATION_GRAVE) and c:IsReason(REASON_DESTROY) and c:IsPreviousLocation(LOCATION_ONFIELD) and c:IsPreviousPosition(POS_FACEUP) and c:GetTurnID()==Duel.GetTurnCount())
-  end
-  local function target(e,tp,eg,ep,ev,re,r,rp,chk)
-    local c=e:GetHandler()
-    if chk==0 then return Duel.IsExistingMatchingCard(filter,tp,LOCATION_GRAVE+LOCATION_HAND,0,1,nil,c) and c:GetFlagEffect(id)==0 end
-    c:RegisterFlagEffect(id,RESET_CHAIN,0,1)
-    local eqg=Duel.GetMatchingGroup(filter,tp,LOCATION_GRAVE+LOCATION_HAND,0,nil,c)
-    Duel.SetOperationInfo(0,CATEGORY_EQUIP,eqg,1,0,0)
-  end
-  local function operation(e,tp,eg,ep,ev,re,r,rp)
-    local c=e:GetHandler()
-    Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_EQUIP)
-    local g=Duel.SelectMatchingCard(tp,filter,tp,LOCATION_GRAVE+LOCATION_HAND,0,1,1,nil,c)
-    if g:GetCount()>0 then
-      Duel.Equip(tp,g:GetFirst(),c)
-    end
-  end
-  local e=Effect.CreateEffect(baseC)
-	e:SetCategory(CATEGORY_EQUIP)
-	e:SetType(EFFECT_TYPE_QUICK_O)
-	e:SetRange(LOCATION_MZONE)
-	e:SetCode(EVENT_FREE_CHAIN)
-	e:SetTarget(target)
-	e:SetOperation(operation)
-	return e
-end
 function BCOT.toa_mata_combination_tagout(baseC,attr1,attr2)
   local function filter1(c,e,tp)
     return c:IsLevel(6) and c:IsSetCard(0x1b02) and c:IsAttribute(attr1) and c:IsCanBeSpecialSummoned(e,0,tp,false,false) 
@@ -184,43 +154,6 @@ function BCOT.toa_mata_combination_tagout(baseC,attr1,attr2)
   return e
 end
 --Kanohi
-function BCOT.kanohi_equip_great(baseC)
-  local function filter1(c)
-    return c:IsFaceup() and c:IsLevelAbove(6)
-  end
-  local function target1(e,tp,eg,ep,ev,re,r,rp,chk)
-    if chk==0 then return Duel.IsExistingTarget(filter1,tp,LOCATION_MZONE,LOCATION_MZONE,1,nil) end
-    Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_EQUIP)
-    Duel.SelectTarget(tp,filter1,tp,LOCATION_MZONE,LOCATION_MZONE,1,1,nil)
-    Duel.SetOperationInfo(0,CATEGORY_EQUIP,e:GetHandler(),1,0,0)
-  end
-  local function operation1(e,tp,eg,ep,ev,re,r,rp)
-    local c=e:GetHandler()
-    local tc=Duel.GetFirstTarget()
-    if c:IsRelateToEffect(e) and tc:IsRelateToEffect(e) then
-      Duel.Equip(tp,c,tc)
-    end
-  end
-  local function condition2(e,c)
-    return c:IsLevelAbove(6)
-  end
-
-	--Activate
-	local e1=Effect.CreateEffect(baseC)
-	e1:SetCategory(CATEGORY_EQUIP)
-	e1:SetType(EFFECT_TYPE_ACTIVATE)
-	e1:SetCode(EVENT_FREE_CHAIN)
-	e1:SetProperty(EFFECT_FLAG_CARD_TARGET)
-	e1:SetTarget(target1)
-	e1:SetOperation(operation1)
-	--Equip limit
-	local e2=Effect.CreateEffect(baseC)
-	e2:SetType(EFFECT_TYPE_SINGLE)
-	e2:SetCode(EFFECT_EQUIP_LIMIT)
-	e2:SetProperty(EFFECT_FLAG_CANNOT_DISABLE)
-	e2:SetValue(condition2)
-  return e1, e2
-end
 function BCOT.kanohi_selfdestruct(baseC)
   local function filter(c,ec)
     return c:GetEquipTarget()==ec and c:IsSetCard(0xb04)
@@ -300,6 +233,7 @@ function BCOT.kanohi_revive(baseC, targetCode)
     local g=Duel.SelectTarget(tp,filter,tp,LOCATION_GRAVE,0,1,1,nil,e,tp,c)
     Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,g,1,0,0)
     Duel.SetOperationInfo(0,CATEGORY_EQUIP,c,1,0,0)
+    Duel.SetOperationInfo(0,CATEGORY_LEAVE_GRAVE,c,1,0,0)
   end
   local function operation(e,tp,eg,ep,ev,re,r,rp)
     local c=e:GetHandler()
