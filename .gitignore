@@ -14,3 +14,6 @@
 # BBTS
 !cards-bbts/**/*.lua
 !util-bbts.lua
+# BPEV
+!cards-bpev/**/*.lua
+!util-bpev.lua
