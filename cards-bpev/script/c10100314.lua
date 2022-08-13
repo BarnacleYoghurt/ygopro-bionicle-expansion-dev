@@ -8,10 +8,9 @@ function s.initial_effect(c)
   --Destroy if replaced
   local e1=bcot.kanohi_selfdestruct(c)
   c:RegisterEffect(e1)
-  --Search EP monster
+  --Place Nuva Symbol
   local e2=Effect.CreateEffect(c)
   e2:SetDescription(aux.Stringid(id,0))
-  e2:SetCategory(CATEGORY_SEARCH+CATEGORY_TOHAND)
   e2:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
   e2:SetProperty(EFFECT_FLAG_DELAY)
   e2:SetCode(EVENT_TO_GRAVE)
@@ -44,23 +43,30 @@ function s.initial_effect(c)
   e5:SetCountLimit(1)
   c:RegisterEffect(e5)
 end
-function s.filter2(c)
-  return c:IsSetCard(0xb0b) and c:IsAbleToHand()
+function s.filter2a(c)
+  return c:IsType(TYPE_MONSTER) and c:IsAbleToRemoveAsCost()
+end
+function s.filter2b(c,tp)
+  return c:IsSetCard(0xb0c) and c:IsType(TYPE_CONTINUOUS) and c:IsType(TYPE_SPELL) and not c:IsForbidden() and c:CheckUniqueOnField(tp)
 end
 function s.cost2(e,tp,eg,ep,ev,re,r,rp,chk)
-  if chk==0 then return Duel.IsExistingMatchingCard(Card.IsDiscardable,tp,LOCATION_HAND,0,1,nil) end
-  Duel.DiscardHand(tp,Card.IsDiscardable,1,1,REASON_COST+REASON_DISCARD,nil)
+  if chk==0 then return Duel.IsExistingMatchingCard(s.filter2a,tp,LOCATION_GRAVE,0,1,nil) end
+  Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_REMOVE)
+  local g=Duel.SelectMatchingCard(tp,s.filter2a,tp,LOCATION_GRAVE,0,1,1,nil)
+  Duel.Remove(g,POS_FACEUP,REASON_COST)
 end
 function s.target2(e,tp,eg,ep,ev,re,r,rp,chk)
-  if chk==0 then return Duel.IsExistingMatchingCard(s.filter2,tp,LOCATION_DECK,0,1,nil) end
-  Duel.SetOperationInfo(0,CATEGORY_TOHAND,nil,1,tp,LOCATION_DECK)
+  if chk==0 then 
+    return Duel.GetLocationCount(tp,LOCATION_SZONE)>0 and Duel.IsExistingMatchingCard(s.filter2b,tp,LOCATION_DECK,0,1,nil,tp)
+  end
 end
 function s.operation2(e,tp,eg,ep,ev,re,r,rp)
-  Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_ATOHAND)
-  local g=Duel.SelectMatchingCard(tp,s.filter2,tp,LOCATION_DECK,0,1,1,nil)
-  if #g>0 then
-    Duel.SendtoHand(g,nil,REASON_EFFECT)
-    Duel.ConfirmCards(1-tp,g)
+  if Duel.GetLocationCount(tp,LOCATION_SZONE)>0 then
+    Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TOFIELD)
+    local g=Duel.SelectMatchingCard(tp,s.filter2b,tp,LOCATION_DECK,0,1,1,nil,tp)
+    if #g>0 then
+      Duel.MoveToField(g:GetFirst(),tp,tp,LOCATION_SZONE,POS_FACEUP,true)
+    end
   end
 end
 function s.operation5(e,tp,eg,ep,ev,re,r,rp)
