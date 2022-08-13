@@ -7,7 +7,7 @@ function s.initial_effect(c)
 	e0:SetType(EFFECT_TYPE_ACTIVATE)
 	e0:SetCode(EVENT_FREE_CHAIN)
 	c:RegisterEffect(e0)
-  --Search Onua
+  --Search EP or Onua
   local e1=Effect.CreateEffect(c)
   e1:SetDescription(aux.Stringid(id,0))
   e1:SetCategory(CATEGORY_SEARCH+CATEGORY_TOHAND)
@@ -22,8 +22,7 @@ function s.initial_effect(c)
   local e2=Effect.CreateEffect(c)
   e2:SetDescription(aux.Stringid(id,1))
   e2:SetCategory(CATEGORY_RECOVER)
-  e2:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O)
-  e2:SetProperty(EFFECT_FLAG_DELAY)
+  e2:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_F)
   e2:SetRange(LOCATION_SZONE)
   e2:SetCode(EVENT_CHAINING)
   e2:SetCondition(s.condition2)
@@ -44,7 +43,7 @@ function s.initial_effect(c)
   c:RegisterEffect(e3)
 end
 function s.filter1(c)
-  return c:IsCode(10100003) and c:IsAbleToHand()
+  return (c:IsSetCard(0xb0b) or c:IsCode(10100003)) and c:IsAbleToHand()
 end
 function s.cost1(e,tp,eg,ep,ev,re,r,rp,chk)
   local c=e:GetHandler()
@@ -52,12 +51,12 @@ function s.cost1(e,tp,eg,ep,ev,re,r,rp,chk)
   Duel.SendtoDeck(c,nil,LOCATION_DECKBOT,REASON_COST)
 end
 function s.target1(e,tp,eg,ep,ev,re,r,rp,chk)
-  if chk==0 then return Duel.IsExistingMatchingCard(s.filter1,tp,LOCATION_DECK+LOCATION_GRAVE,0,1,nil) end
-  Duel.SetOperationInfo(0,CATEGORY_TOHAND,nil,1,tp,LOCATION_DECK+LOCATION_GRAVE)
+  if chk==0 then return Duel.IsExistingMatchingCard(s.filter1,tp,LOCATION_DECK,0,1,nil) end
+  Duel.SetOperationInfo(0,CATEGORY_TOHAND,nil,1,tp,LOCATION_DECK)
 end
 function s.operation1(e,tp,eg,ep,ev,re,r,rp)
   Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_ATOHAND)
-  local g=Duel.SelectMatchingCard(tp,aux.NecroValleyFilter(s.filter1),tp,LOCATION_DECK+LOCATION_GRAVE,0,1,1,nil)
+  local g=Duel.SelectMatchingCard(tp,s.filter1,tp,LOCATION_DECK,0,1,1,nil)
   if #g>0 then
     Duel.SendtoHand(g,nil,REASON_EFFECT)
     Duel.ConfirmCards(1-tp,g)
