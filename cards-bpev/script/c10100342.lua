@@ -24,9 +24,9 @@ function s.initial_effect(c)
   --Scout
   local e3=Effect.CreateEffect(c)
   e3:SetDescription(aux.Stringid(id,1))
-  e3:SetCategory(CATEGORY_REMOVE)
   e3:SetType(EFFECT_TYPE_XMATERIAL+EFFECT_TYPE_IGNITION)
   e3:SetCondition(s.condition3)
+  e3:SetCost(aux.dxmcostgen(1,1,nil))
   e3:SetTarget(s.target3)
   e3:SetOperation(s.operation3)
   e3:SetCountLimit(1)
@@ -68,25 +68,27 @@ function s.condition3(e,tp,eg,ep,ev,re,r,rp)
   return e:GetHandler():IsSetCard(0xb08)
 end
 function s.target3(e,tp,eg,ep,ev,re,r,rp,chk)
-  if chk==0 then return Duel.IsPlayerCanRemove(tp) and Duel.GetFieldGroupCount(1-tp,LOCATION_DECK,0)>0 end
-  Duel.SetOperationInfo(0,CATEGORY_REMOVE,nil,1,1-tp,LOCATION_DECK)
+	if chk==0 then return true end
+	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_CODE)
+	local ac=Duel.AnnounceCard(tp)
+	Duel.SetTargetParam(ac)
+	Duel.SetOperationInfo(0,CATEGORY_ANNOUNCE,nil,0,tp,ANNOUNCE_CARD)
 end
 function s.operation3(e,tp,eg,ep,ev,re,r,rp)
-  local rg=Duel.GetDecktopGroup(1-tp,1)
-  if #rg>0 then
-    local rc=rg:GetFirst()
-    if Duel.Remove(rc,POS_FACEUP,REASON_EFFECT)>0 and rc:IsLocation(LOCATION_REMOVED) then
-      local e1=Effect.CreateEffect(e:GetHandler())
-      e1:SetType(EFFECT_TYPE_FIELD)
-      e1:SetTargetRange(0,LOCATION_ALL)
-      e1:SetCode(EFFECT_DISABLE)
-      e1:SetTarget(s.target3_1)
-      e1:SetLabel(rc:GetCode())
-      e1:SetReset(RESET_PHASE+PHASE_END,2)
-      Duel.RegisterEffect(e1,tp)
-    end
-  end
+  local c=e:GetHandler()
+	local ac=Duel.GetChainInfo(0,CHAININFO_TARGET_PARAM)
+  
+	local e1=Effect.CreateEffect(c)
+	e1:SetDescription(aux.Stringid(id,1))
+	e1:SetType(EFFECT_TYPE_FIELD)
+	e1:SetProperty(EFFECT_FLAG_PLAYER_TARGET+EFFECT_FLAG_CLIENT_HINT)
+	e1:SetTargetRange(0,1)
+	e1:SetCode(EFFECT_CANNOT_ACTIVATE)
+	e1:SetValue(s.value3_1)
+	e1:SetLabel(ac)
+	e1:SetReset(RESET_PHASE+PHASE_END+RESET_OPPO_TURN)
+	Duel.RegisterEffect(e1,tp)
 end
-function s.target3_1(e,c)
-	return c:IsCode(e:GetLabel())
+function s.value3_1(e,re,tp)
+	return re:GetHandler():IsOriginalCode(e:GetLabel())
 end
