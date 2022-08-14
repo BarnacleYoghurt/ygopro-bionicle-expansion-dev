@@ -19,7 +19,7 @@ function s.initial_effect(c)
   --To Deck
   local e2=Effect.CreateEffect(c)
   e2:SetDescription(aux.Stringid(id,1))
-  e2:SetCategory(CATEGORY_TODECK)
+  e2:SetCategory(CATEGORY_TODECK+CATEGORY_RECOVER)
   e2:SetType(EFFECT_TYPE_QUICK_O)
   e2:SetProperty(EFFECT_FLAG_CARD_TARGET)
   e2:SetRange(LOCATION_MZONE)
@@ -63,15 +63,21 @@ function s.target2(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
   Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TODECK)
   local g=Duel.SelectTarget(tp,Card.IsAbleToDeck,tp,LOCATION_GRAVE,LOCATION_GRAVE,1,1,nil)
   Duel.SetOperationInfo(0,CATEGORY_TODECK,g,1,0,0)
+  Duel.SetOperationInfo(0,CATEGORY_RECOVER,nil,0,tp,1000)
 end
 function s.operation2(e,tp,eg,ep,ev,re,r,rp)
   local tc=Duel.GetFirstTarget()
   if tc:IsRelateToEffect(e) then
+    local ct
     if tc:IsType(TYPE_FUSION+TYPE_SYNCHRO+TYPE_XYZ+TYPE_LINK) or Duel.SelectOption(tp,aux.Stringid(id,2),aux.Stringid(id,3))==0 then
-			Duel.SendtoDeck(tc,nil,0,REASON_EFFECT)
+			ct=Duel.SendtoDeck(tc,nil,0,REASON_EFFECT)
 		else
-			Duel.SendtoDeck(tc,nil,1,REASON_EFFECT)
+			ct=Duel.SendtoDeck(tc,nil,1,REASON_EFFECT)
 		end
+    if ct>0 and tc:IsLocation(LOCATION_DECK+LOCATION_EXTRA) then
+      Duel.BreakEffect()
+      Duel.Recover(tp,1000,REASON_EFFECT)
+    end
   end
 end
     
