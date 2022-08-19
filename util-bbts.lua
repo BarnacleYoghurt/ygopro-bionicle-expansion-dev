@@ -161,7 +161,7 @@ function BBTS.krana_summon(baseC)
 		return c:IsSetCard(0xb08) and c:GetLevel()==4 and c:IsCanBeSpecialSummoned(e,0,tp,false,false,POS_FACEUP_ATTACK)
 	end
 	local function condition(e,tp,eg,ep,ev,re,r,rp)
-		return Duel.GetCurrentPhase()==PHASE_MAIN1
+		return e:GetHandler():IsSummonType(SUMMON_TYPE_NORMAL)
 	end
 	local function cost(e,tp,eg,ep,ev,re,r,rp,chk)
 		if chk==0 then return e:GetHandler():IsAbleToHandAsCost() end
@@ -177,17 +177,20 @@ function BBTS.krana_summon(baseC)
     Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
 		local g=Duel.SelectMatchingCard(tp,filter,tp,LOCATION_DECK,0,1,1,nil,e,tp)
 		if g:GetCount() > 0 then
-			if Duel.SpecialSummon(g,0,tp,tp,false,false,POS_FACEUP_ATTACK)>0 then
-				Duel.BreakEffect()
-				Duel.SkipPhase(tp,PHASE_MAIN1,RESET_PHASE+PHASE_END,1)
-				local e1=Effect.CreateEffect(e:GetHandler())
-				e1:SetType(EFFECT_TYPE_FIELD)
-				e1:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
-				e1:SetTargetRange(1,0)
-				e1:SetCode(EFFECT_CANNOT_BP)
-				e1:SetReset(RESET_PHASE+PHASE_END)
-				Duel.RegisterEffect(e1,tp)
+			if Duel.SpecialSummonStep(g:GetFirst(),0,tp,tp,false,false,POS_FACEUP_ATTACK) then
+        local e1=Effect.CreateEffect(e:GetHandler())
+        e1:SetDescription(3206)
+        e1:SetType(EFFECT_TYPE_SINGLE)
+        e1:SetProperty(EFFECT_FLAG_CLIENT_HINT)
+        e1:SetCode(EFFECT_CANNOT_ATTACK)
+        e1:SetReset(RESET_EVENT+RESETS_STANDARD+RESET_PHASE+PHASE_END)
+        g:GetFirst():RegisterEffect(e1)
+        local e2=e1:Clone()
+        e2:SetDescription(3302)
+        e2:SetCode(EFFECT_CANNOT_TRIGGER)
+        g:GetFirst():RegisterEffect(e2)
 			end
+      Duel.SpecialSummonComplete()
 		end
 	end
 	
