@@ -41,7 +41,7 @@ function s.operation1(e,tp,eg,ep,ev,re,r,rp)
   end
 end
 function s.condition2(e)
-	return not Duel.IsExistingMatchingCard(Card.IsFaceup,e:GetHandlerPlayer(),LOCATION_MZONE,LOCATION_MZONE,1,nil)
+	return not Duel.IsExistingMatchingCard(Card.IsFaceup,e:GetHandlerPlayer(),LOCATION_MZONE,0,1,nil)
 end
 function s.target3(e,tp,eg,ep,ev,re,r,rp,chk)
   if chk==0 then 
