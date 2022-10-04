@@ -2,6 +2,8 @@
 local s,id=GetID()
 function s.initial_effect(c)
   --Special or Fusion Summon
+  --TODO: We have to conduct a fusion summon here with a monster that isn't in any location until the effect resolves. This is a pain in the ass.
+	local params={nil,aux.FilterBoolFunction(Card.IsLocation,LOCATION_MZONE),s.extrafil1,nil,nil,nil,2}
   local e1=Effect.CreateEffect(c)
   e1:SetDescription(aux.Stringid(id,0))
   e1:SetCategory(CATEGORY_TOGRAVE+CATEGORY_SPECIAL_SUMMON+CATEGORY_TOKEN+CATEGORY_FUSION_SUMMON)
@@ -12,7 +14,11 @@ function s.initial_effect(c)
   e1:SetOperation(s.operation1)
   c:RegisterEffect(e1)
 end
+function s.extrafil1(e,tp,mg)
+  return Group.FromCards(Duel.CreateToken(tp,id+10000))
+end
 function s.filter1a(c,e,tp)
+  local token=Card.FromLuaRef(id+10000)
   return c:IsFaceup() and (
     Duel.IsExistingMatchingCard(s.filter1b,tp,LOCATION_DECK,0,1,nil,e,tp) or
     (Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and Duel.IsPlayerCanSpecialSummonMonster(tp,id+10000,0,0,TYPES_TOKEN,0,1,RACE_AQUA,ATTRIBUTE_LIGHT) and Duel.IsExistingMatchingCard(s.filter1c,tp,LOCATION_EXTRA,0,1,nil,e,tp))
@@ -22,7 +28,7 @@ function s.filter1b(c,e,tp)
   return c:IsSetCard(0xb0b) and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
 end
 function s.filter1c(c,e,tp)
-  return true
+  return true and C
 end
 function s.target1(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
   if chkc then return chkc:IsLocation(LOCATION_MZONE) and chkc:IsControler(tp) and s.filter1a(chkc,e,tp) end
