@@ -1,3 +1,6 @@
+if not bpev then
+	Duel.LoadScript("../util-bpev.lua")
+end
 --Toa Nuva Tahu
 local s,id=GetID()
 function s.initial_effect(c)
@@ -5,15 +8,8 @@ function s.initial_effect(c)
 	--Fusion Material
 	Fusion.AddProcMix(c,true,true,10100001,aux.FilterBoolFunctionEx(Card.IsSetCard,0xb0b))
   --Add Spell/Trap
-  local e1=Effect.CreateEffect(c)
+  local e1=bpev.toa_nuva_search(c)
   e1:SetDescription(aux.Stringid(id,0))
-  e1:SetCategory(CATEGORY_SEARCH+CATEGORY_TOHAND+CATEGORY_TOGRAVE)
-  e1:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
-  e1:SetProperty(EFFECT_FLAG_DELAY)
-  e1:SetCode(EVENT_SPSUMMON_SUCCESS)
-  e1:SetCondition(s.condition1)
-  e1:SetTarget(s.target1)
-  e1:SetOperation(s.operation1)
   e1:SetCountLimit(1,id)
   c:RegisterEffect(e1)
   --ATK to 0
@@ -30,29 +26,6 @@ function s.initial_effect(c)
 	e2:SetOperation(s.operation2)
   e2:SetCountLimit(1,{id,1})
 	c:RegisterEffect(e2)
-end
-function s.filter1(c)
-  return c:IsSetCard(0xb0c) and c:IsType(TYPE_SPELL+TYPE_TRAP) and c:IsAbleToHand()
-end
-function s.condition1(e,tp,eg,ep,ev,re,r,rp)
-  return e:GetHandler():IsSummonType(SUMMON_TYPE_FUSION)
-end
-function s.target1(e,tp,eg,ep,ev,re,r,rp,chk)
-  if chk==0 then return Duel.IsExistingMatchingCard(s.filter1,tp,LOCATION_DECK+LOCATION_GRAVE,0,1,nil) end
-  Duel.SetOperationInfo(0,CATEGORY_TOHAND,nil,1,tp,LOCATION_DECK+LOCATION_GRAVE)
-end
-function s.operation1(e,tp,eg,ep,ev,re,r,rp)
-  Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_ATOHAND)
-  local g=Duel.SelectMatchingCard(tp,aux.NecroValleyFilter(s.filter1),tp,LOCATION_DECK+LOCATION_GRAVE,0,1,1,nil)
-  if #g>0 and Duel.SendtoHand(g,nil,REASON_EFFECT)>0 then
-		local og=Duel.GetOperatedGroup()
-    if og:FilterCount(Card.IsLocation,nil,LOCATION_HAND)>0 then
-      Duel.ConfirmCards(1-tp,g)
-      Duel.BreakEffect()
-      Duel.ShuffleHand(tp)
-      Duel.DiscardHand(tp,aux.TRUE,1,1,REASON_EFFECT+REASON_DISCARD)
-    end
-  end
 end
 function s.filter2(c)
   return c:IsFaceup() and c:IsAttackPos()
