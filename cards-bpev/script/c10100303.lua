@@ -30,7 +30,7 @@ function s.condition1(e,tp,eg,ep,ev,re,r,rp)
   return e:GetHandler():IsReason(REASON_EFFECT)
 end
 function s.target1(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.GetFieldGroupCount(tp,0,LOCATION_EXTRA)>0 end
+	if chk==0 then return true end
 	Duel.SetOperationInfo(0,CATEGORY_TOGRAVE,nil,0,1-tp,LOCATION_EXTRA)
 end
 function s.operation1(e,tp,eg,ep,ev,re,r,rp)
