@@ -75,6 +75,10 @@ function s.operation1(e,tp,eg,ep,ev,re,r,rp)
       local token=Duel.CreateToken(tp,id+10000)
       if Duel.SpecialSummon(token,0,tp,tp,false,false,POS_FACEUP)>0 then
         Duel.BreakEffect()
+        --Hack to just try and fusion summon without any checks
+        local gc=Group.FromCards(tc,token)
+        local params={nil,Fusion.OnFieldMat(function(c) return gc:IsContains(c) end),nil,nil,nil,nil,2}
+        Fusion.SummonEffOP(table.unpack(params))(e,tp,eg,ep,ev,re,r,rp)
       end
     end
     Debug.Message("this one is hard") 
