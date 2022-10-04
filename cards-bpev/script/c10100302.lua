@@ -18,7 +18,6 @@ function s.extrafil1(e,tp,mg)
   return Group.FromCards(Duel.CreateToken(tp,id+10000))
 end
 function s.filter1a(c,e,tp)
-  local token=Card.FromLuaRef(id+10000)
   return c:IsFaceup() and (
     Duel.IsExistingMatchingCard(s.filter1b,tp,LOCATION_DECK,0,1,nil,e,tp) or
     (Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and Duel.IsPlayerCanSpecialSummonMonster(tp,id+10000,0,0,TYPES_TOKEN,0,1,RACE_AQUA,ATTRIBUTE_LIGHT) and Duel.IsExistingMatchingCard(s.filter1c,tp,LOCATION_EXTRA,0,1,nil,e,tp))
@@ -28,7 +27,7 @@ function s.filter1b(c,e,tp)
   return c:IsSetCard(0xb0b) and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
 end
 function s.filter1c(c,e,tp)
-  return true and C
+  return true
 end
 function s.target1(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
   if chkc then return chkc:IsLocation(LOCATION_MZONE) and chkc:IsControler(tp) and s.filter1a(chkc,e,tp) end
