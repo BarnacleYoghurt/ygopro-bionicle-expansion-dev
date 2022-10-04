@@ -29,6 +29,7 @@ function s.initial_effect(c)
   e3:SetCondition(s.condition3)
   e3:SetTarget(s.target3)
   e3:SetOperation(s.operation3)
+  e3:SetCountLimit(1,id)
   c:RegisterEffect(e3)
 end
 function s.condition1(e,c)
