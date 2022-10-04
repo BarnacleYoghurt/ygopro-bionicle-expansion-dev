@@ -36,3 +36,41 @@ function BPEV.toa_nuva_search(baseC)
   e:SetOperation(operation)
   return e
 end
+--Kanohi Nuva
+function BPEV.kanohi_nuva_search(baseC)
+  local function filterA(c)
+    return c:IsType(TYPE_MONSTER) and c:IsAbleToRemoveAsCost()
+  end
+  local function filterB(c,tp)
+    return c:IsSetCard(0xb0c) and c:IsType(TYPE_CONTINUOUS) and c:IsType(TYPE_SPELL) and not c:IsForbidden() and c:CheckUniqueOnField(tp)
+  end
+  local function cost(e,tp,eg,ep,ev,re,r,rp,chk)
+    if chk==0 then return Duel.IsExistingMatchingCard(filterA,tp,LOCATION_GRAVE,0,1,nil) end
+    Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_REMOVE)
+    local g=Duel.SelectMatchingCard(tp,filterA,tp,LOCATION_GRAVE,0,1,1,nil)
+    Duel.Remove(g,POS_FACEUP,REASON_COST)
+  end
+  local function target(e,tp,eg,ep,ev,re,r,rp,chk)
+    if chk==0 then 
+      return Duel.GetLocationCount(tp,LOCATION_SZONE)>0 and Duel.IsExistingMatchingCard(filterB,tp,LOCATION_DECK,0,1,nil,tp)
+    end
+  end
+  local function operation(e,tp,eg,ep,ev,re,r,rp)
+    if Duel.GetLocationCount(tp,LOCATION_SZONE)>0 then
+      Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TOFIELD)
+      local g=Duel.SelectMatchingCard(tp,filterB,tp,LOCATION_DECK,0,1,1,nil,tp)
+      if #g>0 then
+        Duel.MoveToField(g:GetFirst(),tp,tp,LOCATION_SZONE,POS_FACEUP,true)
+      end
+    end
+  end
+  
+  local e=Effect.CreateEffect(baseC)
+  e:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
+  e:SetProperty(EFFECT_FLAG_DELAY)
+  e:SetCode(EVENT_TO_GRAVE)
+  e:SetCost(cost)
+  e:SetTarget(target)
+  e:SetOperation(operation)
+  return e
+end

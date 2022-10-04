@@ -1,6 +1,9 @@
 if not bcot then
 	Duel.LoadScript("../util-bcot.lua")
 end
+if not bpev then
+	Duel.LoadScript("../util-bpev.lua")
+end
 --Great Kanohi Pakari Nuva
 local s,id=GetID()
 function s.initial_effect(c)
@@ -9,14 +12,8 @@ function s.initial_effect(c)
   local e1=bcot.kanohi_selfdestruct(c)
   c:RegisterEffect(e1)
   --Place Nuva Symbol
-  local e2=Effect.CreateEffect(c)
+  local e2=bpev.kanohi_nuva_search(c)
   e2:SetDescription(aux.Stringid(id,0))
-  e2:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
-  e2:SetProperty(EFFECT_FLAG_DELAY)
-  e2:SetCode(EVENT_TO_GRAVE)
-  e2:SetCost(s.cost2)
-  e2:SetTarget(s.target2)
-  e2:SetOperation(s.operation2)
   e2:SetCountLimit(1,id)
   c:RegisterEffect(e2)
   --ATK gain
