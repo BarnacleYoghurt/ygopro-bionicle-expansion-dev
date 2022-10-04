@@ -74,3 +74,79 @@ function BPEV.kanohi_nuva_search(baseC)
   e:SetOperation(operation)
   return e
 end
+--Nuva Symbols
+function BPEV.nuva_symbol_search(baseC,targetCode)
+  local function filter(c)
+    return (c:IsSetCard(0xb0b) or c:IsCode(targetCode)) and c:IsAbleToHand()
+  end
+  local function cost(e,tp,eg,ep,ev,re,r,rp,chk)
+    local c=e:GetHandler()
+    if chk==0 then return c:IsAbleToDeckAsCost() end
+    Duel.SendtoDeck(c,nil,LOCATION_DECKBOT,REASON_COST)
+  end
+  local function target(e,tp,eg,ep,ev,re,r,rp,chk)
+    if chk==0 then return Duel.IsExistingMatchingCard(filter,tp,LOCATION_DECK,0,1,nil) end
+    Duel.SetOperationInfo(0,CATEGORY_TOHAND,nil,1,tp,LOCATION_DECK)
+  end
+  local function operation(e,tp,eg,ep,ev,re,r,rp)
+    Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_ATOHAND)
+    local g=Duel.SelectMatchingCard(tp,filter,tp,LOCATION_DECK,0,1,1,nil)
+    if #g>0 then
+      Duel.SendtoHand(g,nil,REASON_EFFECT)
+      Duel.ConfirmCards(1-tp,g)
+    end
+  end
+  
+  local e=Effect.CreateEffect(baseC)
+  e:SetCategory(CATEGORY_SEARCH+CATEGORY_TOHAND)
+  e:SetType(EFFECT_TYPE_IGNITION)
+  e:SetRange(LOCATION_SZONE)
+  e:SetCost(cost)
+  e:SetTarget(target)
+  e:SetOperation(operation)
+  return e
+end
+function BPEV.nuva_symbol_punish(baseC,targetCode,punish)
+  local function condition(e,tp,eg,ep,ev,re,r,rp)
+    return e:GetHandler():IsFaceup() and not e:GetHandler():IsLocation(LOCATION_DECK)
+  end
+  local function target(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
+    if chkc then return chkc:IsFaceup() and chkc:IsCode(targetCode) end
+    if chk==0 then return true end
+    Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TARGET)
+    local g=Duel.SelectTarget(tp,aux.FaceupFilter(Card.IsCode,targetCode),tp,LOCATION_ONFIELD,0,1,1,nil)
+    if #g>0 then
+      Duel.SetOperationInfo(0,CATEGORY_REMOVE,nil,1,tp,LOCATION_HAND)
+    end
+  end
+  local function operation(e,tp,eg,ep,ev,re,r,rp)
+    local tc=Duel:GetFirstTarget()
+    if tc and tc:IsRelateToEffect(e) and tc:IsFaceup() then
+      Duel.NegateRelatedChain(tc,RESET_TURN_SET)
+      local e1=Effect.CreateEffect(e:GetHandler())
+      e1:SetType(EFFECT_TYPE_SINGLE)
+      e1:SetCode(EFFECT_DISABLE)
+      e1:SetReset(RESET_EVENT+RESETS_STANDARD)
+      tc:RegisterEffect(e1)
+      local e2=Effect.CreateEffect(e:GetHandler())
+      e2:SetType(EFFECT_TYPE_SINGLE)
+      e2:SetCode(EFFECT_DISABLE_EFFECT)
+      e2:SetValue(RESET_TURN_SET)
+      e2:SetReset(RESET_EVENT+RESETS_STANDARD)
+      tc:RegisterEffect(e2)
+      if (not tc:IsImmuneToEffect(e1)) and (not tc:IsImmuneToEffect(e2)) then
+        punish(e,tp,eg,ep,ev,re,r,rp)
+      end
+    end
+  end
+  
+  local e=Effect.CreateEffect(baseC)
+  e:SetCategory(CATEGORY_REMOVE)
+  e:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_F)
+  e:SetProperty(EFFECT_FLAG_CARD_TARGET)
+  e:SetCode(EVENT_LEAVE_FIELD)
+  e:SetCondition(condition)
+  e:SetTarget(target)
+  e:SetOperation(operation)
+  return e
+end
