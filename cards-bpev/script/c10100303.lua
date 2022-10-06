@@ -28,7 +28,8 @@ function s.initial_effect(c)
 end
 s.material_setcode={0xb0b}
 function s.condition1(e,tp,eg,ep,ev,re,r,rp)
-  return e:GetHandler():IsReason(REASON_EFFECT)
+  local c=e:GetHandler()
+  return c:IsPreviousLocation(LOCATION_MZONE) and c:IsSummonType(SUMMON_TYPE_FUSION) and c:IsReason(REASON_EFFECT)
 end
 function s.target1(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return true end
