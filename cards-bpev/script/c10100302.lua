@@ -3,7 +3,6 @@ local s,id=GetID()
 function s.initial_effect(c)
   --Special or Fusion Summon
   --TODO: We have to conduct a fusion summon here with a monster that isn't in any location until the effect resolves. This is a pain in the ass.
-	local params={nil,aux.FilterBoolFunction(Card.IsLocation,LOCATION_MZONE),s.extrafil1,nil,nil,nil,2}
   local e1=Effect.CreateEffect(c)
   e1:SetDescription(aux.Stringid(id,0))
   e1:SetCategory(CATEGORY_TOGRAVE+CATEGORY_SPECIAL_SUMMON+CATEGORY_TOKEN+CATEGORY_FUSION_SUMMON)
@@ -77,8 +76,10 @@ function s.operation1(e,tp,eg,ep,ev,re,r,rp)
         Duel.BreakEffect()
         --Hack to just try and fusion summon without any checks
         local gc=Group.FromCards(tc,token)
-        local params={nil,Fusion.OnFieldMat(function(c) return gc:IsContains(c) end),nil,nil,nil,nil,2}
-        Fusion.SummonEffOP(table.unpack(params))(e,tp,eg,ep,ev,re,r,rp)
+        --local params={nil,Fusion.OnFieldMat(function(c) return gc:IsContains(c) end),nil,nil,nil,nil,2}
+        local params={fusfilter=aux.FilterBoolFunction(Card.ListsArchetypeAsMaterial,0xb0b),
+          matfilter=Fusion.OnFieldMat(function(c) return gc:IsContains(c) end),sumpos=POS_FACEUP_DEFENSE,exactcount=2}
+        Fusion.SummonEffOP(params)(e,tp,eg,ep,ev,re,r,rp)
       end
     end
     Debug.Message("this one is hard") 

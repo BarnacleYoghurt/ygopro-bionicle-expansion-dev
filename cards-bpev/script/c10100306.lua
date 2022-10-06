@@ -27,6 +27,7 @@ function s.initial_effect(c)
   e2:SetCountLimit(1,{id,1})
 	c:RegisterEffect(e2)
 end
+s.material_setcode={0xb02,0xb0b,0xb0c}
 function s.filter2(c)
   return c:IsFaceup() and c:IsAttackPos()
 end

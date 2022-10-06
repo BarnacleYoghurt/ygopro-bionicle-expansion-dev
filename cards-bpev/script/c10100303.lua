@@ -26,6 +26,7 @@ function s.initial_effect(c)
 	e2:SetOperation(Fusion.SummonEffOP(params))
 	c:RegisterEffect(e2)
 end
+s.material_setcode={0xb0b}
 function s.condition1(e,tp,eg,ep,ev,re,r,rp)
   return e:GetHandler():IsReason(REASON_EFFECT)
 end
