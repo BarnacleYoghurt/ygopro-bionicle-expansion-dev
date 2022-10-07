@@ -2,87 +2,72 @@
 local s,id=GetID()
 function s.initial_effect(c)
   --Special or Fusion Summon
-  --TODO: We have to conduct a fusion summon here with a monster that isn't in any location until the effect resolves. This is a pain in the ass.
   local e1=Effect.CreateEffect(c)
   e1:SetDescription(aux.Stringid(id,0))
-  e1:SetCategory(CATEGORY_TOGRAVE+CATEGORY_SPECIAL_SUMMON+CATEGORY_TOKEN+CATEGORY_FUSION_SUMMON)
+  e1:SetCategory(CATEGORY_TOGRAVE+CATEGORY_DESTROY+CATEGORY_SPECIAL_SUMMON+CATEGORY_TOKEN+CATEGORY_FUSION_SUMMON)
   e1:SetType(EFFECT_TYPE_ACTIVATE)
 	e1:SetProperty(EFFECT_FLAG_CARD_TARGET)
 	e1:SetCode(EVENT_FREE_CHAIN)
   e1:SetTarget(s.target1)
   e1:SetOperation(s.operation1)
+  e1:SetCountLimit(1,id,EFFECT_COUNT_CODE_OATH)
   c:RegisterEffect(e1)
 end
-function s.extrafil1(e,tp,mg)
-  return Group.FromCards(Duel.CreateToken(tp,id+10000))
-end
-function s.filter1a(c,e,tp)
-  return c:IsFaceup() and (
-    Duel.IsExistingMatchingCard(s.filter1b,tp,LOCATION_DECK,0,1,nil,e,tp) or
-    (Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and Duel.IsPlayerCanSpecialSummonMonster(tp,id+10000,0,0,TYPES_TOKEN,0,1,RACE_AQUA,ATTRIBUTE_LIGHT) and Duel.IsExistingMatchingCard(s.filter1c,tp,LOCATION_EXTRA,0,1,nil,e,tp))
-  )
-end
-function s.filter1b(c,e,tp)
+function s.filter1(c,e,tp)
   return c:IsSetCard(0xb0b) and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
 end
-function s.filter1c(c,e,tp)
-  return true
-end
 function s.target1(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
-  if chkc then return chkc:IsLocation(LOCATION_MZONE) and chkc:IsControler(tp) and s.filter1a(chkc,e,tp) end
-  if chk==0 then return Duel.IsExistingTarget(s.filter1a,tp,LOCATION_MZONE,0,1,nil,e,tp) end
+  if chkc then return chkc:IsFaceup() and chkc:IsLocation(LOCATION_MZONE) and chkc:IsControler(tp) end
+  if chk==0 then return 
+    Duel.IsExistingTarget(Card.IsFaceup,tp,LOCATION_MZONE,0,1,nil) 
+      and Duel.GetLocationCount(tp,LOCATION_MZONE)>0 
+      and Duel.IsPlayerCanSpecialSummonMonster(tp,id+10000,0,0,TYPES_TOKEN,0,1,RACE_AQUA,ATTRIBUTE_LIGHT) 
+  end
   Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TARGET)
-  local tg=Duel.SelectTarget(tp,s.filter1a,tp,LOCATION_MZONE,0,1,1,nil,e,tp)
-  local tc=tg:GetFirst()
-  local b1=(Duel.IsExistingMatchingCard(s.filter1b,tp,LOCATION_DECK,0,1,nil,e,tp))
-  local b2=(Duel.GetLocationCount(tp,LOCATION_MZONE)>0 
-    and Duel.IsPlayerCanSpecialSummonMonster(tp,id+10000,0,0,TYPES_TOKEN,0,1,RACE_AQUA,ATTRIBUTE_LIGHT) 
-    and Duel.IsExistingMatchingCard(s.filter1c,tp,LOCATION_EXTRA,0,1,nil,e,tp))
+  local tg=Duel.SelectTarget(tp,Card.IsFaceup,tp,LOCATION_MZONE,0,1,1,nil)
   
-  local sel=-1
-  if b1 and b2 then
-    sel=Duel.SelectOption(tp,aux.Stringid(id,0),aux.Stringid(id,1))
-  elseif b1 then
-    sel=Duel.SelectOption(tp,aux.Stringid(id,0))
-  elseif b2 then
-    sel=Duel.SelectOption(tp,aux.Stringid(id,1))+1
-  end
-  e:SetLabel(sel)
-  
-  if sel==0 then
-    Duel.SetOperationInfo(0,CATEGORY_TOGRAVE,tc,1,0,0)
-    Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,1,tp,LOCATION_DECK)
-  elseif sel==1 then
-    Duel.SetOperationInfo(0,CATEGORY_TOKEN,nil,1,0,0)
-    Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,1,tp,0)
-    Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,1,tp,LOCATION_EXTRA)
-  end
+  Duel.SetOperationInfo(0,CATEGORY_TOKEN,nil,1,0,0)
+  Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,1,tp,0)
+  Duel.SetPossibleOperationInfo(0,CATEGORY_TOGRAVE,tg,1,0,0)
+  Duel.SetPossibleOperationInfo(0,CATEGORY_DESTROY,nil,1,tp,0)
+  Duel.SetPossibleOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,1,tp,LOCATION_DECK)
+  Duel.SetPossibleOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,1,tp,LOCATION_EXTRA)
 end
 function s.operation1(e,tp,eg,ep,ev,re,r,rp)
+  local token=Duel.CreateToken(tp,id+10000)
   local tc=Duel.GetFirstTarget()
-  if not tc:IsRelateToEffect(e) then return end
+  local mg=Group.FromCards(tc,token)
+  local params={fusfilter=aux.FilterBoolFunction(Card.ListsArchetypeAsMaterial,0xb0b),
+    matfilter=Fusion.OnFieldMat(function(c) return mg:IsContains(c) end),sumpos=POS_FACEUP_DEFENSE,exactcount=2}
   
-  if e:GetLabel()==0 then
-    if Duel.SendtoGrave(tc,REASON_EFFECT)>0 then
-      local g=Duel.SelectMatchingCard(tp,s.filter1b,tp,LOCATION_DECK,0,1,1,nil,e,tp)
-      if g:GetCount()>0 then
-        Duel.SpecialSummon(g,0,tp,tp,false,false,POS_FACEUP)
-      end
+  if Duel.SpecialSummon(token,0,tp,tp,false,false,POS_FACEUP)>0 and tc:IsRelateToEffect(e) then
+    local b1=tc:IsAbleToGrave()
+    local b2=Fusion.SummonEffTG(params)(e,tp,eg,ep,ev,re,r,rp,0)
+    
+    local sel=-1
+    if b1 and b2 then
+      sel=Duel.SelectOption(tp,aux.Stringid(id,0),aux.Stringid(id,1))
+    elseif b1 then
+      sel=Duel.SelectOption(tp,aux.Stringid(id,0))
+    elseif b2 then
+      sel=Duel.SelectOption(tp,aux.Stringid(id,1))+1
     end
-  elseif e:GetLabel()==1 then
-    if Duel.GetLocationCount(tp,LOCATION_MZONE)>0 then
-      local token=Duel.CreateToken(tp,id+10000)
-      if Duel.SpecialSummon(token,0,tp,tp,false,false,POS_FACEUP)>0 then
-        Duel.BreakEffect()
-        --Hack to just try and fusion summon without any checks
-        local gc=Group.FromCards(tc,token)
-        --local params={nil,Fusion.OnFieldMat(function(c) return gc:IsContains(c) end),nil,nil,nil,nil,2}
-        local params={fusfilter=aux.FilterBoolFunction(Card.ListsArchetypeAsMaterial,0xb0b),
-          matfilter=Fusion.OnFieldMat(function(c) return gc:IsContains(c) end),sumpos=POS_FACEUP_DEFENSE,exactcount=2}
-        Fusion.SummonEffOP(params)(e,tp,eg,ep,ev,re,r,rp)
+    
+    if sel==0 then
+      Duel.BreakEffect()
+      if Duel.SendtoGrave(tc,REASON_EFFECT)>0 and token:IsDestructable() 
+        and Duel.IsExistingMatchingCard(s.filter1,tp,LOCATION_DECK,0,1,nil,e,tp) and Duel.SelectYesNo(tp,aux.Stringid(id,2)) then
+        if Duel.Destroy(token,REASON_EFFECT)>0 then
+          local g=Duel.SelectMatchingCard(tp,s.filter1,tp,LOCATION_DECK,0,1,1,nil,e,tp)
+          if g:GetCount()>0 then
+            Duel.SpecialSummon(g,0,tp,tp,false,false,POS_FACEUP)
+          end
+        end
       end
+    elseif sel==1 then
+      Duel.BreakEffect()
+      Fusion.SummonEffOP(params)(e,tp,eg,ep,ev,re,r,rp)
     end
-    Debug.Message("this one is hard") 
   end
 end
   
