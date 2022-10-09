@@ -90,7 +90,7 @@ end
 function s.operation3(e,tp,eg,ep,ev,re,r,rp)
   local c=e:GetHandler()
   if c:IsRelateToEffect(e) and c:GetActivateEffect():IsActivatable(tp,true,true) then
-    if aux.PlayFieldSpell(c,e,tp,eg,ep,ev,re,r,rp) then
+    if Duel.ActivateFieldSpell(c,e,tp,eg,ep,ev,re,r,rp) then
       local e1=Effect.CreateEffect(c)
       e1:SetDescription(3300)
       e1:SetType(EFFECT_TYPE_SINGLE)
