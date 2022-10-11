@@ -36,35 +36,14 @@ function s.initial_effect(c)
   e5:SetType(EFFECT_TYPE_IGNITION)
   e5:SetRange(LOCATION_SZONE)
   e5:SetCondition(function(e) return bcot.kanohi_con(e,{0xb0c}) end)
+  e5:SetCost(s.cost5)
   e5:SetOperation(s.operation5)
   e5:SetCountLimit(1)
   c:RegisterEffect(e5)
 end
-function s.filter2a(c)
-  return c:IsType(TYPE_MONSTER) and c:IsAbleToRemoveAsCost()
-end
-function s.filter2b(c,tp)
-  return c:IsSetCard(0xb0c) and c:IsType(TYPE_CONTINUOUS) and c:IsType(TYPE_SPELL) and not c:IsForbidden() and c:CheckUniqueOnField(tp)
-end
-function s.cost2(e,tp,eg,ep,ev,re,r,rp,chk)
-  if chk==0 then return Duel.IsExistingMatchingCard(s.filter2a,tp,LOCATION_GRAVE,0,1,nil) end
-  Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_REMOVE)
-  local g=Duel.SelectMatchingCard(tp,s.filter2a,tp,LOCATION_GRAVE,0,1,1,nil)
-  Duel.Remove(g,POS_FACEUP,REASON_COST)
-end
-function s.target2(e,tp,eg,ep,ev,re,r,rp,chk)
-  if chk==0 then 
-    return Duel.GetLocationCount(tp,LOCATION_SZONE)>0 and Duel.IsExistingMatchingCard(s.filter2b,tp,LOCATION_DECK,0,1,nil,tp)
-  end
-end
-function s.operation2(e,tp,eg,ep,ev,re,r,rp)
-  if Duel.GetLocationCount(tp,LOCATION_SZONE)>0 then
-    Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TOFIELD)
-    local g=Duel.SelectMatchingCard(tp,s.filter2b,tp,LOCATION_DECK,0,1,1,nil,tp)
-    if #g>0 then
-      Duel.MoveToField(g:GetFirst(),tp,tp,LOCATION_SZONE,POS_FACEUP,true)
-    end
-  end
+function s.cost5(e,tp,eg,ep,ev,re,r,rp,chk)
+	if chk==0 then return Duel.IsExistingMatchingCard(Card.IsDiscardable,tp,LOCATION_HAND,0,1,nil) end
+	Duel.DiscardHand(tp,Card.IsDiscardable,1,1,REASON_COST+REASON_DISCARD)
 end
 function s.operation5(e,tp,eg,ep,ev,re,r,rp)
   if e:GetHandler():IsRelateToEffect(e) then

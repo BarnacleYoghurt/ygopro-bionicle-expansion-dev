@@ -36,9 +36,14 @@ function s.initial_effect(c)
   e5:SetType(EFFECT_TYPE_IGNITION)
   e5:SetRange(LOCATION_SZONE)
   e5:SetCondition(function(e) return bcot.kanohi_con(e,{0xb0c}) end)
+  e5:SetCost(s.cost5)
   e5:SetOperation(s.operation5)
   e5:SetCountLimit(1)
   c:RegisterEffect(e5)
+end
+function s.cost5(e,tp,eg,ep,ev,re,r,rp,chk)
+	if chk==0 then return Duel.IsExistingMatchingCard(Card.IsDiscardable,tp,LOCATION_HAND,0,1,nil) end
+	Duel.DiscardHand(tp,Card.IsDiscardable,1,1,REASON_COST+REASON_DISCARD)
 end
 function s.operation5(e,tp,eg,ep,ev,re,r,rp)
   if e:GetHandler():IsRelateToEffect(e) then
