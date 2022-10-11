@@ -11,7 +11,7 @@ function s.initial_effect(c)
 	e0:SetCode(EVENT_FREE_CHAIN)
 	c:RegisterEffect(e0)
   --Search EP or Tahu
-  local e1=bpev.nuva_symbol_search(c,10100001)
+  local e1=bpev.nuva_symbol_search(c,10100001,aux.Stringid(id,2))
   e1:SetDescription(aux.Stringid(id,0))
   e1:SetCountLimit(1,id)
   c:RegisterEffect(e1)
@@ -27,7 +27,7 @@ function s.initial_effect(c)
 	c:RegisterEffect(e2)	
   --Leave field
   local e3=bpev.nuva_symbol_punish(c,10100306,s.operation3)
-  e3:SetDescription(aux.Stringid(id,2))
+  e3:SetDescription(aux.Stringid(id,1))
   c:RegisterEffect(e3)
 end
 function s.filter2(c,tp)

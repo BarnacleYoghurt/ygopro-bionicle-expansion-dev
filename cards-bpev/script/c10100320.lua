@@ -11,7 +11,7 @@ function s.initial_effect(c)
 	e0:SetCode(EVENT_FREE_CHAIN)
 	c:RegisterEffect(e0)
   --Search EP or Onua
-  local e1=bpev.nuva_symbol_search(c,10100003)
+  local e1=bpev.nuva_symbol_search(c,10100003,aux.Stringid(id,3))
   e1:SetDescription(aux.Stringid(id,0))
   e1:SetCountLimit(1,id)
   c:RegisterEffect(e1)

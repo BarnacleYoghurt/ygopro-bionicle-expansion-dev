@@ -75,9 +75,15 @@ function BPEV.kanohi_nuva_search(baseC)
   return e
 end
 --Nuva Symbols
-function BPEV.nuva_symbol_search(baseC,targetCode)
-  local function filter(c)
-    return (c:IsSetCard(0xb0b) or c:IsCode(targetCode)) and c:IsAbleToHand()
+function BPEV.nuva_symbol_search(baseC,targetCode,qStr)
+  local function filterA(c)
+    return c:IsCode(targetCode) and c:IsAbleToHand()
+  end
+  local function filterB(c,tp)
+    return c:IsCode(targetCode) and not c:IsPublic() and Duel.IsExistingMatchingCard(filterC,tp,LOCATION_DECK,0,1,nil)
+  end
+  local function filterC(c)
+    return c:IsSetCard(0xb0b) and c:IsAbleToHand()
   end
   local function cost(e,tp,eg,ep,ev,re,r,rp,chk)
     local c=e:GetHandler()
@@ -85,12 +91,25 @@ function BPEV.nuva_symbol_search(baseC,targetCode)
     Duel.SendtoDeck(c,nil,LOCATION_DECKBOT,REASON_COST)
   end
   local function target(e,tp,eg,ep,ev,re,r,rp,chk)
-    if chk==0 then return Duel.IsExistingMatchingCard(filter,tp,LOCATION_DECK,0,1,nil) end
+    if chk==0 then 
+      return Duel.IsExistingMatchingCard(filterA,tp,LOCATION_DECK,0,1,nil)
+        or Duel.IsExistingMatchingCard(filterB,tp,LOCATION_HAND,0,1,nil,tp)
+    end
     Duel.SetOperationInfo(0,CATEGORY_TOHAND,nil,1,tp,LOCATION_DECK)
   end
   local function operation(e,tp,eg,ep,ev,re,r,rp)
+    local addFilter=filterA
+    if Duel.IsExistingMatchingCard(filterB,tp,LOCATION_HAND,0,1,nil,tp) then
+      if (not Duel.IsExistingMatchingCard(filterA,tp,LOCATION_DECK,0,1,nil)) or Duel.SelectYesNo(tp,qStr) then
+        Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_CONFIRM)
+        local rg=Duel.SelectMatchingCard(tp,filterB,tp,LOCATION_HAND,0,1,1,nil,tp)
+        Duel.ConfirmCards(1-tp,rg)
+        addFilter=filterC
+      end
+    end
+    
     Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_ATOHAND)
-    local g=Duel.SelectMatchingCard(tp,filter,tp,LOCATION_DECK,0,1,1,nil)
+    local g=Duel.SelectMatchingCard(tp,addFilter,tp,LOCATION_DECK,0,1,1,nil)
     if #g>0 then
       Duel.SendtoHand(g,nil,REASON_EFFECT)
       Duel.ConfirmCards(1-tp,g)
