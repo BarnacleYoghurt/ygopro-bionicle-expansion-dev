@@ -88,7 +88,7 @@ function BPEV.nuva_symbol_search(baseC,targetCode,qStr)
   local function cost(e,tp,eg,ep,ev,re,r,rp,chk)
     local c=e:GetHandler()
     if chk==0 then return c:IsAbleToDeckAsCost() end
-    Duel.SendtoDeck(c,nil,LOCATION_DECKBOT,REASON_COST)
+    Duel.SendtoDeck(c,nil,LOCATION_DECKSHF,REASON_COST)
   end
   local function target(e,tp,eg,ep,ev,re,r,rp,chk)
     if chk==0 then 
