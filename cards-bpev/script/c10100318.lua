@@ -4,7 +4,6 @@ end
 --Nuva Symbol of Burning Courage
 local s,id=GetID()
 function s.initial_effect(c)
-  c:SetUniqueOnField(1,0,id)
   --Activate
   local e0=Effect.CreateEffect(c)
 	e0:SetType(EFFECT_TYPE_ACTIVATE)
@@ -26,7 +25,7 @@ function s.initial_effect(c)
 	e2:SetCondition(s.condition2)
 	c:RegisterEffect(e2)	
   --Leave field
-  local e3=bpev.nuva_symbol_punish(c,10100306,s.operation3)
+  local e3=bpev.nuva_symbol_punish(c,s.operation3)
   e3:SetDescription(aux.Stringid(id,1))
   c:RegisterEffect(e3)
 end
@@ -35,7 +34,6 @@ function s.filter2(c,tp)
 end
 function s.condition2(e)
 	local tp=e:GetHandlerPlayer()
-  if not Duel.IsExistingMatchingCard(aux.FaceupFilter(Card.IsCode,10100306),tp,LOCATION_ONFIELD,0,1,nil) then return false end
 	local a=Duel.GetAttacker()
 	local d=Duel.GetAttackTarget()
 	return (a and s.filter2(a,tp)) or (d and s.filter2(d,tp))
