@@ -4,7 +4,6 @@ end
 --Nuva Symbol of Deep Wisdom
 local s,id=GetID()
 function s.initial_effect(c)
-  c:SetUniqueOnField(1,0,id)
   --Activate
   local e0=Effect.CreateEffect(c)
 	e0:SetType(EFFECT_TYPE_ACTIVATE)
@@ -27,16 +26,15 @@ function s.initial_effect(c)
   e2:SetCost(s.cost2)
   e2:SetTarget(s.target2)
   e2:SetOperation(s.operation2)
-  e2:SetCountLimit(1)
+  e2:SetCountLimit(1,{id,1})
   c:RegisterEffect(e2)
   --Leave field
-  local e3=bpev.nuva_symbol_punish(c,10100308,s.operation3)
+  local e3=bpev.nuva_symbol_punish(c,s.operation3)
   e3:SetDescription(aux.Stringid(id,2))
   c:RegisterEffect(e3)
 end
 function s.condition2(e,tp,eg,ep,ev,re,r,rp)
-  return re:IsActiveType(TYPE_MONSTER) and re:GetHandler():IsSetCard(0xb0c) 
-    and Duel.IsExistingMatchingCard(aux.FaceupFilter(Card.IsCode,10100320),tp,LOCATION_ONFIELD,0,1,nil)
+  return re:IsActiveType(TYPE_MONSTER) and re:GetHandler():IsSetCard(0xb0c)
 end
 function s.cost2(e,tp,eg,ep,ev,re,r,rp,chk)
   if chk==0 then return Duel.CheckLPCost(tp,1000) end
