@@ -34,14 +34,17 @@ function s.filter2b(c)
 	return c:IsFaceup() and c:IsRace(RACE_ROCK)
 end
 function s.condition2a(e,tp,eg,ep,ev,re,r,rp)
-  return e:GetHandler():GetFlagEffect(id)==0 and eg:IsExists(Card.IsSummonLocation,1,nil,LOCATION_EXTRA)
+  return eg:IsExists(Card.IsSummonLocation,1,nil,LOCATION_EXTRA)
 end
 function s.condition2b(e,tp,eg,ep,ev,re,r,rp)
-	return e:GetHandler():GetFlagEffect(id)==0 and re:IsActiveType(TYPE_MONSTER) and re:GetHandler():IsSummonLocation(LOCATION_EXTRA) 
+	return re:IsActiveType(TYPE_MONSTER) and re:GetHandler():IsSummonLocation(LOCATION_EXTRA) 
 end
 function s.target2(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 	if chkc then return chkc:IsOnField() and s.filter2a(chkc) end
-	if chk==0 then return Duel.IsExistingTarget(s.filter2a,tp,LOCATION_ONFIELD,LOCATION_ONFIELD,1,nil) end
+	if chk==0 then 
+    return e:GetHandler():GetFlagEffect(id)==0 --check in target so triggers chained to first activation don't sneak through
+      and Duel.IsExistingTarget(s.filter2a,tp,LOCATION_ONFIELD,LOCATION_ONFIELD,1,nil) 
+  end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_DESTROY)
 	local g=Duel.SelectTarget(tp,s.filter2a,tp,LOCATION_ONFIELD,LOCATION_ONFIELD,1,1,nil)
 	Duel.SetOperationInfo(0,CATEGORY_DESTROY,g,1,0,0)
