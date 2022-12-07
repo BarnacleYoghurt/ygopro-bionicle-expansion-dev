@@ -65,9 +65,10 @@ function BPEV.kanohi_nuva_search(baseC,aoeop)
       if #g>0 then
         Duel.MoveToField(g:GetFirst(),tp,tp,LOCATION_SZONE,POS_FACEUP,true)
       end
-      if aoeop and Duel.IsExistingMatchingCard(filterC,tp,LOCATION_MZONE,0,1,1,nil) then
-        aoeop(e,tp,eg,ep,ev,re,r,rp)
-      end
+    end
+    
+    if aoeop and Duel.IsExistingMatchingCard(filterC,tp,LOCATION_MZONE,0,1,1,nil) then
+      aoeop(e,tp,eg,ep,ev,re,r,rp)
     end
   end
   
