@@ -37,12 +37,15 @@ function BPEV.toa_nuva_search(baseC)
   return e
 end
 --Kanohi Nuva
-function BPEV.kanohi_nuva_search(baseC)
+function BPEV.kanohi_nuva_search(baseC,aoeop)
   local function filterA(c)
     return c:IsType(TYPE_MONSTER) and c:IsAbleToRemoveAsCost()
   end
   local function filterB(c,tp)
     return c:IsSetCard(0xb0c) and c:IsType(TYPE_CONTINUOUS) and c:IsType(TYPE_SPELL) and not c:IsForbidden() and c:CheckUniqueOnField(tp)
+  end
+  local function filterC(c)
+    return c:IsSetCard(0xb0c) and c:IsType(TYPE_FUSION)
   end
   local function cost(e,tp,eg,ep,ev,re,r,rp,chk)
     if chk==0 then return Duel.IsExistingMatchingCard(filterA,tp,LOCATION_GRAVE,0,1,nil) end
@@ -61,6 +64,9 @@ function BPEV.kanohi_nuva_search(baseC)
       local g=Duel.SelectMatchingCard(tp,filterB,tp,LOCATION_DECK,0,1,1,nil,tp)
       if #g>0 then
         Duel.MoveToField(g:GetFirst(),tp,tp,LOCATION_SZONE,POS_FACEUP,true)
+      end
+      if aoeop and Duel.IsExistingMatchingCard(filterC,tp,LOCATION_MZONE,0,1,1,nil) then
+        aoeop(e,tp,eg,ep,ev,re,r,rp)
       end
     end
   end
