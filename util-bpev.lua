@@ -125,7 +125,7 @@ function BPEV.nuva_symbol_search(baseC,targetCode,qStr)
   e:SetOperation(operation)
   return e
 end
-function BPEV.nuva_symbol_punish(baseC,punish)
+function BPEV.nuva_symbol_punish(baseC,punish,punishtg)
   local function filter(c)
     return c:IsFaceup() and c:IsSetCard(0xb0c) and c:IsType(TYPE_FUSION)
   end
@@ -134,11 +134,14 @@ function BPEV.nuva_symbol_punish(baseC,punish)
   end
   local function target(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
     if chkc then return filter(chkc) and chkc:IsLocation(LOCATION_MZONE) and chkc:IsControler(tp) end
-    if chk==0 then return true end
+    if chk==0 then return not punishtg or punishtg(e,tp,eg,ep,ev,re,r,rp,chk,chkc) end
     Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TARGET)
     local g=Duel.SelectTarget(tp,filter,tp,LOCATION_MZONE,0,1,1,nil)
     if #g>0 then
       Duel.SetOperationInfo(0,CATEGORY_REMOVE,nil,1,tp,LOCATION_HAND)
+    end
+    if punishtg then
+      punishtg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
     end
   end
   local function operation(e,tp,eg,ep,ev,re,r,rp)
@@ -156,7 +159,7 @@ function BPEV.nuva_symbol_punish(baseC,punish)
       e2:SetValue(RESET_TURN_SET)
       e2:SetReset(RESET_EVENT+RESETS_STANDARD)
       tc:RegisterEffect(e2)
-      if (not tc:IsImmuneToEffect(e1)) and (not tc:IsImmuneToEffect(e2)) then
+      if (not tc:IsImmuneToEffect(e1)) and (not tc:IsImmuneToEffect(e2)) and punish then
         punish(e,tp,eg,ep,ev,re,r,rp)
       end
     end
