@@ -26,9 +26,9 @@ function s.initial_effect(c)
 	e3:SetValue(1)
 	c:RegisterEffect(e3)
   --Place Nuva Symbol & protect field
-  local e4=bpev.kanohi_nuva_search(c,s.operation4)
+  local e4,chainfilter=bpev.kanohi_nuva_search(c,s.operation4,id)
+  Duel.AddCustomActivityCounter(id,ACTIVITY_CHAIN,chainfilter)
   e4:SetDescription(aux.Stringid(id,0))
-  e4:SetCountLimit(1,id)
   c:RegisterEffect(e4)
 end
 function s.operation4(e,tp,eg,ep,ev,re,r,rp)

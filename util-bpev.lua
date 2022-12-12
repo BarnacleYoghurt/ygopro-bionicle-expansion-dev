@@ -37,7 +37,7 @@ function BPEV.toa_nuva_search(baseC)
   return e
 end
 --Kanohi Nuva
-function BPEV.kanohi_nuva_search(baseC,aoeop)
+function BPEV.kanohi_nuva_search(baseC,aoeop,id)
   local function filterA(c)
     return c:IsType(TYPE_MONSTER) and c:IsAbleToRemoveAsCost()
   end
@@ -48,7 +48,10 @@ function BPEV.kanohi_nuva_search(baseC,aoeop)
     return c:IsSetCard(0xb0c) and c:IsType(TYPE_FUSION)
   end
   local function cost(e,tp,eg,ep,ev,re,r,rp,chk)
-    if chk==0 then return Duel.IsExistingMatchingCard(filterA,tp,LOCATION_GRAVE,0,1,nil) end
+    if chk==0 then 
+      return Duel.IsExistingMatchingCard(filterA,tp,LOCATION_GRAVE,0,1,nil) and
+        Duel.GetCustomActivityCount(id,tp,ACTIVITY_CHAIN)==0 --need to check in cost so it updates after every trigger
+    end
     Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_REMOVE)
     local g=Duel.SelectMatchingCard(tp,filterA,tp,LOCATION_GRAVE,0,1,1,nil)
     Duel.Remove(g,POS_FACEUP,REASON_COST)
@@ -71,6 +74,10 @@ function BPEV.kanohi_nuva_search(baseC,aoeop)
       aoeop(e,tp,eg,ep,ev,re,r,rp)
     end
   end
+  local function chainfilter(re,tp,cid)
+    local loc=Duel.GetChainInfo(cid,CHAININFO_TRIGGERING_LOCATION)
+    return not (re:IsActiveType(TYPE_SPELL) and re:IsActiveType(TYPE_EQUIP) and loc==LOCATION_GRAVE)
+  end
   
   local e=Effect.CreateEffect(baseC)
   e:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
@@ -79,7 +86,7 @@ function BPEV.kanohi_nuva_search(baseC,aoeop)
   e:SetCost(cost)
   e:SetTarget(target)
   e:SetOperation(operation)
-  return e
+  return e,chainfilter
 end
 --Nuva Symbols
 function BPEV.nuva_symbol_search(baseC,targetCode,qStr)
