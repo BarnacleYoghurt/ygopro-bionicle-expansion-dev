@@ -48,7 +48,7 @@ function s.filter2d(c,e,tp)
   return c:IsFaceup() and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
 end
 function s.target2(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
-  local g=Duel.GetMatchingGroup(s.filter2a,tp,LOCATION_SZONE,LOCATION_GRAVE,nil,e)
+  local g=Duel.GetMatchingGroup(s.filter2a,tp,LOCATION_SZONE+LOCATION_GRAVE,LOCATION_GRAVE,nil,e)
   if chkc then return false end
   if chk==0 then return #g>0 end
   local tg=aux.SelectUnselectGroup(g,e,tp,1,6,aux.dncheck,1,tp,HINTMSG_TODECK)
@@ -58,7 +58,8 @@ function s.target2(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
   Duel.SetPossibleOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,0,tp,LOCATION_REMOVED)
 end
 function s.operation2(e,tp,eg,ep,ev,re,r,rp)
-  if e:GetHandler():IsRelateToEffect(e) then
+  local c=e:GetHandler()
+  if c:IsRelateToEffect(e) then
     local tg=Duel.GetTargetCards(e)
     local ct=Duel.SendtoDeck(tg,nil,SEQ_DECKSHUFFLE,REASON_EFFECT)
     if ct>0 and Duel.IsExistingMatchingCard(s.filter2b,tp,LOCATION_DECK,0,1,nil,tp) and Duel.GetLocationCount(tp,LOCATION_SZONE)>0
@@ -70,12 +71,24 @@ function s.operation2(e,tp,eg,ep,ev,re,r,rp)
         Duel.MoveToField(g1:GetFirst(),tp,tp,LOCATION_SZONE,POS_FACEUP,true)
       end
     end
-    if ct>2 and Duel.IsExistingMatchingCard(s.filter2c,1-tp,LOCATION_MZONE,0,1,nil) and Duel.SelectYesNo(tp,aux.Stringid(id,2)) then
+    if ct>2 and Duel.IsExistingMatchingCard(Card.IsNegatableSpellTrap,tp,LOCATION_ONFIELD,LOCATION_ONFIELD,1,c) and Duel.SelectYesNo(tp,aux.Stringid(id,2)) then
       Duel.BreakEffect()
-      Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TODECK)
-      local g2=Duel.SelectMatchingCard(tp,s.filter2c,1-tp,LOCATION_MZONE,0,1,1,nil)
-      if #g2>0 then
-        Duel.SendtoDeck(g2,nil,SEQ_DECKSHUFFLE,REASON_EFFECT)
+      Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_NEGATE)
+      local nc=Duel.SelectMatchingCard(tp,Card.IsNegatableSpellTrap,tp,LOCATION_ONFIELD,LOCATION_ONFIELD,1,1,c):GetFirst()
+      Duel.NegateRelatedChain(nc,RESET_TURN_SET)
+      local e1=Effect.CreateEffect(c)
+      e1:SetType(EFFECT_TYPE_SINGLE)
+      e1:SetCode(EFFECT_DISABLE)
+      e1:SetReset(RESET_EVENT+RESETS_STANDARD+RESET_PHASE+PHASE_END)
+      nc:RegisterEffect(e1)
+      local e2=e1:Clone()
+      e2:SetCode(EFFECT_DISABLE_EFFECT)
+      e2:SetValue(RESET_TURN_SET)
+      nc:RegisterEffect(e2)
+      if nc:IsType(TYPE_TRAPMONSTER) then
+        local e3=e1:Clone()
+        e3:SetCode(EFFECT_DISABLE_TRAPMONSTER)
+        nc:RegisterEffect(e3)
       end
     end
     if ct==6 and Duel.IsExistingMatchingCard(s.filter2d,tp,LOCATION_REMOVED,0,1,nil,e,tp) and Duel.GetLocationCount(tp,LOCATION_MZONE)>0 
