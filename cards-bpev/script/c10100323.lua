@@ -42,10 +42,10 @@ function s.condition2(e,tp,eg,ep,ev,re,r,rp)
   return eg:IsExists(s.filter2a,1,nil,tp)
 end
 function s.target2(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
-  if chkc then return s.filter2b(chkc,e,tp) and chkc:IsControler(tp) and chkc:IsLocation(LOCATION_GRAVE+LOCATION_REMOVED) end
-  if chk==0 then return Duel.IsExistingTarget(s.filter2b,tp,LOCATION_GRAVE+LOCATION_REMOVED,0,1,nil,e,tp) end
+  if chkc then return s.filter2b(chkc,e,tp) and chkc:IsControler(tp) and chkc:IsLocation(LOCATION_GRAVE) end
+  if chk==0 then return Duel.IsExistingTarget(s.filter2b,tp,LOCATION_GRAVE,0,1,nil,e,tp) end
   Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
-  local tc=Duel.SelectTarget(tp,s.filter2b,tp,LOCATION_GRAVE+LOCATION_REMOVED,0,1,1,nil,e,tp)
+  local tc=Duel.SelectTarget(tp,s.filter2b,tp,LOCATION_GRAVE,0,1,1,nil,e,tp)
   Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,tc,1,0,0)
 end
 function s.operation2(e,tp,eg,ep,ev,re,r,rp)
