@@ -1,0 +1,46 @@
+--Bohrok Counterattack
+local s,id=GetID()
+function s.initial_effect(c)
+  --Activate
+  local e1=Effect.CreateEffect(c)
+  e1:SetCategory(CATEGORY_NEGATE)
+  e1:SetType(EFFECT_TYPE_ACTIVATE)
+  e1:SetCode(EVENT_CHAINING)
+	e1:SetCondition(s.condition1)
+	e1:SetCost(s.cost1)
+	e1:SetTarget(s.target1)
+	e1:SetOperation(s.operation1)
+	c:RegisterEffect(e1)
+end
+function s.filter1a(c)
+  return c:IsFaceup() and not c:IsSetCard(0xb08)
+end
+function s.filter1b(c)
+  return c:IsSetCard(0xb09) and c:IsAbleToGraveAsCost()
+end
+function s.filter1c(c)
+  return c:IsFaceup() and c:IsSetCard(0xb08) and c:IsType(TYPE_XYZ)
+end
+function s.condition1(e,tp,eg,ep,ev,re,r,rp)
+  return ep~=tp and Duel.IsChainNegatable(ev) and 
+    Duel.GetFieldGroupCount(tp,LOCATION_MZONE,0)>0 and Duel.GetMatchingGroupCount(s.filter1a,tp,LOCATION_MZONE,0,nil)==0
+end
+function s.cost1(e,tp,eg,ep,ev,re,r,rp,chk)
+  if chk==0 then return Duel.IsExistingMatchingCard(s.filter1b,tp,LOCATION_DECK+LOCATION_EXTRA,0,1,nil) end
+  Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TOGRAVE)
+  local g=Duel.SelectMatchingCard(tp,s.filter1b,tp,LOCATION_DECK+LOCATION_EXTRA,0,1,1,nil)
+  Duel.SendtoGrave(g,REASON_COST)
+end
+function s.target1(e,tp,eg,ep,ev,re,r,rp,chk)
+	if chk==0 then return true end
+	Duel.SetOperationInfo(0,CATEGORY_NEGATE,eg,1,0,0)
+end
+function s.operation1(e,tp,eg,ep,ev,re,r,rp)
+  if Duel.NegateActivation(ev) and re:GetHandler():IsRelateToEffect(re) then
+    if Duel.IsExistingMatchingCard(s.filter1c,tp,LOCATION_MZONE,0,1,nil) and Duel.SelectYesNo(tp,aux.Stringid(id,0)) then
+      Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_XMATERIAL)
+      local g=Duel.SelectMatchingCard(tp,s.filter1c,tp,LOCATION_MZONE,0,1,1,nil)
+      Duel.Overlay(g:GetFirst(),re:GetHandler(),true)
+    end
+  end
+end
