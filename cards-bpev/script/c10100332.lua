@@ -1,3 +1,6 @@
+if not bpev then
+	Duel.LoadScript("../util-bpev.lua")
+end
 --Bohrok Gahlok-Kal
 local s,id=GetID()
 function s.initial_effect(c)
@@ -6,22 +9,11 @@ function s.initial_effect(c)
 	--Xyz Material
 	Xyz.AddProcedure(c,aux.FilterBoolFunctionEx(Card.IsSetCard,0xb08),4,2)
   --Materials to Deck
-  local e1=Effect.CreateEffect(c)
-	e1:SetType(EFFECT_TYPE_FIELD)
-  e1:SetProperty(EFFECT_FLAG_IGNORE_RANGE) --somehow required to affect Xyz Materials
-	e1:SetRange(LOCATION_MZONE)
-	e1:SetTargetRange(0xff,0)
-	e1:SetCode(EFFECT_TO_GRAVE_REDIRECT)
-	e1:SetTarget(s.target1)
-	e1:SetValue(LOCATION_DECKBOT)
+  local e1=bpev.bohrok_kal_xmat(c)
 	c:RegisterEffect(e1)
   --Attach
-  local e2=Effect.CreateEffect(c)
+  local e2=bpev.bohrok_kal_attach(c)
   e2:SetDescription(aux.Stringid(id,0))
-  e2:SetType(EFFECT_TYPE_IGNITION)
-  e2:SetRange(LOCATION_MZONE)
-  e2:SetTarget(s.target2)
-  e2:SetOperation(s.operation2)
   e2:SetCountLimit(1)
   c:RegisterEffect(e2)
   --Magnetize
@@ -36,24 +28,6 @@ function s.initial_effect(c)
   e3:SetOperation(s.operation3)
   e3:SetCountLimit(1,id)
   c:RegisterEffect(e3)
-end
-function s.target1(e,c)
-  return c:IsLocation(LOCATION_OVERLAY) and e:GetHandler():GetOverlayGroup():IsContains(c)
-end
-function s.filter2(c)
-  return c:IsSetCard(0xb09) and c:IsType(TYPE_MONSTER)
-end
-function s.target2(e,tp,eg,ep,ev,re,r,rp,chk)
-  if chk==0 then return Duel.IsExistingMatchingCard(s.filter2,tp,LOCATION_HAND+LOCATION_MZONE+LOCATION_GRAVE,0,1,nil) end
-end
-function s.operation2(e,tp,eg,ep,ev,re,r,rp)
-  local c=e:GetHandler()
-  if c:IsRelateToEffect(e) then
-    local g=Duel.SelectMatchingCard(tp,aux.NecroValleyFilter(s.filter2),tp,LOCATION_HAND+LOCATION_MZONE+LOCATION_GRAVE,0,1,1,nil)
-    if #g>0 then
-      Duel.Overlay(c,g,true)
-    end
-  end
 end
 function s.filter3(c,tp)
   return (c:IsControler(tp) or c:IsAbleToChangeControler()) and c:CheckUniqueOnField(tp) and not c:IsForbidden()

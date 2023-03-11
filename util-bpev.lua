@@ -189,3 +189,43 @@ function BPEV.nuva_symbol_punish(baseC,punish,punishtg)
   e:SetOperation(operation)
   return e
 end
+--Bohrok-Kal
+function BPEV.bohrok_kal_xmat(baseC)
+  local function target(e,c)
+    return c:IsLocation(LOCATION_OVERLAY) and e:GetHandler():GetOverlayGroup():IsContains(c)
+  end
+  
+  local e=Effect.CreateEffect(baseC)
+	e:SetType(EFFECT_TYPE_FIELD)
+  e:SetProperty(EFFECT_FLAG_IGNORE_RANGE) --somehow required to affect Xyz Materials
+	e:SetRange(LOCATION_MZONE)
+	e:SetTargetRange(0xff,0)
+	e:SetCode(EFFECT_TO_GRAVE_REDIRECT)
+	e:SetTarget(target)
+	e:SetValue(LOCATION_DECKBOT)
+	return e
+end
+function BPEV.bohrok_kal_attach(baseC)
+  local function filter(c)
+    return c:IsSetCard(0xb09) and c:IsType(TYPE_MONSTER)
+  end
+  local function target(e,tp,eg,ep,ev,re,r,rp,chk)
+    if chk==0 then return Duel.IsExistingMatchingCard(filter,tp,LOCATION_HAND+LOCATION_MZONE+LOCATION_GRAVE,0,1,nil) end
+  end
+  local function operation(e,tp,eg,ep,ev,re,r,rp)
+    local c=e:GetHandler()
+    if c:IsRelateToEffect(e) then
+      local g=Duel.SelectMatchingCard(tp,aux.NecroValleyFilter(filter),tp,LOCATION_HAND+LOCATION_MZONE+LOCATION_GRAVE,0,1,1,nil)
+      if #g>0 then
+        Duel.Overlay(c,g,true)
+      end
+    end
+  end
+  
+  local e=Effect.CreateEffect(baseC)
+  e:SetType(EFFECT_TYPE_IGNITION)
+  e:SetRange(LOCATION_MZONE)
+  e:SetTarget(target)
+  e:SetOperation(operation)
+  return e
+end
