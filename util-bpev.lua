@@ -229,3 +229,27 @@ function BPEV.bohrok_kal_attach(baseC)
   e:SetOperation(operation)
   return e
 end
+--Krana-Kal
+function BPEV.krana_kal_debuff(baseC)
+  local function condition(e)
+    local ph=Duel.GetCurrentPhase()
+    return (ph==PHASE_DAMAGE or ph==PHASE_DAMAGE_CAL) and Duel.GetAttackTarget()
+  end
+  local function target(e,c)
+    local tp=e:GetHandlerPlayer()
+    local bc=c:GetBattleTarget()
+    return e:GetHandler():GetLinkedGroup():IsContains(c) and c:IsControler(1-tp) and bc and bc:IsSetCard(0xb08)
+  end
+  
+  local e1=Effect.CreateEffect(baseC)
+  e1:SetType(EFFECT_TYPE_FIELD)
+  e1:SetRange(LOCATION_MZONE)
+  e1:SetTargetRange(0,LOCATION_MZONE)
+  e1:SetCode(EFFECT_SET_ATTACK_FINAL)
+  e1:SetCondition(condition)
+  e1:SetTarget(target)
+  e1:SetValue(0)
+  local e2=e1:Clone()
+  e2:SetCode(EFFECT_SET_DEFENSE_FINAL)
+  return e1,e2
+end
