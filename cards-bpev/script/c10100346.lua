@@ -22,8 +22,9 @@ function s.filter1c(c)
   return c:IsFaceup() and c:IsSetCard(0xb08) and c:IsType(TYPE_XYZ)
 end
 function s.condition1(e,tp,eg,ep,ev,re,r,rp)
-  return ep~=tp and Duel.IsChainNegatable(ev) and 
-    Duel.GetFieldGroupCount(tp,LOCATION_MZONE,0)>0 and Duel.GetMatchingGroupCount(s.filter1a,tp,LOCATION_MZONE,0,nil)==0
+  return ep~=tp and Duel.IsChainNegatable(ev) and (re:IsActiveType(TYPE_MONSTER) or re:IsHasType(EFFECT_TYPE_ACTIVATE)) and
+    Duel.GetFieldGroupCount(tp,LOCATION_MZONE,0)>0 and 
+    (Duel.GetMatchingGroupCount(Card.IsFaceup,tp,LOCATION_MZONE,0,nil)==0 or Duel.IsExistingMatchingCard(aux.FaceupFilter(Card.IsSetCard,0xb08),tp,LOCATION_MZONE,0,1,nil))
 end
 function s.cost1(e,tp,eg,ep,ev,re,r,rp,chk)
   if chk==0 then return Duel.IsExistingMatchingCard(s.filter1b,tp,LOCATION_DECK+LOCATION_EXTRA,0,1,nil) end
