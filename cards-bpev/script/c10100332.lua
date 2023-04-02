@@ -46,14 +46,22 @@ function s.operation3(e,tp,eg,ep,ev,re,r,rp)
     local e1=Effect.CreateEffect(c)
     e1:SetType(EFFECT_TYPE_SINGLE)
     e1:SetCode(EFFECT_CANNOT_ATTACK)
-    e1:SetReset(RESET_EVENT+RESETS_STANDARD+RESET_PHASE+PHASE_END,2)
+    if Duel.GetTurnPlayer()~=tp then
+      e1:SetReset(RESET_EVENT+RESETS_STANDARD+RESET_PHASE+PHASE_END,2)
+    else
+      e1:SetReset(RESET_EVENT+RESETS_STANDARD+RESET_PHASE+PHASE_END,1)
+    end
     tc:RegisterEffect(e1)
-    
-    if Duel.GetLocationCount(tp,LOCATION_SZONE)>0 and Duel.IsExistingMatchingCard(s.filter3,tp,LOCATION_MZONE,LOCATION_MZONE,1,tc,tp) 
-      and Duel.SelectYesNo(tp,aux.Stringid(id,2)) then
+      
+    local cg=tc:GetColumnGroup()
+    if tc:IsInMainMZone() then
+      cg=cg+tc:GetColumnGroup(1,1):Filter(Card.IsControler,nil,tc:GetControler()) --Cards in left and right zone only, without the rest of the columns
+    end
+    cg=cg:Filter(Card.IsLocation,nil,LOCATION_MZONE) --Monsters only!
+    if Duel.GetLocationCount(tp,LOCATION_SZONE)>0 and cg:IsExists(s.filter3,1,tc,tp) and Duel.SelectYesNo(tp,aux.Stringid(id,2)) then
       Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_EQUIP)
-      local g2=Duel.SelectMatchingCard(tp,s.filter3,tp,LOCATION_MZONE,LOCATION_MZONE,1,1,tc,tp)
-      if #g2>0 and aux.EquipByEffectAndLimitRegister(tc,e,tp,g2:GetFirst(),id) then
+      local g2=cg:FilterSelect(tp,s.filter3,1,1,tc,tp)
+      if #g2>0 and tc:EquipByEffectAndLimitRegister(e,tp,g2:GetFirst(),id) then
         local e2=Effect.CreateEffect(c)
         e2:SetType(EFFECT_TYPE_SINGLE)
         e2:SetProperty(EFFECT_FLAG_CANNOT_DISABLE)
