@@ -22,7 +22,8 @@ function s.initial_effect(c)
   e3:SetCategory(CATEGORY_TOHAND)
   e3:SetType(EFFECT_TYPE_IGNITION)
   e3:SetRange(LOCATION_MZONE)
-  e3:SetCost(aux.dxmcostgen(1,function() return c:GetOverlayCount() end,function(e,g) e:SetLabel(#g) end))
+  --TODO: Technically max detach needs to account for number of available zones here too, right?
+  e3:SetCost(aux.dxmcostgen(2,s.cost3max,function(e,g) e:SetLabel(#g) end))
   e3:SetTarget(s.target3)
   e3:SetOperation(s.operation3)
   e3:SetCountLimit(1,id)
@@ -31,12 +32,20 @@ end
 function s.filter3(c,zones,offset)
   return zones&(1<<(offset+c:GetSequence()))~=0
 end
+function s.cost3max(e)
+  local zones=Duel.GetLocationCount(0,LOCATION_MZONE)+Duel.GetLocationCount(0,LOCATION_SZONE) --P0 open zones
+  zones=zones+Duel.GetLocationCount(1,LOCATION_MZONE)+Duel.GetLocationCount(1,LOCATION_SZONE) --P1 open zones
+  zones=zones+Duel.GetFieldGroupCount(0,LOCATION_ONFIELD,LOCATION_ONFIELD) --Occupied zones
+  zones=zones-Duel.GetMatchingGroupCount(function(c) return c:GetSequence()>4 end,0,LOCATION_ONFIELD,LOCATION_ONFIELD,nil) --minus EMZ, Field Zones
+  return math.min(e:GetHandler():GetOverlayCount(),zones)
+end
 function s.target3(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return true end
   local ez_own=(1<<5)+(1<<6)
   local ez_opp=(1<<21)+(1<<22)
   local fz_own=(1<<13)
   local fz_opp=(1<<29)
+  --TODO: Cannot choose already locked open zones!
 	local dis=Duel.SelectFieldZone(tp,e:GetLabel(),LOCATION_ONFIELD,LOCATION_ONFIELD,ez_own+ez_opp+fz_own+fz_opp)
 	Duel.Hint(HINT_ZONE,tp,dis)
 	Duel.SetTargetParam(dis)
