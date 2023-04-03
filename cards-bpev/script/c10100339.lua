@@ -35,6 +35,9 @@ function s.initial_effect(c)
   e3:SetCountLimit(1)
   c:RegisterEffect(e3)
 end
+function s.filter0(c)
+  return c:IsSetCard(0xb08) or c:IsSetCard(0xb09)
+end
 function s.filter2a(c,e,tp)
   local pg=aux.GetMustBeMaterialGroup(tp,Group.FromCards(c),tp,nil,nil,REASON_XYZ)
   return #(pg-c)==0 and c:IsFaceup() and c:IsSetCard(0xb08) and c:IsLevel(4) and e:GetHandler():GetLinkedGroup():IsContains(c)
