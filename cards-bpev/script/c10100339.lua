@@ -32,6 +32,7 @@ function s.initial_effect(c)
   e3:SetTarget(s.target3)
   e3:SetOperation(s.operation3)
   e3:SetLabelObject(c)
+  e3:SetCountLimit(1)
   c:RegisterEffect(e3)
 end
 function s.filter2a(c,e,tp)
@@ -73,9 +74,9 @@ function s.condition3(e,tp,eg,ep,ev,re,r,rp)
   return e:GetHandler():IsSetCard(0xb08)
 end
 function s.target3(e,tp,eg,ep,ev,re,r,rp,chk)
-  if chk==0 then return e:GetHandler():IsAbleToRemove() and Duel.IsExistingMatchingCard(s.filter3,tp,LOCATION_GRAVE,0,1,nil) end
+  if chk==0 then return e:GetHandler():IsAbleToRemove() end
 	Duel.SetOperationInfo(0,CATEGORY_REMOVE,e:GetHandler(),1,0,0)
-  Duel.SetOperationInfo(0,CATEGORY_TOHAND,nil,1,tp,LOCATION_GRAVE)
+  Duel.SetPossibleOperationInfo(0,CATEGORY_TOHAND,nil,1,tp,LOCATION_GRAVE)
 end
 function s.operation3(e,tp,eg,ep,ev,re,r,rp)
   local c=e:GetHandler()
@@ -90,7 +91,7 @@ function s.operation3(e,tp,eg,ep,ev,re,r,rp)
       e1:SetReset(RESET_PHASE+PHASE_END)
       Duel.RegisterEffect(e1,tp)
       
-      if Duel.IsExistingMatchingCard(s.filter3,tp,LOCATION_GRAVE,0,1,nil) then
+      if Duel.IsExistingMatchingCard(s.filter3,tp,LOCATION_GRAVE,0,1,nil) and Duel.SelectYesNo(tp,aux.Stringid(id,2)) then
         Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_ATOHAND)
         local g=Duel.SelectMatchingCard(tp,s.filter3,tp,LOCATION_GRAVE,0,1,1,nil)
         if #g>0 then
