@@ -36,7 +36,7 @@ function s.filter0(c)
   return c:IsSetCard(0xb08) or c:IsSetCard(0xb09)
 end
 function s.filter2(c,e,tp)
-  return c:IsLevel(4) and c:IsSetCard(0xb08) and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
+  return c:IsLevel(4) and c:IsSetCard(0xb08) and c:IsCanBeSpecialSummoned(e,0,tp,false,false,POS_DEFENSE)
 end
 function s.cost2(e,tp,eg,ep,ev,re,r,rp,chk)
   local c=e:GetHandler()
@@ -52,7 +52,7 @@ end
 function s.operation2(e,tp,eg,ep,ev,re,r,rp)
   Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
   local g=Duel.SelectMatchingCard(tp,aux.NecroValleyFilter(s.filter2),tp,LOCATION_HAND+LOCATION_GRAVE,0,1,1,nil,e,tp)
-  if #g>0 and Duel.SpecialSummon(g,0,tp,tp,false,false,POS_FACEUP)>0 then
+  if #g>0 and Duel.SpecialSummon(g,0,tp,tp,false,false,POS_DEFENSE)>0 then
     --Return it to deck if it leaves the field
     local e1=Effect.CreateEffect(e:GetHandler())
     e1:SetDescription(3301)
