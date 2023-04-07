@@ -39,6 +39,7 @@ end
 function s.operation1(e,tp,eg,ep,ev,re,r,rp)
   if Duel.NegateActivation(ev) and re:GetHandler():IsRelateToEffect(re) then
     if Duel.IsExistingMatchingCard(s.filter1c,tp,LOCATION_MZONE,0,1,nil) and Duel.SelectYesNo(tp,aux.Stringid(id,0)) then
+      re:GetHandler():CancelToGrave()
       Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_XMATERIAL)
       local g=Duel.SelectMatchingCard(tp,s.filter1c,tp,LOCATION_MZONE,0,1,1,nil)
       Duel.Overlay(g:GetFirst(),re:GetHandler(),true)
