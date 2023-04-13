@@ -77,6 +77,7 @@ function s.target2(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
   if op~=0 then
     Duel.SetOperationInfo(0,CATEGORY_TOHAND,nil,1,tp,LOCATION_DECK)
   end
+  e:SetCategory((op~=1 and CATEGORY_DESTROY or 0)+(op~=0 and CATEGORY_SEARCH+CATEGORY_TOHAND or 0))
   e:SetProperty(EFFECT_FLAG_DELAY+(op~=1 and EFFECT_FLAG_CARD_TARGET or 0))
 end
 function s.operation2(e,tp,eg,ep,ev,re,r,rp)
