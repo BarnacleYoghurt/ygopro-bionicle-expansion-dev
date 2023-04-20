@@ -21,6 +21,7 @@ if true then --Test for ridiculously many materials
   for i=1,25 do
     Debug.AddCard(71068247,0,0,LOCATION_MZONE,0,POS_FACEUP_ATTACK)
   end
+  
   Debug.AddCard(34989413,0,0,LOCATION_MZONE,5,POS_FACEUP_ATTACK)
   Debug.AddCard(72859417,0,0,LOCATION_SZONE,1,POS_FACEUP)
 end
