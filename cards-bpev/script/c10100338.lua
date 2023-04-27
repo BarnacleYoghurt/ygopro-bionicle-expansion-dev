@@ -15,9 +15,10 @@ function s.initial_effect(c)
 	e1:SetValue(1)
 	c:RegisterEffect(e1)
   --ATK/DEF to 0
-  local e2a,e2b=bpev.krana_kal_debuff(c)
+  local e2a,e2b,e2c=bpev.krana_kal_debuff(c,aux.Stringid(id,1))
   c:RegisterEffect(e2a)
   c:RegisterEffect(e2b)
+  c:RegisterEffect(e2c)
   --Negate destruction
   local e3=Effect.CreateEffect(c)
   e3:SetDescription(aux.Stringid(id,0))
