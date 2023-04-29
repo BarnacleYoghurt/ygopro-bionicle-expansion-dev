@@ -230,7 +230,7 @@ function BPEV.bohrok_kal_attach(baseC)
   return e
 end
 --Krana-Kal
-function BPEV.krana_kal_debuff(baseC)
+function BPEV.krana_kal_debuff(baseC,desc)
   local function condition(e)
     local ph=Duel.GetCurrentPhase()
     return (ph==PHASE_DAMAGE or ph==PHASE_DAMAGE_CAL) and Duel.GetAttackTarget()
@@ -251,5 +251,16 @@ function BPEV.krana_kal_debuff(baseC)
   e1:SetValue(0)
   local e2=e1:Clone()
   e2:SetCode(EFFECT_SET_DEFENSE_FINAL)
-  return e1,e2
+  local e3
+  if desc then --Extremly convoluted way of applying the client hint to the affected card
+    e3=e1:Clone()
+    e3:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_GRANT)
+    e3:SetCode(0)
+    local e3_inner=Effect.CreateEffect(baseC)
+    e3_inner:SetDescription(desc)
+    e3_inner:SetType(EFFECT_TYPE_SINGLE)
+    e3_inner:SetProperty(EFFECT_FLAG_CLIENT_HINT)
+    e3:SetLabelObject(e3_inner)
+  end
+  return e1,e2,e3
 end
