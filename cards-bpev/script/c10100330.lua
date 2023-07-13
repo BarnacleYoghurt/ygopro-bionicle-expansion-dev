@@ -3,9 +3,8 @@ local s,id=GetID()
 function s.initial_effect(c)
     --Fusion Summon
     local e1=Fusion.CreateSummonEff{handler=c,fusfilter=aux.FilterBoolFunction(Card.IsSetCard,0xb0c),matfilter=Fusion.InHandMat(Card.IsAbleToDeck),
-                                    extrafil=s.extrafil,extraop=Fusion.ShuffleMaterial,extratg=s.extratg}
+                                    extrafil=s.extrafil,extraop=s.extraop,extratg=s.extratg}
     e1:SetCountLimit(1,id)
-    e1:SetCondition(s.condition1)
     c:RegisterEffect(e1)
     --Add Spell/Trap
     local e2=Effect.CreateEffect(c)
@@ -21,16 +20,27 @@ function s.initial_effect(c)
     e2:SetCountLimit(1,{id,1})
     c:RegisterEffect(e2)
 end
+function s.checkmat(tp,sg,fc)
+    local dl=math.min(Duel.GetFieldGroupCount(1-tp,LOCATION_MZONE,0),1)
+    return sg:FilterCount(Card.IsLocation,nil,LOCATION_DECK)<=dl
+end
 function s.extrafil(e,tp,mg)
-    return Duel.GetMatchingGroup(aux.NecroValleyFilter(Fusion.IsMonsterFilter(Card.IsAbleToDeck)),tp,LOCATION_GRAVE,0,nil)
+    local eg=Duel.GetMatchingGroup(aux.NecroValleyFilter(Fusion.IsMonsterFilter(Card.IsAbleToDeck)),tp,LOCATION_GRAVE,0,nil)
         +  Duel.GetMatchingGroup(Fusion.IsMonsterFilter(Card.IsFaceup),tp,LOCATION_REMOVED,0,nil)
+        +  Duel.GetMatchingGroup(Fusion.IsMonsterFilter(Card.IsAbleToRemove),tp,LOCATION_DECK,0,nil)
+    return eg,s.checkmat
 end
 function s.extratg(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return true end
 	Duel.SetOperationInfo(0,CATEGORY_TODECK,e:GetHandler(),1,tp,LOCATION_HAND+LOCATION_MZONE+LOCATION_GRAVE)
 end
-function s.condition1(e,tp,eg,ep,ev,re,r,rp)
-    return Duel.GetTurnPlayer()==1-tp
+function s.extraop(e,tc,tp,sg)
+    local rg=sg:Filter(Card.IsLocation,nil,LOCATION_DECK)
+    if #rg>0 then
+        Duel.Remove(rg,POS_FACEUP,REASON_EFFECT+REASON_MATERIAL+REASON_FUSION)
+        sg:Sub(rg)
+    end
+    Fusion.ShuffleMaterial(e,tc,tp,sg)
 end
 function s.filter2(c)
     return c:IsSetCard(0xb0c) and c:IsType(TYPE_SPELL+TYPE_TRAP) and not c:IsCode(id) and c:IsAbleToHand()
