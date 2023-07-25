@@ -33,6 +33,39 @@ function s.operation4(e,tp,eg,ep,ev,re,r,rp)
         e1:SetValue(1)
         e1:SetReset(RESET_EVENT+RESETS_STANDARD+RESET_PHASE+PHASE_END)
         tc:RegisterEffect(e1)
+        local e2=Effect.CreateEffect(e:GetHandler())
+        e2:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_CONTINUOUS)
+        e2:SetCode(EVENT_PRE_DAMAGE_CALCULATE)
+        e2:SetRange(LOCATION_MZONE)
+        e2:SetCondition(s.condition4_1)
+        e2:SetOperation(s.operation4_1)
+        e2:SetReset(RESET_EVENT+RESETS_STANDARD+RESET_PHASE+PHASE_END)
+        tc:RegisterEffect(e2)
     end
 end
-
+function s.condition4_1(e,tp,eg,ep,ev,re,r,rp)
+	return Duel.GetAttackTarget()==nil and e:GetHandler():IsHasEffect(EFFECT_DIRECT_ATTACK)
+        and Duel.IsExistingMatchingCard(aux.NOT(Card.IsHasEffect),tp,0,LOCATION_MZONE,1,nil,EFFECT_IGNORE_BATTLE_TARGET)
+end
+function s.operation4_1(e,tp,eg,ep,ev,re,r,rp)
+    -- The Wisdom of Cyberdark Edge: We have to properly handle the case of multiple stacked direct attack effects!
+    -- In that case, list out the cards owning those effects and let the player choose.
+    -- Our debuff is only applied if this effect is actually the chosen one.
+	local c=e:GetHandler()
+	local effs={c:GetCardEffect(EFFECT_DIRECT_ATTACK)}
+	local eg=Group.CreateGroup()
+	for _,eff in ipairs(effs) do
+		eg:AddCard(eff:GetOwner())
+	end
+	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_EFFECT)
+	local ec = #eg==1 and eg:GetFirst() or eg:Select(tp,1,1,nil):GetFirst()
+	if ec==e:GetOwner() then
+		local e1=Effect.CreateEffect(e:GetOwner())
+		e1:SetType(EFFECT_TYPE_SINGLE)
+		e1:SetCode(EFFECT_SET_ATTACK_FINAL)
+		e1:SetRange(LOCATION_MZONE)
+		e1:SetValue(c:GetAttack()/2)
+		e1:SetReset(RESET_EVENT+RESETS_STANDARD_DISABLE+RESET_PHASE+PHASE_DAMAGE_CAL)
+		c:RegisterEffect(e1)
+	end
+end
