@@ -19,7 +19,7 @@ function s.initial_effect(c)
 	e2:SetCode(EFFECT_PUBLIC)
     e2:SetCondition(s.condition2)
 	c:RegisterEffect(e2)
-    --Place Nuva Symbol & allow direct attacks
+    --Place Nuva Symbol & check hand
     local e4,chainfilter=bpev.kanohi_nuva_search(c,s.operation4,id)
     Duel.AddCustomActivityCounter(id,ACTIVITY_CHAIN,chainfilter)
     e4:SetDescription(aux.Stringid(id,0))
@@ -30,12 +30,9 @@ function s.condition2(e)
     return bcot.kanohi_con(e,{0xb0c}) and ec:IsControler(e:GetOwnerPlayer())
 end
 function s.operation4(e,tp,eg,ep,ev,re,r,rp)
-    local e1=Effect.CreateEffect(e:GetHandler())
-	e1:SetType(EFFECT_TYPE_FIELD)
-	e1:SetRange(LOCATION_SZONE)
-	e1:SetTargetRange(0,LOCATION_HAND)
-	e1:SetCode(EFFECT_PUBLIC)
-    e1:SetCondition(function() return Duel.GetFieldGroupCount(tp,LOCATION_MZONE,0)>0 end)
-    e1:SetReset(RESET_PHASE+PHASE_END)
-	Duel.RegisterEffect(e1,tp)
+    local g=Duel.GetMatchingGroup(aux.NOT(Card.IsPublic),tp,0,LOCATION_HAND,nil)
+	if #g>0 then
+		Duel.ConfirmCards(tp,g)
+		Duel.ShuffleHand(1-tp)
+	end
 end
