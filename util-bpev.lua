@@ -37,14 +37,29 @@ function BPEV.toa_nuva_search(baseC)
   return e
 end
 --Kanohi Nuva
-function BPEV.kanohi_nuva_search(baseC,aoeop,id)
+function BPEV.kanohi_nuva_search_spell(baseC,aoeop,id)
+  return bpev.kanohi_nuva_search(baseC,aoeop,id,
+    function (c,tp)
+      return c:IsSetCard(0xb0c) and c:IsType(TYPE_CONTINUOUS) and c:IsType(TYPE_SPELL) and not c:IsForbidden() and c:CheckUniqueOnField(tp)
+    end,
+    function (g,tp) Duel.MoveToField(g:GetFirst(),tp,tp,LOCATION_SZONE,POS_FACEUP,true) end,
+    HINTMSG_TOFIELD
+  )
+end
+function BPEV.kanohi_nuva_search_trap(baseC,aoeop,id)
+  return bpev.kanohi_nuva_search(baseC,aoeop,id,
+    function (c,tp)
+      return c:IsSetCard(0xb0c) and c:IsType(TYPE_TRAP) and c:IsSSetable()
+    end,
+    function (g,tp) Duel.SSet(tp,g) end,
+    HINTMSG_SET
+  )
+end
+function BPEV.kanohi_nuva_search(baseC,aoeop,id,searchfilter,searchop,hintmsg)
   local function filterA(c)
     return c:IsType(TYPE_MONSTER) and c:IsAbleToRemoveAsCost()
   end
-  local function filterB(c,tp)
-    return c:IsSetCard(0xb0c) and c:IsType(TYPE_CONTINUOUS) and c:IsType(TYPE_SPELL) and not c:IsForbidden() and c:CheckUniqueOnField(tp)
-  end
-  local function filterC(c)
+  local function filterB(c)
     return c:IsSetCard(0xb0c) and c:IsType(TYPE_FUSION)
   end
   local function cost(e,tp,eg,ep,ev,re,r,rp,chk)
@@ -58,19 +73,19 @@ function BPEV.kanohi_nuva_search(baseC,aoeop,id)
   end
   local function target(e,tp,eg,ep,ev,re,r,rp,chk)
     if chk==0 then 
-      return Duel.GetLocationCount(tp,LOCATION_SZONE)>0 and Duel.IsExistingMatchingCard(filterB,tp,LOCATION_DECK,0,1,nil,tp)
+      return Duel.GetLocationCount(tp,LOCATION_SZONE)>0 and Duel.IsExistingMatchingCard(searchfilter,tp,LOCATION_DECK,0,1,nil,tp)
     end
   end
   local function operation(e,tp,eg,ep,ev,re,r,rp)
     if Duel.GetLocationCount(tp,LOCATION_SZONE)>0 then
-      Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TOFIELD)
-      local g=Duel.SelectMatchingCard(tp,filterB,tp,LOCATION_DECK,0,1,1,nil,tp)
+      Duel.Hint(HINT_SELECTMSG,tp,hintmsg)
+      local g=Duel.SelectMatchingCard(tp,searchfilter,tp,LOCATION_DECK,0,1,1,nil,tp)
       if #g>0 then
-        Duel.MoveToField(g:GetFirst(),tp,tp,LOCATION_SZONE,POS_FACEUP,true)
+        searchop(g,tp)
       end
     end
     
-    if aoeop and Duel.IsExistingMatchingCard(filterC,tp,LOCATION_MZONE,0,1,1,nil) then
+    if aoeop and Duel.IsExistingMatchingCard(filterB,tp,LOCATION_MZONE,0,1,1,nil) then
       aoeop(e,tp,eg,ep,ev,re,r,rp)
     end
   end

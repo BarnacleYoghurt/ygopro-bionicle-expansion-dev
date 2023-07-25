@@ -19,8 +19,8 @@ function s.initial_effect(c)
 	e2:SetCode(EFFECT_PUBLIC)
     e2:SetCondition(s.condition2)
 	c:RegisterEffect(e2)
-    --Place Nuva Symbol & check hand
-    local e4,chainfilter=bpev.kanohi_nuva_search(c,s.operation4,id)
+    --Set Nuva Trap & check hand
+    local e4,chainfilter=bpev.kanohi_nuva_search_trap(c,s.operation4,id)
     Duel.AddCustomActivityCounter(id,ACTIVITY_CHAIN,chainfilter)
     e4:SetDescription(aux.Stringid(id,0))
     c:RegisterEffect(e4)
