@@ -44,14 +44,22 @@ function s.target2(e,tp,eg,ep,ev,re,r,rp,chk)
     Duel.SetOperationInfo(0,CATEGORY_REMOVE,nil,1,1-tp,LOCATION_ONFIELD)
 end
 function s.operation2(e,tp,eg,ep,ev,re,r,rp)
-    Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_REMOVE)
-    local g=Duel.SelectMatchingCard(tp,Card.IsAbleToRemove,tp,0,LOCATION_ONFIELD,1,1,nil)
+	local g1=Duel.GetMatchingGroup(Card.IsAbleToRemove,tp,0,LOCATION_ONFIELD,nil)
+	local g2=Duel.GetMatchingGroup(Card.IsAbleToRemove,tp,0,LOCATION_HAND,nil)
+    local op=Duel.SelectEffect(tp,{#g1>0,aux.Stringid(id,4)},{#g2>0,aux.Stringid(id,5)})
+    local g=Group.CreateGroup()
+    if op==1 then
+        Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_REMOVE)
+        g=g1:Select(tp,1,1,nil)
+    elseif op==2 then
+        g=g2:RandomSelect(tp,1)
+    end
     if #g>0 then
         Duel.Remove(g,POS_FACEUP,REASON_EFFECT)
     end
 end
 function s.operation3(e,tp,eg,ep,ev,re,r,rp)
-    if Duel.IsExistingMatchingCard(Card.IsAbleToHand,tp,0,LOCATION_REMOVED,1,nil) and Duel.SelectYesNo(1-tp,aux.Stringid(id,4)) then
+    if Duel.IsExistingMatchingCard(Card.IsAbleToHand,tp,0,LOCATION_REMOVED,1,nil) and Duel.SelectYesNo(1-tp,aux.Stringid(id,6)) then
         local g=Duel.SelectMatchingCard(1-tp,Card.IsAbleToHand,tp,0,LOCATION_REMOVED,1,1,nil)
         if #g>0 then
             Duel.SendtoHand(g,nil,REASON_EFFECT)
