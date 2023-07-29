@@ -52,9 +52,12 @@ function s.operation2(e,tp,eg,ep,ev,re,r,rp)
         Duel.SpecialSummon(g,0,tp,tp,false,false,POS_FACEUP)
     end
 end
+function s.filter3(c,e)
+    return c:IsReleasableByEffect() and not c:IsType(TYPE_FUSION)
+end
 function s.operation3(e,tp,eg,ep,ev,re,r,rp)
     Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_RELEASE)
-    local rg=Duel.SelectMatchingCard(tp,Card.IsReleasableByEffect,tp,LOCATION_MZONE,0,1,1,nil,e)
+    local rg=Duel.SelectMatchingCard(tp,s.filter3,tp,LOCATION_MZONE,0,1,1,nil,e)
     if #rg>0 then
         Duel.Release(rg,REASON_EFFECT)
     end
