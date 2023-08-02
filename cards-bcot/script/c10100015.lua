@@ -104,8 +104,11 @@ function s.operation1(e,tp,eg,ep,ev,re,r,rp)
       for sc in aux.Next(ssg) do
         if Duel.SpecialSummonStep(sc,0,tp,tp,false,false,POS_FACEUP) then
           local e1=Effect.CreateEffect(c)
+          e1:SetDescription(3206)
           e1:SetType(EFFECT_TYPE_SINGLE)
+          e1:SetProperty(EFFECT_FLAG_CLIENT_HINT)
           e1:SetCode(EFFECT_CANNOT_ATTACK)
+          e1:SetReset(RESET_EVENT+RESETS_STANDARD)
           sc:RegisterEffect(e1,true)
           sc:RegisterFlagEffect(id,RESET_EVENT+RESETS_STANDARD,0,1,c:GetFieldID())
         end
