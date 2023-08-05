@@ -12,14 +12,18 @@ function s.initial_effect(c)
 	e1:SetDescription(aux.Stringid(id,0))
 	e1:SetCountLimit(1,id)
 	c:RegisterEffect(e1)
-	--Change position
+	--Banish
 	local e2=Effect.CreateEffect(c)
-	e2:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
+	e2:SetDescription(aux.Stringid(id,1))
+	e2:SetCategory(CATEGORY_REMOVE)
+	e2:SetType(EFFECT_TYPE_QUICK_O)
 	e2:SetRange(LOCATION_MZONE)
-	e2:SetCode(EVENT_PHASE+PHASE_BATTLE)
+	e2:SetProperty(EFFECT_FLAG_CARD_TARGET)
+	e2:SetCode(EVENT_FREE_CHAIN)
 	e2:SetCondition(s.condition2)
+	e2:SetTarget(s.target2)
 	e2:SetOperation(s.operation2)
-	e2:SetCountLimit(1)
+	e2:SetCountLimit(1,{id,1})
 	c:RegisterEffect(e2)
 	--Attack protection
 	local e3a=Effect.CreateEffect(c)
@@ -44,12 +48,19 @@ function s.initial_effect(c)
 end
 s.material_setcode={0xb02,0xb0b,0xb0c}
 function s.condition2(e,tp,eg,ep,ev,re,r,rp)
-	return e:GetHandler():GetAttackedCount()>0
+	return Duel.GetFieldGroupCount(tp,LOCATION_MZONE,0)<=1
+end
+function s.target2(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
+	if chkc then return chkc:IsLocation(LOCATION_MZONE) and chkc:IsControler(1-tp) and chkc:IsAbleToRemove() end
+	if chk==0 then return Duel.IsExistingTarget(Card.IsAbleToRemove,tp,0,LOCATION_MZONE,1,nil) end
+	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_REMOVE)
+	local g=Duel.SelectTarget(tp,Card.IsAbleToRemove,tp,0,LOCATION_MZONE,1,1,nil)
+	Duel.SetOperationInfo(0,CATEGORY_REMOVE,g,1,0,0)
 end
 function s.operation2(e,tp,eg,ep,ev,re,r,rp)
-	local c=e:GetHandler()
-	if c:IsAttackPos() then
-		Duel.ChangePosition(c,POS_FACEUP_DEFENSE)
+	local tc=Duel.GetFirstTarget()
+	if tc:IsRelateToEffect(e) then
+		Duel.Remove(tc,POS_FACEUP,REASON_EFFECT)
 	end
 end
 function s.condition3(e)
