@@ -7,24 +7,23 @@ function s.initial_effect(c)
 	c:EnableReviveLimit()
 	--Fusion Material
 	Fusion.AddProcMix(c,true,true,10100001,aux.FilterBoolFunctionEx(Card.IsSetCard,0xb0b))
-  --Add Spell/Trap
-  local e1=bpev.toa_nuva_search(c)
-  e1:SetDescription(aux.Stringid(id,0))
-  e1:SetCountLimit(1,id)
-  c:RegisterEffect(e1)
-  --ATK to 0
-  local e2=Effect.CreateEffect(c)
+  	--Add Spell/Trap
+  	local e1=bpev.toa_nuva_search(c)
+  	e1:SetDescription(aux.Stringid(id,0))
+  	c:RegisterEffect(e1)
+  	--ATK to 0
+  	local e2=Effect.CreateEffect(c)
 	e2:SetDescription(aux.Stringid(id,1))
 	e2:SetCategory(CATEGORY_ATKCHANGE)
-  e2:SetType(EFFECT_TYPE_QUICK_O)
-  e2:SetProperty(EFFECT_FLAG_CARD_TARGET+EFFECT_FLAG_DAMAGE_STEP)
+	e2:SetType(EFFECT_TYPE_QUICK_O)
+  	e2:SetProperty(EFFECT_FLAG_CARD_TARGET+EFFECT_FLAG_DAMAGE_STEP)
 	e2:SetRange(LOCATION_MZONE)
-  e2:SetCode(EVENT_FREE_CHAIN)
+	e2:SetCode(EVENT_FREE_CHAIN)
 	e2:SetHintTiming(TIMING_DAMAGE_STEP)
-  e2:SetCondition(s.condition2)
+  	e2:SetCondition(s.condition2)
 	e2:SetTarget(s.target2)
 	e2:SetOperation(s.operation2)
-  e2:SetCountLimit(1,{id,1})
+  	e2:SetCountLimit(1,id)
 	c:RegisterEffect(e2)
 end
 s.material_setcode={0xb02,0xb0b,0xb0c}

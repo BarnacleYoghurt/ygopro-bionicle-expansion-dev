@@ -10,7 +10,6 @@ function s.initial_effect(c)
 	--Add Spell/Trap
 	local e1=bpev.toa_nuva_search(c)
 	e1:SetDescription(aux.Stringid(id,0))
-	e1:SetCountLimit(1,id)
 	c:RegisterEffect(e1)
 	--Destroy Spells/Traps
 	local e2=Effect.CreateEffect(c)
@@ -23,7 +22,7 @@ function s.initial_effect(c)
 	e2:SetCondition(s.condition2)
 	e2:SetTarget(s.target2)
 	e2:SetOperation(s.operation2)
-	e2:SetCountLimit(1,{id,1})
+	e2:SetCountLimit(1,id)
 	c:RegisterEffect(e2)
 end
 s.material_setcode={0xb02,0xb0b,0xb0c}
