@@ -19,6 +19,7 @@ function s.initial_effect(c)
 	e2:SetRange(LOCATION_MZONE)
 	e2:SetProperty(EFFECT_FLAG_CARD_TARGET)
 	e2:SetCode(EVENT_FREE_CHAIN)
+	e2:SetHintTiming(TIMING_MAIN_END)
 	e2:SetCondition(s.condition2)
 	e2:SetTarget(s.target2)
 	e2:SetOperation(s.operation2)
@@ -47,7 +48,7 @@ function s.initial_effect(c)
 end
 s.material_setcode={0xb02,0xb0b,0xb0c}
 function s.condition2(e,tp,eg,ep,ev,re,r,rp)
-	return Duel.GetFieldGroupCount(tp,LOCATION_MZONE,0)<=1
+	return Duel.GetFieldGroupCount(tp,LOCATION_MZONE,0)<=1 and Duel.IsMainPhase()
 end
 function s.target2(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 	if chkc then return chkc:IsLocation(LOCATION_MZONE) and chkc:IsControler(1-tp) and chkc:IsAbleToRemove() end
