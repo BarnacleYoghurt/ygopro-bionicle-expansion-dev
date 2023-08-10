@@ -1,5 +1,5 @@
 if not bcot then
-	Duel.LoadScript("../util-bcot.lua")
+	Duel.LoadScript("util-bcot.lua")
 end
 --Toa Mata Combination - Magma
 local s,id=GetID()

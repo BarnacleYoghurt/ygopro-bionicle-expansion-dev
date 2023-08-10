@@ -1,8 +1,8 @@
 if not bcot then
-	Duel.LoadScript("../util-bcot.lua")
+	Duel.LoadScript("util-bcot.lua")
 end
 if not bpev then
-	Duel.LoadScript("../util-bpev.lua")
+	Duel.LoadScript("util-bpev.lua")
 end
 --Great Kanohi Kaukau Nuva
 local s,id=GetID()

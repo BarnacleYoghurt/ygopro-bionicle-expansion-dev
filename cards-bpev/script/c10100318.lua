@@ -1,5 +1,5 @@
 if not bpev then
-	Duel.LoadScript("../util-bpev.lua")
+	Duel.LoadScript("util-bpev.lua")
 end
 --Nuva Symbol of Burning Courage
 local s,id=GetID()

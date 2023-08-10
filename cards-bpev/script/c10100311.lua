@@ -1,5 +1,5 @@
 if not bpev then
-	Duel.LoadScript("../util-bpev.lua")
+	Duel.LoadScript("util-bpev.lua")
 end
 --Toa Nuva Lewa
 local s,id=GetID()
