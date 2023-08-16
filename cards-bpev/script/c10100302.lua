@@ -55,7 +55,7 @@ function s.operation1(e,tp,eg,ep,ev,re,r,rp)
     
     if sel==0 then
       Duel.BreakEffect()
-      if Duel.SendtoGrave(tc,REASON_EFFECT)>0 and token:IsDestructable() 
+      if Duel.SendtoGrave(tc,REASON_EFFECT)>0 and tc:IsLocation(LOCATION_GRAVE) and token:IsDestructable() 
         and Duel.IsExistingMatchingCard(s.filter1,tp,LOCATION_DECK,0,1,nil,e,tp) and Duel.GetMZoneCount(tp,token)
         and Duel.SelectYesNo(tp,aux.Stringid(id,2)) then
         if Duel.Destroy(token,REASON_EFFECT)>0 then
