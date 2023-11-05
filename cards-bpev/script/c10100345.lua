@@ -55,14 +55,16 @@ function s.target0(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
     -- Instead we have to manually provide that option here
     if chck then s.target2(e,tp,eg,ep,ev,re,r,rp,chk,chkc) end
     if chk==0 then return true end
+    local e0=e:GetLabelObject():GetLabelObject()
     if Duel.IsMainPhase() and s.cost2(e,tp,eg,ep,ev,re,r,rp,0)
-        and s.target2(e,tp,eg,ep,ev,re,r,rp,0) and Duel.SelectYesNo(tp,94) then
+        and s.target2(e,tp,eg,ep,ev,re,r,rp,0) and e0:CheckCountLimit(tp)
+        and Duel.SelectYesNo(tp,94) then
         e:SetCategory(CATEGORY_SPECIAL_SUMMON)
         e:SetProperty(EFFECT_FLAG_CARD_TARGET)
         e:SetOperation(s.operation2)
         s.cost2(e,tp,eg,ep,ev,re,r,rp,1)
         s.target2(e,tp,eg,ep,ev,re,r,rp,1)
-        e:GetLabelObject():GetLabelObject():UseCountLimit(tp)
+        e0:UseCountLimit(tp)
     end
 end
 function s.filter1(c)
