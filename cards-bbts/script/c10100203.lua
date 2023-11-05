@@ -1,5 +1,5 @@
 if not bbts then
-	dofile "expansions/util-bbts.lua"
+	Duel.LoadScript("util-bbts.lua")
 end
 local s,id=GetID()
 --Bohrok Nuhvok
