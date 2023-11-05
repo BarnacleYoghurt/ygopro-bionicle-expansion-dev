@@ -6,6 +6,8 @@ function s.initial_effect(c)
     e0:SetType(EFFECT_TYPE_ACTIVATE)
     e0:SetCode(EVENT_FREE_CHAIN)
     e0:SetCost(s.cost0)
+    e0:SetTarget(s.target0)
+    e0:SetHintTiming(TIMING_MAIN_END)
     c:RegisterEffect(e0)
     --Activate in same turn
     local e1=Effect.CreateEffect(c)
@@ -32,6 +34,7 @@ function s.initial_effect(c)
     e2:SetHintTiming(TIMING_MAIN_END)
     e2:SetCountLimit(1,id)
     c:RegisterEffect(e2)
+    e1:SetLabelObject(e2) -- we need to get it to e0 but the direct slot is taken, so ...
 end
 function s.cost0(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then 
@@ -47,30 +50,46 @@ function s.cost0(e,tp,eg,ep,ev,re,r,rp,chk)
         end
 	end
 end
+function s.target0(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
+    -- Because the activation has a cost function, the default mechanism for using the effect in the same chain link does not apply
+    -- Instead we have to manually provide that option here
+    if chck then s.target2(e,tp,eg,ep,ev,re,r,rp,chk,chkc) end
+    if chk==0 then return true end
+    if Duel.IsMainPhase() and s.cost2(e,tp,eg,ep,ev,re,r,rp,0)
+        and s.target2(e,tp,eg,ep,ev,re,r,rp,0) and Duel.SelectYesNo(tp,94) then
+        e:SetCategory(CATEGORY_SPECIAL_SUMMON)
+        e:SetProperty(EFFECT_FLAG_CARD_TARGET)
+        e:SetOperation(s.operation2)
+        s.cost2(e,tp,eg,ep,ev,re,r,rp,1)
+        s.target2(e,tp,eg,ep,ev,re,r,rp,1)
+        e:GetLabelObject():GetLabelObject():UseCountLimit(tp)
+    end
+end
 function s.filter1(c)
     return c:IsSetCard(0xb0a) and c:IsAbleToRemoveAsCost()
 end
-function s.filter2a(c)
+function s.filter2a(c,e,tp)
     return (c:IsSetCard(0xb08) or c:IsSetCard(0xb09)) and (c:IsLocation(LOCATION_HAND) or c:IsFaceup()) and c:IsAbleToGraveAsCost()
+        and Duel.IsExistingMatchingCard(s.filter2c,tp,LOCATION_EXTRA,0,1,nil,e,tp,c)
 end
 function s.filter2b(c)
     return c:IsSetCard(0xb08) and c:IsType(TYPE_MONSTER)
 end
-function s.filter2c(c,e,tp)
-    --TODO: In MR4, can you send the monster blocking the EMZ to activate this??? 
-    return c:IsSetCard(0xb08) and c:IsType(TYPE_XYZ) and c:IsCanBeSpecialSummoned(e,0,tp,false,false) and Duel.GetLocationCountFromEx(tp,tp,nil,c)>0
+function s.filter2c(c,e,tp,sc)
+    return c:IsSetCard(0xb08) and c:IsType(TYPE_XYZ) and c:IsCanBeSpecialSummoned(e,0,tp,false,false) and Duel.GetLocationCountFromEx(tp,tp,sc,c)>0
 end
 function s.cost2(e,tp,eg,ep,ev,re,r,rp,chk)
-    if chk==0 then return Duel.IsExistingMatchingCard(s.filter2a,tp,LOCATION_HAND+LOCATION_ONFIELD,0,1,nil) end
-    local g=Duel.SelectMatchingCard(tp,s.filter2a,tp,LOCATION_HAND+LOCATION_ONFIELD,0,1,1,nil)
+    if chk==0 then return Duel.IsExistingMatchingCard(s.filter2a,tp,LOCATION_HAND+LOCATION_ONFIELD,0,1,nil,e,tp) end
+    local g=Duel.SelectMatchingCard(tp,s.filter2a,tp,LOCATION_HAND+LOCATION_ONFIELD,0,1,1,nil,e,tp)
     Duel.SendtoGrave(g,REASON_COST)
 end
 function s.target2(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
     if chkc then return false end
-    if chk==0 then return Duel.IsExistingTarget(s.filter2b,tp,LOCATION_GRAVE,0,1,nil) and Duel.IsExistingMatchingCard(s.filter2c,tp,LOCATION_EXTRA,0,1,nil,e,tp) end
+    if chk==0 then return Duel.IsExistingTarget(s.filter2b,tp,LOCATION_GRAVE,0,1,nil) end
     Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_XMATERIAL)
-    Duel.SelectTarget(tp,s.filter2b,tp,LOCATION_GRAVE,0,1,2,nil)
+    local g=Duel.SelectTarget(tp,s.filter2b,tp,LOCATION_GRAVE,0,1,2,nil)
 	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,1,tp,LOCATION_EXTRA)
+	Duel.SetOperationInfo(0,CATEGORY_LEAVE_GRAVE,g,1,0,0)
 end
 function s.operation2(e,tp,eg,ep,ev,re,r,rp)
     Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
