@@ -279,3 +279,86 @@ function BPEV.krana_kal_debuff(baseC,desc)
   end
   return e1,e2,e3
 end
+function BPEV.krana_kal_ssummon(baseC)
+  local function filter(c,e,tp)
+    return c:IsLevel(4) and c:IsSetCard(0xb08) and c:IsCanBeSpecialSummoned(e,0,tp,false,false,POS_DEFENSE)
+  end
+  local function cost(e,tp,eg,ep,ev,re,r,rp,chk)
+    local c=e:GetHandler()
+    if chk==0 then return c:IsReleasable() end
+    Duel.Release(c,REASON_COST)
+  end
+  local function target(e,tp,eg,ep,ev,re,r,rp,chk)
+    if chk==0 then
+      return Duel.GetMZoneCount(tp,e:GetHandler())>0 and Duel.IsExistingMatchingCard(filter,tp,LOCATION_HAND+LOCATION_GRAVE,0,1,nil,e,tp);
+    end
+    Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,1,tp,LOCATION_HAND+LOCATION_GRAVE)
+  end
+  local function operation(e,tp,eg,ep,ev,re,r,rp)
+    Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
+    local g=Duel.SelectMatchingCard(tp,aux.NecroValleyFilter(filter),tp,LOCATION_HAND+LOCATION_GRAVE,0,1,1,nil,e,tp)
+    if #g>0 and Duel.SpecialSummon(g,0,tp,tp,false,false,POS_DEFENSE)>0 then
+      --Return it to deck if it leaves the field
+      local e1=Effect.CreateEffect(e:GetHandler())
+      e1:SetDescription(3301)
+      e1:SetType(EFFECT_TYPE_SINGLE)
+      e1:SetCode(EFFECT_LEAVE_FIELD_REDIRECT)
+      e1:SetProperty(EFFECT_FLAG_CANNOT_DISABLE+EFFECT_FLAG_CLIENT_HINT)
+      e1:SetReset(RESET_EVENT+RESETS_REDIRECT)
+      e1:SetValue(LOCATION_DECKSHF)
+      g:GetFirst():RegisterEffect(e1,true)
+    end
+  end
+
+  local e=Effect.CreateEffect(baseC)
+  e:SetCategory(CATEGORY_SPECIAL_SUMMON)
+  e:SetType(EFFECT_TYPE_IGNITION)
+  e:SetRange(LOCATION_MZONE)
+  e:SetCost(cost)
+  e:SetTarget(target)
+  e:SetOperation(operation)
+  return e
+end
+function BPEV.krana_kal_xsummon(baseC)
+  local function filterB(c,e,tp,mc,pg)
+    return c:IsSetCard(0xb08) and c:IsType(TYPE_XYZ)
+      and Duel.GetLocationCountFromEx(tp,tp,mc,c)>0 and mc:IsCanBeXyzMaterial(c,tp)
+      and c:IsCanBeSpecialSummoned(e,SUMMON_TYPE_XYZ,tp,false,false)
+  end
+  local function filterA(c,e,tp)
+    local pg=aux.GetMustBeMaterialGroup(tp,Group.FromCards(c),tp,nil,nil,REASON_XYZ)
+    return #(pg-c)==0 and c:IsFaceup() and c:IsSetCard(0xb08) and c:IsLevel(4) and e:GetHandler():GetLinkedGroup():IsContains(c)
+      and Duel.IsExistingMatchingCard(filterB,tp,LOCATION_EXTRA,0,1,nil,e,tp,c,pg)
+  end
+  local function target(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
+    if chkc then return chkc:IsLocation(LOCATION_MZONE) and filterA(chkc,e) end
+    if chk==0 then return Duel.IsExistingTarget(filterA,tp,LOCATION_MZONE,0,1,nil,e,tp) end
+    Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TARGET)
+    Duel.SelectTarget(tp,filterA,tp,LOCATION_MZONE,0,1,1,nil,e,tp)
+    Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,1,tp,LOCATION_EXTRA)
+  end
+  local function operation(e,tp,eg,ep,ev,re,r,rp)
+    local tc=Duel.GetFirstTarget()
+    if tc and filterA(tc,e,tp) then
+      local pg=aux.GetMustBeMaterialGroup(tp,Group.FromCards(tc),tp,nil,nil,REASON_XYZ)
+      Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
+      local g=Duel.SelectMatchingCard(tp,filterB,tp,LOCATION_EXTRA,0,1,1,nil,e,tp,tc,pg)
+      local sc=g:GetFirst()
+      if sc then
+        sc:SetMaterial(tc)
+        Duel.Overlay(sc,tc)
+        Duel.SpecialSummon(sc,SUMMON_TYPE_XYZ,tp,tp,false,false,POS_FACEUP)
+        sc:CompleteProcedure()
+      end
+    end
+  end
+
+  local e=Effect.CreateEffect(baseC)
+  e:SetCategory(CATEGORY_SPECIAL_SUMMON)
+  e:SetType(EFFECT_TYPE_IGNITION)
+  e:SetProperty(EFFECT_FLAG_CARD_TARGET)
+  e:SetRange(LOCATION_MZONE)
+  e:SetTarget(target)
+  e:SetOperation(operation)
+  return e
+end
