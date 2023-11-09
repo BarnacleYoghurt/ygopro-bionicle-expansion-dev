@@ -68,6 +68,7 @@ function s.operation3(e,tp,eg,ep,ev,re,r,rp)
                 Duel.Destroy(g,REASON_EFFECT)
                 local dg=Duel.GetOperatedGroup():Filter(aux.NecroValleyFilter(s.filter3),nil)
                 if #dg>0 and Duel.SelectYesNo(tp,aux.Stringid(id,2)) then
+                    Duel.BreakEffect()
                     local ag=dg:Select(tp,1,1,nil)
                     Duel.Overlay(c,ag,true)
                 end
