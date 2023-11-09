@@ -28,6 +28,9 @@ function s.initial_effect(c)
     e3:SetCountLimit(1)
     c:RegisterEffect(e3)
 end
+function s.filter0(c)
+  return c:IsSetCard(0xb08) or c:IsSetCard(0xb09)
+end
 function s.condition3(e,tp,eg,ep,ev,re,r,rp)
     return e:GetHandler():IsSetCard(0xb08)
 end
