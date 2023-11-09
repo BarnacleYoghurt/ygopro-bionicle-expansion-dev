@@ -1,8 +1,8 @@
 if not bpev then
 	Duel.LoadScript("util-bpev.lua")
 end
-local s,id=GetID()
 --Krana Ca-Kal, Seeker
+local s,id=GetID()
 function s.initial_effect(c)
     --Link Summon
     Link.AddProcedure(c,s.filter0,1,1)
