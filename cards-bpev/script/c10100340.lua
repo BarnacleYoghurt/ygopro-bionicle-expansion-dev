@@ -32,7 +32,7 @@ function s.initial_effect(c)
     --Draw
     local e4=Effect.CreateEffect(c)
     e4:SetDescription(aux.Stringid(id,1))
-    e4:SetCategory(CATEGORY_DRAW)
+    e4:SetCategory(CATEGORY_DRAW+CATEGORY_HANDES)
     e4:SetType(EFFECT_TYPE_XMATERIAL+EFFECT_TYPE_IGNITION)
     e4:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
     e4:SetRange(LOCATION_MZONE)
@@ -55,11 +55,13 @@ function s.make_condition(ct)
 end
 function s.target4(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsPlayerCanDraw(tp,1) end
-	Duel.SetTargetPlayer(tp)
-	Duel.SetTargetParam(1)
+	Duel.SetOperationInfo(0,CATEGORY_HANDES,nil,0,tp,1)
 	Duel.SetOperationInfo(0,CATEGORY_DRAW,nil,0,tp,1)
 end
 function s.operation4(e,tp,eg,ep,ev,re,r,rp)
-	local p,d=Duel.GetChainInfo(0,CHAININFO_TARGET_PLAYER,CHAININFO_TARGET_PARAM)
-	Duel.Draw(p,d,REASON_EFFECT)
+	if Duel.Draw(tp,1,REASON_EFFECT)~=0 then
+		Duel.ShuffleHand(tp)
+		Duel.BreakEffect()
+		Duel.DiscardHand(tp,nil,1,1,REASON_EFFECT+REASON_DISCARD)
+	end
 end
