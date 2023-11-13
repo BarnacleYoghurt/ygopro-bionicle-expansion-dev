@@ -28,6 +28,7 @@ function s.initial_effect(c)
     e3:SetCategory(CATEGORY_DESTROY)
     e3:SetType(EFFECT_TYPE_IGNITION)
     e3:SetRange(LOCATION_MZONE)
+    e3:SetCondition(s.condition3)
     e3:SetTarget(s.target3)
     e3:SetOperation(s.operation3)
     e3:SetCountLimit(1,id)
@@ -50,6 +51,9 @@ function s.operation2(e,tp,eg,ep,ev,re,r,rp)
 end
 function s.filter3(c)
     return c:IsFaceup() and c:IsLocation(LOCATION_GRAVE+LOCATION_REMOVED)
+end
+function s.condition3(e,tp,eg,ep,ev,re,r,rp)
+    return e:GetHandler():GetOverlayCount()>=4
 end
 function s.target3(e,tp,eg,ep,ev,re,r,rp,chk)
     local c=e:GetHandler()
