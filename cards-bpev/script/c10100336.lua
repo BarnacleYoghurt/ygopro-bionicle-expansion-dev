@@ -20,6 +20,7 @@ function s.initial_effect(c)
     e2:SetCode(EVENT_FREE_CHAIN)
     e2:SetTarget(s.target2)
     e2:SetOperation(s.operation2)
+    e2:SetHintTiming(TIMING_END_PHASE)
     e2:SetCountLimit(1)
     c:RegisterEffect(e2)
     --blow
