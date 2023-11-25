@@ -29,16 +29,17 @@ function s.initial_effect(c)
     c:RegisterEffect(e3)
 end
 function s.target3(e,tp,eg,ep,ev,re,r,rp,chk)
-    local tc=e:GetHandler():GetBattleTarget()
-    if chk==0 then return tc and tc:IsControler(1-tp) and tc:IsAbleToRemove() end
-    Duel.SetOperationInfo(0,CATEGORY_REMOVE,tc,1,0,0)
+    if chk==0 then return Duel.IsExistingMatchingCard(Card.IsAbleToRemove,tp,0,LOCATION_MZONE,1,nil) end
+    Duel.SetOperationInfo(0,CATEGORY_REMOVE,nil,1,1-tp,LOCATION_MZONE)
 end
 function s.operation3(e,tp,eg,ep,ev,re,r,rp)
-    local tc=e:GetHandler():GetBattleTarget()
-    if tc and tc:IsRelateToBattle() then
-        local atk=tc:GetBaseAttack()
-        if Duel.Remove(tc,POS_FACEUP,REASON_EFFECT)>0 then
-            Duel.Damage(1-tp,atk,REASON_EFFECT)
+    local g=Duel.SelectMatchingCard(tp,Card.IsAbleToRemove,tp,0,LOCATION_MZONE,1,1,nil)
+    if #g>0 then
+        g=g:GetFirst()+g:GetFirst():GetColumnGroup()
+        g=g:Filter(Card.IsControler,nil,1-tp)
+        if Duel.Remove(g,POS_FACEDOWN,REASON_EFFECT)==1 then
+            Duel.BreakEffect()
+            Duel.Damage(1-tp,1200,REASON_EFFECT)
         end
     end
 end
