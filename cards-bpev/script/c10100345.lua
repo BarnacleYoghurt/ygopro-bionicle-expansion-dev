@@ -16,7 +16,7 @@ function s.initial_effect(c)
 	e1:SetProperty(EFFECT_FLAG_SET_AVAILABLE)
 	e1:SetCode(EFFECT_TRAP_ACT_IN_SET_TURN)
 	e1:SetValue(function(e,c) e:SetLabel(1) end) -- set label to 1 to indicate this needed to be checked (=> same turn activation applies)
-	e1:SetCondition(function(e) return Duel.GetMatchingGroup(s.filter1,e:GetHandlerPlayer(),LOCATION_EXTRA,0,nil):GetClassCount(Card.GetCode) > 1 end)
+	e1:SetCondition(s.condition1)
 	c:RegisterEffect(e1)
     e0:SetLabelObject(e1)
     --Special Summon and attach
@@ -69,6 +69,11 @@ function s.target0(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 end
 function s.filter1(c)
     return c:IsSetCard(0xb0a) and c:IsAbleToRemoveAsCost()
+end
+function s.condition1(e)
+    local tp=e:GetHandlerPlayer()
+    return Duel.IsExistingMatchingCard(Card.IsFaceup,tp,0,LOCATION_ONFIELD,1,nil)
+        and Duel.GetMatchingGroup(s.filter1,tp,LOCATION_EXTRA,0,nil):GetClassCount(Card.GetCode) > 1
 end
 function s.filter2a(c,e,tp)
     return (c:IsSetCard(0xb08) or c:IsSetCard(0xb09)) and (c:IsLocation(LOCATION_HAND) or c:IsFaceup()) and c:IsAbleToGraveAsCost()
