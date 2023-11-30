@@ -103,8 +103,34 @@ function s.operation2(e,tp,eg,ep,ev,re,r,rp)
     local g=Duel.SelectMatchingCard(tp,s.filter2c,tp,LOCATION_EXTRA,0,1,1,nil,e,tp)
     if #g>0 then
         local tg=Duel.GetTargetCards(e)
-        if Duel.SpecialSummon(g,0,tp,tp,false,false,POS_FACEUP)>0 and #tg>0 then
-            Duel.Overlay(g:GetFirst(),tg)
+        if Duel.SpecialSummon(g,0,tp,tp,false,false,POS_FACEUP)>0 then
+            local tc=g:GetFirst()
+            if #tg>0 then
+                Duel.Overlay(tc,tg)
+            end
+
+            local c=e:GetHandler()
+            local fid=c:GetFieldID()
+            tc:RegisterFlagEffect(id,RESET_EVENT+RESETS_STANDARD,EFFECT_FLAG_CLIENT_HINT,1,fid,aux.Stringid(id,2))
+            local e1=Effect.CreateEffect(c)
+            e1:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
+            e1:SetProperty(EFFECT_FLAG_IGNORE_IMMUNE)
+            e1:SetCode(EVENT_PHASE+PHASE_END)
+            e1:SetLabel(fid)
+            e1:SetLabelObject(tc)
+            e1:SetCondition(s.condition2_1)
+            e1:SetOperation(s.operation2_1)
+            e1:SetCountLimit(1)
+            Duel.RegisterEffect(e1,tp)
         end
     end
+end
+function s.condition2_1(e,tp,eg,ep,ev,re,r,rp)
+	if Duel.IsTurnPlayer(tp) then return false end
+	if e:GetLabelObject():GetFlagEffectLabel(id)==e:GetLabel() then return true end
+	e:Reset()
+	return false
+end
+function s.operation2_1(e,tp,eg,ep,ev,re,r,rp)
+	Duel.SendtoDeck(e:GetLabelObject(),nil,SEQ_DECKSHUFFLE,REASON_EFFECT)
 end
