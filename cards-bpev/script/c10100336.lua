@@ -54,7 +54,7 @@ function s.filter3(c)
     return c:IsFaceup() and c:IsLocation(LOCATION_GRAVE+LOCATION_REMOVED)
 end
 function s.condition3(e,tp,eg,ep,ev,re,r,rp)
-    return e:GetHandler():GetOverlayCount()>=4
+    return e:GetHandler():GetOverlayCount()>=5
 end
 function s.target3(e,tp,eg,ep,ev,re,r,rp,chk)
     local c=e:GetHandler()
