@@ -39,7 +39,7 @@ function s.operation3(e,tp,eg,ep,ev,re,r,rp)
     local tc=Duel.GetFirstTarget()
     if tc:IsRelateToEffect(e) then
         local tg=tc+tc:GetColumnGroup():Filter(Card.IsAbleToRemove,nil):Filter(Card.IsControler,nil,1-tp)
-        if Duel.Remove(tg,POS_FACEUP,REASON_EFFECT)==1 then
+        if Duel.Remove(tg,POS_FACEUP,REASON_EFFECT)==1 and tg:FilterCount(Card.IsLocation,nil,LOCATION_REMOVED)==1 then
             Duel.BreakEffect()
             Duel.Damage(1-tp,1200,REASON_EFFECT)
         end
