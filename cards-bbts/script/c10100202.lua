@@ -5,8 +5,8 @@ local s,id=GetID()
 --Bohrok Gahlok
 function s.initial_effect(c)
 	--flip
-  local e1=bbts.bohrok_flip(c)
-  c:RegisterEffect(e1)
+	local e1=bbts.bohrok_flip(c)
+	c:RegisterEffect(e1)
 	--be unpredictable
 	local e2=Effect.CreateEffect(c)
 	e2:SetDescription(aux.Stringid(id,1))
@@ -19,7 +19,7 @@ function s.initial_effect(c)
 end
 function s.target2(e,tp,eg,ep,ev,re,r,rp,chk)
 	local g=Duel.GetFieldGroup(tp,0,LOCATION_GRAVE)
-	if g:GetCount()==0 then return false end
+	if #g==0 then return false end
 	local top=g:GetFirst()
 	local tc=g:GetNext()
 	while tc do
@@ -31,7 +31,7 @@ function s.target2(e,tp,eg,ep,ev,re,r,rp,chk)
 		if top:IsType(TYPE_MONSTER) then
 			return Duel.IsExistingTarget(Card.IsDestructable,tp,0,LOCATION_ONFIELD,1,nil)
 		elseif top:IsType(TYPE_SPELL) then
-			return Duel.IsExistingMatchingCard(Card.IsFaceup,tp,0,LOCATION_MZONE,1,nil)
+			return Duel.IsExistingMatchingCard(Card.IsNegatableMonster,tp,0,LOCATION_MZONE,1,nil)
 		elseif top:IsType(TYPE_TRAP) then
 			return Duel.IsExistingMatchingCard(Card.IsAbleToRemove,tp,0,LOCATION_HAND,1,nil)
 		else 
@@ -41,34 +41,29 @@ function s.target2(e,tp,eg,ep,ev,re,r,rp,chk)
 	if top:IsType(TYPE_MONSTER) then
 		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_DESTROY)
 		local tg=Duel.SelectTarget(tp,Card.IsDestructable,tp,0,LOCATION_ONFIELD,1,1,nil)
+		e:SetLabel(TYPE_MONSTER)
 		Duel.SetOperationInfo(0,CATEGORY_DESTROY,tg,1,0,0)
 	elseif top:IsType(TYPE_SPELL) then
 		local tg=Duel.GetMatchingGroup(Card.IsNegatableMonster,tp,0,LOCATION_MZONE,nil)
+		e:SetLabel(TYPE_SPELL)
 		Duel.SetOperationInfo(0,CATEGORY_DISABLE,tg,1,0,0)
 	elseif top:IsType(TYPE_TRAP) then
 		local tg=Duel.GetMatchingGroup(Card.IsAbleToRemove,tp,0,LOCATION_HAND,nil)
+		e:SetLabel(TYPE_TRAP)
 		Duel.SetOperationInfo(0,CATEGORY_REMOVE,tg,1,0,0)
 	end
 end
 function s.operation2(e,tp,eg,ep,ev,re,r,rp)
-	local g=Duel.GetFieldGroup(tp,0,LOCATION_GRAVE)
-	if g:GetCount()==0 then return false end
-	local top=g:GetFirst()
-	local tc=g:GetNext()
-	while tc do
-		if tc:GetSequence()>top:GetSequence() then top=tc end
-		tc=g:GetNext()
-	end
-  
 	local c=e:GetHandler()
-	if top:IsType(TYPE_MONSTER) then
+	local opt=e:GetLabel()
+	if opt==TYPE_MONSTER then
 		local tc=Duel.GetFirstTarget()
-		if tc and tc:IsRelateToEffect(e) then 
+		if tc:IsRelateToEffect(e) then 
 			Duel.Destroy(tc,REASON_EFFECT)
 		end
-	elseif top:IsType(TYPE_SPELL) then
+	elseif opt==TYPE_SPELL then
 		local g=Duel.SelectMatchingCard(tp,Card.IsNegatableMonster,tp,0,LOCATION_MZONE,1,1,nil)
-		if g:GetCount()>0 then
+		if #g>0 then
 			local tc=g:GetFirst()
 			local e1=Effect.CreateEffect(c)
 			e1:SetType(EFFECT_TYPE_SINGLE)
@@ -81,9 +76,9 @@ function s.operation2(e,tp,eg,ep,ev,re,r,rp)
 			e2:SetReset(RESET_EVENT+RESETS_STANDARD+RESET_PHASE+PHASE_END)
 			tc:RegisterEffect(e2)
 		end
-	elseif top:IsType(TYPE_TRAP) then
+	elseif opt==TYPE_TRAP then
 		local g=Duel.GetMatchingGroup(Card.IsAbleToRemove,tp,0,LOCATION_HAND,nil)
-		if g:GetCount()>0 then
+		if #g>0 then
 			local sc=g:RandomSelect(tp,1):GetFirst()
 			Duel.Remove(sc,POS_FACEUP,REASON_EFFECT)
 
