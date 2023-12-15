@@ -45,14 +45,11 @@ function s.operation3(e,tp,eg,ep,ev,re,r,rp)
     end
     --Hand
     local g2=Duel.GetFieldGroup(tp,0,LOCATION_HAND)
-    local max=math.min(#g2, Duel.GetMatchingGroupCount(aux.FaceupFilter(Card.IsSetCard,0xb08),tp,LOCATION_MZONE,0,nil))
-    if max>0 and Duel.SelectYesNo(tp,aux.Stringid(id,2)) then
-        local ct=max
-        if max>1 then
-            ct=Duel.AnnounceNumber(tp,1,max)
-        end
+    local ct=math.min(#g2, Duel.GetMatchingGroupCount(aux.FaceupFilter(Card.IsSetCard,0xb08),tp,LOCATION_MZONE,0,nil))
+    if ct>0 then
         g2=g2:RandomSelect(tp,ct)
-	    Duel.ConfirmCards(tp,g2)
+        Duel.ConfirmCards(tp,g2)
+        Duel.ShuffleHand(1-tp)
     end
 end
 
