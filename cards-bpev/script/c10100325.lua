@@ -98,16 +98,22 @@ function s.cost3(e,tp,eg,ep,ev,re,r,rp,chk)
 	Duel.Release(e:GetHandler(),REASON_COST)
 end
 function s.target3(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
-    Debug.Message(Duel.IsExistingTarget(s.filter3,tp,LOCATION_GRAVE,0,1,nil,e,tp) and e:GetHandler():GetOverlayCount()>0)
     if chkc then return false end
     if chk==0 then return Duel.IsExistingTarget(s.filter3,tp,LOCATION_GRAVE,0,1,nil,e,tp) and e:GetHandler():GetOverlayCount()>0 end
     Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
-    local ct=Duel.GetChainInfo(0,CHAININFO_TARGET_PARAM)
+    local ct=math.min(Duel.GetChainInfo(0,CHAININFO_TARGET_PARAM),Duel.GetLocationCount(tp,LOCATION_MZONE))
     local g=Duel.SelectTarget(tp,s.filter3,tp,LOCATION_GRAVE,0,1,ct,nil,e,tp)
     Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,g,#g,0,0)
 end
 function s.operation3(e,tp,eg,ep,ev,re,r,rp,chk)
+    local ft=Duel.GetLocationCount(tp,LOCATION_MZONE)
+    if Duel.IsPlayerAffectedByEffect(tp,CARD_BLUEEYES_SPIRIT) then ft=1 end
     local g=Duel.GetTargetCards(e)
+    if g:GetCount()==0 then return end
+    if g:GetCount()>ft then
+      Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
+      g=g:Select(tp,ft,ft,nil)
+    end
     if #g>0 then
         Duel.SpecialSummon(g,0,tp,tp,false,false,POS_FACEUP)
     end
