@@ -27,7 +27,7 @@ function s.initial_effect(c)
 end
 function s.condition2(e)
     local ec=e:GetHandler():GetEquipTarget()
-    return bcot.kanohi_con(e,{0xb0c}) and ec:IsControler(e:GetOwnerPlayer())
+    return bcot.kanohi_con(e,{0x3b02}) and ec:IsControler(e:GetOwnerPlayer())
 end
 function s.operation4(e,tp,eg,ep,ev,re,r,rp)
     local g=Duel.GetMatchingGroup(aux.NOT(Card.IsPublic),tp,0,LOCATION_HAND,nil)

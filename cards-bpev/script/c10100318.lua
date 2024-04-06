@@ -30,7 +30,7 @@ function s.initial_effect(c)
   c:RegisterEffect(e3)
 end
 function s.filter2(c,tp)
-	return c:IsFaceup() and c:IsSetCard(0xb0c) and c:IsType(TYPE_FUSION) and c:IsControler(tp)
+	return c:IsFaceup() and c:IsSetCard(0x3b02) and c:IsControler(tp)
 end
 function s.condition2(e)
 	local tp=e:GetHandlerPlayer()

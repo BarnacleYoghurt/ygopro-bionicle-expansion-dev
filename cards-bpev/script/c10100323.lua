@@ -33,7 +33,7 @@ function s.initial_effect(c)
   c:RegisterEffect(e3)
 end
 function s.filter2a(c,tp)
-  return c:IsPreviousPosition(POS_FACEUP) and c:IsSetCard(0xb0c) and c:IsType(TYPE_FUSION) and c:IsPreviousControler(tp) and c:IsReason(REASON_EFFECT)
+  return c:IsPreviousPosition(POS_FACEUP) and c:IsSetCard(0x3b02) and c:IsPreviousControler(tp) and c:IsReason(REASON_EFFECT)
 end
 function s.filter2b(c,e,tp)
   return c:IsLevelBelow(8) and c:IsCanBeSpecialSummoned(e,0,tp,false,false)

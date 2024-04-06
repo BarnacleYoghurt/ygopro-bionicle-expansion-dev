@@ -15,7 +15,7 @@ function s.initial_effect(c)
 	local e2=Effect.CreateEffect(c)
 	e2:SetType(EFFECT_TYPE_EQUIP)
 	e2:SetCode(EFFECT_IMMUNE_EFFECT)
-  e2:SetCondition(function(e) return bcot.kanohi_con(e,{0xb0c}) end)
+  e2:SetCondition(function(e) return bcot.kanohi_con(e,{0x3b02}) end)
 	e2:SetValue(s.value2)
 	c:RegisterEffect(e2)
   --Place Nuva Symbol & protect field

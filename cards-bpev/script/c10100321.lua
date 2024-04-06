@@ -33,7 +33,7 @@ function s.initial_effect(c)
     c:RegisterEffect(e3)
 end
 function s.filter2a(c)
-    return c:IsFaceup() and c:IsSetCard(0xb0c) and c:IsType(TYPE_FUSION)
+    return c:IsFaceup() and c:IsSetCard(0x3b02)
 end
 function s.filter2b(c,e,tp)
     return c:IsLevelBelow(4) and c:IsCanBeSpecialSummoned(e,0,tp,false,false)

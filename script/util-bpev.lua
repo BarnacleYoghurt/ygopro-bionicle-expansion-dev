@@ -60,7 +60,7 @@ function BPEV.kanohi_nuva_search(baseC,aoeop,id,searchfilter,searchop,hintmsg)
     return c:IsType(TYPE_MONSTER) and c:IsAbleToRemoveAsCost()
   end
   local function filterB(c)
-    return c:IsSetCard(0xb0c) and c:IsType(TYPE_FUSION)
+    return c:IsFaceup() and c:IsSetCard(0x3b02)
   end
   local function cost(e,tp,eg,ep,ev,re,r,rp,chk)
     if chk==0 then 
@@ -156,7 +156,7 @@ function BPEV.nuva_symbol_search(baseC,targetCode,qStr)
 end
 function BPEV.nuva_symbol_punish(baseC,punish,punishtg)
   local function filter(c)
-    return c:IsFaceup() and c:IsSetCard(0xb0c) and c:IsType(TYPE_FUSION)
+    return c:IsFaceup() and c:IsSetCard(0x3b02)
   end
   local function condition(e,tp,eg,ep,ev,re,r,rp)
     return e:GetHandler():IsFaceup() and not e:GetHandler():IsLocation(LOCATION_DECK)

@@ -32,7 +32,7 @@ function s.condition2(e,tp,eg,ep,ev,re,r,rp)
   if ev<=1 then return false end
   local pc=Duel.GetChainInfo(ev-1,CHAININFO_TRIGGERING_EFFECT):GetHandler()
   local pp=Duel.GetChainInfo(ev-1,CHAININFO_TRIGGERING_CONTROLER)
-	return ep==1-tp and pp==tp and pc:IsSetCard(0xb0c) and pc:IsType(TYPE_FUSION) and Duel.IsChainDisablable(ev)
+	return ep==1-tp and pp==tp and pc:IsSetCard(0x3b02) and Duel.IsChainDisablable(ev)
 end
 function s.operation2(e,tp,eg,ep,ev,re,r,rp)
 	if Duel.SelectEffectYesNo(tp,e:GetHandler()) then

@@ -25,7 +25,7 @@ function s.initial_effect(c) aux.AddEquipProcedure(c)
   c:RegisterEffect(e3)
 end
 function s.condition2(e,tp,eg,ep,ev,re,r,rp)
-	if not (bcot.kanohi_con(e,{0xb0c}) and re:IsHasProperty(EFFECT_FLAG_CARD_TARGET)) then return false end
+	if not (bcot.kanohi_con(e,{0x3b02}) and re:IsHasProperty(EFFECT_FLAG_CARD_TARGET)) then return false end
 	local g=Duel.GetChainInfo(ev,CHAININFO_TARGET_CARDS)
 	return g and g:IsContains(e:GetHandler():GetEquipTarget()) and ep~=tp
 end

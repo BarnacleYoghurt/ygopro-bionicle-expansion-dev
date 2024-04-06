@@ -35,7 +35,7 @@ function s.initial_effect(c)
 end
 function s.condition2(e,tp,eg,ep,ev,re,r,rp)
   local cont,loc=Duel.GetChainInfo(0,CHAININFO_TRIGGERING_CONTROLER,CHAININFO_TRIGGERING_LOCATION) --Works because condition is checked instantly at triggering EVENT_CHAINING
-  return re:IsActiveType(TYPE_FUSION) and re:GetHandler():IsSetCard(0xb0c) and cont==tp and loc==LOCATION_MZONE
+  return re:IsActiveType(TYPE_MONSTER) and re:GetHandler():IsSetCard(0x3b02) and cont==tp and loc==LOCATION_MZONE
 end
 function s.cost2(e,tp,eg,ep,ev,re,r,rp,chk)
   if chk==0 then return Duel.CheckLPCost(tp,1000) end

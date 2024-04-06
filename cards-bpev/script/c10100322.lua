@@ -33,7 +33,7 @@ function s.initial_effect(c)
     c:RegisterEffect(e3)
 end
 function s.filter2(c,tp)
-    return c:IsPreviousSetCard(0xb0c) and c:IsType(TYPE_FUSION) and c:IsPreviousPosition(POS_FACEUP) and c:IsPreviousControler(tp)
+    return c:IsPreviousSetCard(0x3b02) and c:IsPreviousPosition(POS_FACEUP) and c:IsPreviousControler(tp)
        and c:GetReasonPlayer()==1-tp
 end
 function s.condition2(e,tp,eg,ep,ev,re,r,rp)

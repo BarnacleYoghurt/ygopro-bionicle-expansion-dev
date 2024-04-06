@@ -2,7 +2,7 @@
 local s,id=GetID()
 function s.initial_effect(c)
     --Fusion Summon
-    local e1=Fusion.CreateSummonEff{handler=c,fusfilter=aux.FilterBoolFunction(Card.IsSetCard,0xb0c),matfilter=Fusion.InHandMat(Card.IsAbleToDeck),
+    local e1=Fusion.CreateSummonEff{handler=c,fusfilter=aux.FilterBoolFunction(Card.IsSetCard,0x3b02),matfilter=Fusion.InHandMat(Card.IsAbleToDeck),
                                     extrafil=s.extrafil,extraop=s.extraop,extratg=s.extratg}
     e1:SetCountLimit(1,id)
     c:RegisterEffect(e1)
