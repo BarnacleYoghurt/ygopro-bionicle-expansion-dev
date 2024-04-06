@@ -46,7 +46,7 @@ function s.initial_effect(c)
 	e3b:SetValue(aux.tgoval)
 	c:RegisterEffect(e3b)
 end
-s.material_setcode={0xb02,0xb0b,0xb0c}
+s.material_setcode={0xb02,0xb0b}
 function s.condition2(e,tp,eg,ep,ev,re,r,rp)
 	return Duel.GetFieldGroupCount(tp,LOCATION_MZONE,0)<=1 and Duel.IsMainPhase()
 end

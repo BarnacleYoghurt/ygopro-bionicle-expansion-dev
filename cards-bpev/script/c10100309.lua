@@ -23,7 +23,7 @@ function s.initial_effect(c)
 	e2:SetCountLimit(1,id)
 	c:RegisterEffect(e2)
 end
-s.material_setcode={0xb02,0xb0b,0xb0c}
+s.material_setcode={0xb02,0xb0b}
 function s.target2(e,tp,eg,ep,ev,re,r,rp,chk)
   if chk==0 then return Duel.IsExistingMatchingCard(Card.IsType,tp,0,LOCATION_ONFIELD,1,nil,TYPE_SPELL+TYPE_TRAP) end
   Duel.SetOperationInfo(0,CATEGORY_DESTROY,nil,1,0,0)
