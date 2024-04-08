@@ -128,7 +128,8 @@ function BPEV.nuva_symbol_search(baseC,targetCode,qStr)
   end
   local function operation(e,tp,eg,ep,ev,re,r,rp)
     local addFilter=filterA
-    if Duel.IsExistingMatchingCard(filterB,tp,LOCATION_HAND,0,1,nil,tp) then
+    if Duel.IsExistingMatchingCard(filterB,tp,LOCATION_HAND,0,1,nil,tp)
+    and Duel.IsExistingMatchingCard(filterC,tp,LOCATION_DECK,0,1,nil) then
       if (not Duel.IsExistingMatchingCard(filterA,tp,LOCATION_DECK,0,1,nil)) or Duel.SelectYesNo(tp,qStr) then
         Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_CONFIRM)
         local rg=Duel.SelectMatchingCard(tp,filterB,tp,LOCATION_HAND,0,1,1,nil,tp)
