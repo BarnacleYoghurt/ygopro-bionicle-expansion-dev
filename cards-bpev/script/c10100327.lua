@@ -37,47 +37,59 @@ function s.initial_effect(c)
     e5:SetCondition(s.condition)
     e5:SetValue(1)
     c:RegisterEffect(e5)
-    --Xyz
+    --Change Level and name
     local e6=Effect.CreateEffect(c)
     e6:SetDescription(aux.Stringid(id,0))
-    e6:SetCategory(CATEGORY_SPECIAL_SUMMON)
+    e6:SetCategory(CATEGORY_DESTROY)
 	e6:SetType(EFFECT_TYPE_IGNITION)
+    e6:SetProperty(EFFECT_FLAG_CARD_TARGET)
 	e6:SetRange(LOCATION_SZONE)
-	e6:SetCondition(s.condition6)
 	e6:SetTarget(s.target6)
 	e6:SetOperation(s.operation6)
-    e6:SetCountLimit(1)
     c:RegisterEffect(e6)
 end
 function s.condition(e)
     return bcot.kanohi_con(e,{0x3b02}) and e:GetHandler():GetEquipTarget():IsType(TYPE_XYZ)
 end
-function s.condition6(e,tp,eg,ep,ev,re,r,rp)
-    return bcot.kanohi_con(e,{0x3b02}) and e:GetHandler():GetEquipTarget():IsType(TYPE_FUSION)
+function s.filter6a(c,tp)
+    return c:IsSetCard(0xb02) and c:HasLevel()
+        and Duel.IsExistingTarget(s.filter6b,tp,LOCATION_MZONE,0,1,nil,c:GetLevel(),c:GetCode())
 end
-function s.filter6a(c,e,tp)
-    return c:IsSetCard(0x3b02) and c:IsType(TYPE_FUSION) and Duel.GetLocationCountFromEx(tp,tp,nil,c)>0 and c:IsCanBeSpecialSummoned(e,0,tp,tp,false,false)
+function s.filter6b(c,lv,code)
+    return c:IsFaceup() and c:HasLevel() and not (c:IsLevel(lv) and c:IsCode(code))
 end
-function s.filter6b(c,tp,sg)
-    local g=Duel.GetFieldGroup(tp,LOCATION_MZONE,0)
-    return c:IsSetCard(0xb02) and c:IsXyzSummonable(sg:GetFirst(),Group.Merge(g,sg)) and Duel.GetLocationCountFromEx(tp,tp,Group.Merge(g,sg),c)>0
-end
-function s.filter6c(c,e,tp,lv)
-    return s.filter6a(c,e,tp) and Duel.IsExistingMatchingCard(s.filter6b,tp,LOCATION_EXTRA,0,1,nil,tp,Group.FromCards(c))
-end
-function s.target6(e,tp,eg,ep,ev,re,r,rp,chk)
-    if chk==0 then return Duel.IsExistingMatchingCard(s.filter6c,tp,LOCATION_EXTRA,0,1,nil,e,tp) and Duel.GetLocationCount(tp,LOCATION_MZONE)>0 end
-    Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,1,tp,LOCATION_EXTRA)
+function s.target6(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
+    if chkc then return s.filter6b(chkc,e:GetLabel()) and chkc:IsLocation(LOCATION_MZONE) and chkc:IsControler(tp) end
+    if chk==0 then return Duel.IsExistingMatchingCard(s.filter6a,tp,LOCATION_DECK+LOCATION_EXTRA,0,1,nil,tp) end
+    Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_CONFIRM)
+    local rc=Duel.SelectMatchingCard(tp,s.filter6a,tp,LOCATION_DECK+LOCATION_EXTRA,0,1,1,nil,tp):GetFirst()
+	Duel.ConfirmCards(1-tp,rc)
+    e:SetLabel(rc:GetLevel(),rc:GetCode())
+    if rc:IsLocation(LOCATION_DECK) then
+        Duel.ShuffleDeck(tp)
+    end
+
+    Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TARGET)
+    Duel.SelectTarget(tp,s.filter6b,tp,LOCATION_MZONE,0,1,1,nil,e:GetLabel())
+    Duel.SetOperationInfo(0,CATEGORY_DESTROY,e:GetHandler(),1,0,0)
 end
 function s.operation6(e,tp,eg,ep,ev,re,r,rp)
-    Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
-    local g=Duel.SelectMatchingCard(tp,s.filter6a,tp,LOCATION_EXTRA,0,1,1,nil,e,tp)
-    if #g>0 and Duel.SpecialSummon(g,0,tp,tp,false,false,POS_FACEUP)>0 then
-        Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
-        local xyzg=Duel.SelectMatchingCard(tp,s.filter6b,tp,LOCATION_EXTRA,0,1,1,nil,tp,g)
-        if xyzg:GetCount()>0 then
-            Duel.BreakEffect()
-            Duel.XyzSummon(tp,xyzg:GetFirst(),g:GetFirst())
-        end
+    local c=e:GetHandler()
+    local tc=Duel.GetFirstTarget()
+    local lv,code=e:GetLabel()
+    if tc:IsRelateToEffect(e) then
+        local e1=Effect.CreateEffect(c)
+        e1:SetType(EFFECT_TYPE_SINGLE)
+        e1:SetCode(EFFECT_CHANGE_LEVEL)
+        e1:SetProperty(EFFECT_FLAG_CANNOT_DISABLE)
+        e1:SetValue(lv)
+        e1:SetReset(RESET_EVENT+RESETS_STANDARD+RESET_PHASE+PHASE_END)
+        tc:RegisterEffect(e1)
+        local e2=e1:Clone()
+        e2:SetCode(EFFECT_CHANGE_CODE)
+        e2:SetValue(code)
+        tc:RegisterEffect(e2)
+		Duel.BreakEffect()
+		Duel.Destroy(c,REASON_EFFECT)
     end
 end
