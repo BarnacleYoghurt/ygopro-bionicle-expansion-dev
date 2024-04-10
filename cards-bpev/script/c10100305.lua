@@ -47,7 +47,7 @@ function s.operation1(e,tp,eg,ep,ev,re,r,rp)
 	end
 end
 function s.filter2(c,tp)
-    return c:IsSetCard(0xb0c) and c:IsSpellTrap() and c:IsControler(tp) and c:IsPreviousLocation(LOCATION_HAND) and c:IsSSetable()
+    return c:IsSetCard(0xb0c) and c:IsSpellTrap() and c:IsControler(tp) and c:IsPreviousLocation(LOCATION_HAND+LOCATION_DECK) and c:IsSSetable()
 end
 function s.target2(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
     local pg=eg:Filter(s.filter2,nil,tp)
