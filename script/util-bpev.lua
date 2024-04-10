@@ -36,6 +36,33 @@ function BPEV.toa_nuva_search(baseC)
   e:SetOperation(operation)
   return e
 end
+function BPEV.toa_nuva_kaita_search(baseC)
+  local function filter(c)
+    return c:IsSetCard(0xb0c) and c:IsType(TYPE_SPELL+TYPE_TRAP) and c:IsAbleToHand()
+  end
+  local function target(e,tp,eg,ep,ev,re,r,rp,chk)
+    if chk==0 then return Duel.IsExistingMatchingCard(filter,tp,LOCATION_DECK+LOCATION_GRAVE,0,1,nil) end
+    Duel.SetOperationInfo(0,CATEGORY_TOHAND,nil,1,tp,LOCATION_DECK+LOCATION_GRAVE)
+  end
+  local function operation(e,tp,eg,ep,ev,re,r,rp)
+    Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_ATOHAND)
+    local g=Duel.SelectMatchingCard(tp,aux.NecroValleyFilter(filter),tp,LOCATION_DECK+LOCATION_GRAVE,0,1,1,nil)
+    if #g>0 then
+        Duel.SendtoHand(g,nil,REASON_EFFECT)
+        Duel.ConfirmCards(1-tp,g)
+    end
+  end
+  
+  local e=Effect.CreateEffect(baseC)
+  e:SetCategory(CATEGORY_SEARCH+CATEGORY_TOHAND)
+  e:SetType(EFFECT_TYPE_IGNITION)
+  e:SetProperty(EFFECT_FLAG_DELAY)
+  e:SetRange(LOCATION_MZONE)
+  e:SetCost(aux.dxmcostgen(1,1))
+  e:SetTarget(target)
+  e:SetOperation(operation)
+  return e
+end
 --Kanohi Nuva
 function BPEV.kanohi_nuva_search_spell(baseC,aoeop,id)
   return bpev.kanohi_nuva_search(baseC,aoeop,id,

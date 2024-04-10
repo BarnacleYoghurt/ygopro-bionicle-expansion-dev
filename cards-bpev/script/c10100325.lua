@@ -1,3 +1,6 @@
+if not bpev then
+	Duel.LoadScript("util-bpev.lua")
+end
 --Akamai, Toa Nuva Kaita of Valor
 local s,id=GetID()
 function s.initial_effect(c)
@@ -29,18 +32,10 @@ function s.initial_effect(c)
     e2:SetTarget(s.target2)
     e2:SetOperation(s.operation2)
     c:RegisterEffect(e2)
-    --Special Summon
-    local e3=Effect.CreateEffect(c)
+    --Search
+    local e3=bpev.toa_nuva_kaita_search(c)
     e3:SetDescription(aux.Stringid(id,1))
-    e3:SetCategory(CATEGORY_SPECIAL_SUMMON)
-    e3:SetType(EFFECT_TYPE_QUICK_O)
-    e3:SetProperty(EFFECT_FLAG_CARD_TARGET)
-    e3:SetRange(LOCATION_MZONE)
-    e3:SetCode(EVENT_FREE_CHAIN)
-    e3:SetCondition(function(e,tp,eg,ep,ev,re,r,rp) return Duel.IsMainPhase() end)
-    e3:SetCost(s.cost3)
-    e3:SetTarget(s.target3)
-    e3:SetOperation(s.operation3)
+    e3:SetCountLimit(1,id)
     c:RegisterEffect(e3)
 end
 function s.filter0(c)
@@ -84,33 +79,4 @@ function s.operation2(e,tp,eg,ep,ev,re,r,rp)
 	if tc:IsRelateToEffect(e) then
 		Duel.Destroy(tc,REASON_EFFECT)
 	end
-end
-function s.filter3(c,e,tp)
-    return c:IsLevel(8) and c:IsSetCard(0xb02) and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
-end
-function s.cost3(e,tp,eg,ep,ev,re,r,rp,chk)
-    if chk==0 then return e:GetHandler():IsReleasable() end
-	Duel.SetTargetParam(e:GetHandler():GetOverlayCount())
-	Duel.Release(e:GetHandler(),REASON_COST)
-end
-function s.target3(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
-    if chkc then return false end
-    if chk==0 then return Duel.IsExistingTarget(s.filter3,tp,LOCATION_GRAVE,0,1,nil,e,tp) and e:GetHandler():GetOverlayCount()>0 end
-    Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
-    local ct=math.min(Duel.GetChainInfo(0,CHAININFO_TARGET_PARAM),Duel.GetLocationCount(tp,LOCATION_MZONE))
-    local g=Duel.SelectTarget(tp,s.filter3,tp,LOCATION_GRAVE,0,1,ct,nil,e,tp)
-    Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,g,#g,0,0)
-end
-function s.operation3(e,tp,eg,ep,ev,re,r,rp,chk)
-    local ft=Duel.GetLocationCount(tp,LOCATION_MZONE)
-    if Duel.IsPlayerAffectedByEffect(tp,CARD_BLUEEYES_SPIRIT) then ft=1 end
-    local g=Duel.GetTargetCards(e)
-    if g:GetCount()==0 then return end
-    if g:GetCount()>ft then
-      Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
-      g=g:Select(tp,ft,ft,nil)
-    end
-    if #g>0 then
-        Duel.SpecialSummon(g,0,tp,tp,false,false,POS_FACEUP)
-    end
 end
