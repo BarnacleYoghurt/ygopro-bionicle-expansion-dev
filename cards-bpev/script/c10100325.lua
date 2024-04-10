@@ -5,7 +5,6 @@ end
 local s,id=GetID()
 function s.initial_effect(c)
     c:EnableReviveLimit()
-    c:SetSPSummonOnce(id)
     --Xyz Material
     Xyz.AddProcedure(c,nil,8,3)
     --Cannot activate
