@@ -64,7 +64,7 @@ function s.operation2(e,tp,eg,ep,ev,re,r,rp)
     end
 end
 function s.filter3a(c)
-    return c:IsSetCard(0x3b02) and c:IsMonster() and c:IsAbleToExtra()
+    return c:IsSetCard(0x3b02) and c:IsMonster() and c:IsAbleToDeck()
 end
 function s.filter3b(c,e,tp,code)
     return c:IsSetCard(0x3b02) and c:IsType(TYPE_FUSION) and not c:IsCode(code)
