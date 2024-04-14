@@ -14,7 +14,7 @@ function s.initial_effect(c)
 end
 function s.filter1a(c,e,tp)
 	local pg=aux.GetMustBeMaterialGroup(tp,Group.FromCards(c),tp,nil,nil,REASON_XYZ)
-    if not (#pg<=1 and c:IsFaceup() and c:IsSetCard(0xb02)) then return end
+    if not (#pg<=1 and c:IsFaceup() and c:IsRace(RACE_WARRIOR) and c:IsOriginalSetCard(0xb02)) then return end
     if c:GetRank()>0 or c:IsStatus(STATUS_NO_LEVEL) then
         return Duel.IsExistingMatchingCard(s.filter1b,tp,LOCATION_EXTRA,0,1,nil,e,tp,c,c:GetRank()+2,pg)
     end
@@ -40,7 +40,7 @@ end
 function s.operation1(e,tp,eg,ep,ev,re,r,rp)
     local tc=Duel.GetFirstTarget()
     local pg=aux.GetMustBeMaterialGroup(tp,Group.FromCards(tc),tp,nil,nil,REASON_XYZ)
-    if not tc or tc:IsFacedown() or not tc:IsRelateToEffect(e) or tc:IsControler(1-tp) or tc:IsImmuneToEffect(e) or #pg>1 or (#pg==1 and not pg:IsContains(tc)) then return end
+    if not tc or tc:IsFacedown() or not tc:IsRelateToEffect(e) or tc:IsControler(1-tp) or not tc:IsRace(RACE_WARRIOR) or tc:IsImmuneToEffect(e) or #pg>1 or (#pg==1 and not pg:IsContains(tc)) then return end
     Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
     local g
     if tc:GetRank()>0 or tc:IsStatus(STATUS_NO_LEVEL) then

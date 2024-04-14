@@ -38,7 +38,7 @@ function s.initial_effect(c)
     c:RegisterEffect(e3)
 end
 function s.filter0(c)
-    return c:IsLevel(8) and c:IsSetCard(0xb02)
+    return c:IsSetCard(0xb02) and c:IsType(TYPE_MONSTER)
 end
 function s.value0(e,c)
     local g=c:GetMaterial()
