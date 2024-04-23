@@ -39,37 +39,27 @@ end
 function s.contactsumcon(e,se,sp,st)
 	return (st&SUMMON_TYPE_FUSION)==SUMMON_TYPE_FUSION
 end
-function s.filter1(c)
+function s.filter1a(c)
 	return c:IsSetCard(0xb08) and c:IsAbleToRemoveAsCost()
 end
+function s.filter1b(c)
+	return (c:IsLocation(LOCATION_MZONE) or c:IsMonster()) and not c:IsForbidden()
+end
 function s.cost1(e,tp,eg,ep,ev,re,r,rp,chk)
-	e:SetLabel(0)
-	--Must banish at least 2 if no targets available in opponent's GY
-	local min=Duel.IsExistingTarget(Card.IsType,1-tp,LOCATION_GRAVE,0,1,nil,TYPE_MONSTER) and 1 or 2
-	if chk==0 then return Duel.IsExistingMatchingCard(s.filter1,tp,LOCATION_GRAVE,0,min,nil) end
+	if chk==0 then return Duel.IsExistingMatchingCard(s.filter1a,tp,LOCATION_GRAVE,0,1,nil) end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_REMOVE)
-	local g=Duel.SelectMatchingCard(tp,s.filter1,tp,LOCATION_GRAVE,0,min,3,nil)
-	local ct=Duel.Remove(g,POS_FACEUP,REASON_COST)
-	e:SetLabel(ct)
+	local g=Duel.SelectMatchingCard(tp,s.filter1a,tp,LOCATION_GRAVE,0,1,1,nil)
+	Duel.Remove(g,POS_FACEUP,REASON_COST)
 end
 function s.target1(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
-	local range
-	if e:GetLabel()>=2 then
-		range=LOCATION_GRAVE+LOCATION_MZONE
-	else
-		range=LOCATION_GRAVE
-	end
-	if chkc then return chkc:IsLocation(range) and chkc:IsControler(1-tp) end
+	if chkc then return s.filter1b(chkc) and chkc:IsLocation(LOCATION_GRAVE+LOCATION_MZONE) and chkc:IsControler(1-tp) end
 	if chk==0 then
-		--Label not set here, so allow either location and let cost handle the case of having no targets in GY
-		return Duel.IsExistingTarget(Card.IsType,1-tp,LOCATION_GRAVE+LOCATION_MZONE,0,1,nil,TYPE_MONSTER) and Duel.GetLocationCount(tp,LOCATION_SZONE)>0
+		return Duel.IsExistingTarget(s.filter1b,1-tp,LOCATION_GRAVE+LOCATION_MZONE,0,1,nil) and Duel.GetLocationCount(tp,LOCATION_SZONE)>0
 	end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_EQUIP)
-	local g=Duel.SelectTarget(tp,Card.IsType,1-tp,range,0,1,1,nil,TYPE_MONSTER)
+	local g=Duel.SelectTarget(tp,s.filter1b,1-tp,LOCATION_GRAVE+LOCATION_MZONE,0,1,1,nil)
 	Duel.SetOperationInfo(0,CATEGORY_EQUIP,g,1,0,0)
-	if e:GetLabel()>=3 then
-		Duel.SetChainLimit(function(e,ep,tp) return ep==tp end)
-	end
+	Duel.SetChainLimit(function(e,ep,tp) return ep==tp end)
 end
 function s.operation1(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
