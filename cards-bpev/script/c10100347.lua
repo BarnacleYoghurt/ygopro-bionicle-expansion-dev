@@ -50,10 +50,10 @@ function s.condition2(e,tp,eg,ep,ev,re,r,rp)
 end
 function s.target2(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
   local c=e:GetHandler()
-  if chkc then return e:GetLabel()~=1 and chkc:IsType(TYPE_SPELL+TYPE_TRAP) and chkc~=c end
+  if chkc then return e:GetLabel()~=2 and chkc:IsType(TYPE_SPELL+TYPE_TRAP) and chkc~=c end
   local b1=Duel.IsExistingTarget(Card.IsType,tp,LOCATION_ONFIELD,LOCATION_ONFIELD,1,c,TYPE_SPELL+TYPE_TRAP)
   local b2=Duel.IsExistingMatchingCard(s.filter2b,tp,LOCATION_DECK,0,1,nil)
-  local bkal=Duel.IsExistingMatchingCard(s.filter2c,tp,LOCATION_MZONE,0,1,nil)
+  local bkal=eg:IsExists(Card.IsSummonType,1,nil,SUMMON_TYPE_XYZ)
   if chk==0 then return b1 or b2 end
   local op=Duel.SelectEffect(tp,
     {b1,aux.Stringid(id,2)},
