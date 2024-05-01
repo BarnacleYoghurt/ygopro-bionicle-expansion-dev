@@ -32,7 +32,7 @@ function s.filter2(c)
 end
 function s.condition2(e,tp,eg,ep,ev,re,r,rp)
 	return Duel.GetFieldGroupCount(tp,0,LOCATION_MZONE)>0 and
-		Duel.GetCurrentPhase()~=PHASE_DAMAGE or not Duel.IsDamageCalculated()
+		(Duel.GetCurrentPhase()~=PHASE_DAMAGE or not Duel.IsDamageCalculated())
 end
 function s.target2(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
   if chkc then return s.filter2(chkc) and chkc:IsLocation(LOCATION_MZONE) end
