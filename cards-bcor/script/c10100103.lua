@@ -3,55 +3,47 @@ local s,id=GetID()
 function s.initial_effect(c)
 	--pendulum summon
 	Pendulum.AddProcedure(c)
-	--Indestructible
+	--Destroy
 	local e1=Effect.CreateEffect(c)
-	e1:SetType(EFFECT_TYPE_FIELD)
-	e1:SetCode(EFFECT_INDESTRUCTABLE_EFFECT)
-	e1:SetTargetRange(LOCATION_PZONE,0)
+	e1:SetDescription(aux.Stringid(id,0))
+	e1:SetCategory(CATEGORY_DESTROY)
 	e1:SetRange(LOCATION_PZONE)
+	e1:SetProperty(EFFECT_FLAG_DELAY+EFFECT_FLAG_CARD_TARGET)
+	e1:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O)
+	e1:SetCode(EVENT_SPSUMMON_SUCCESS)
 	e1:SetCondition(s.condition1)
-	e1:SetTarget(aux.TRUE)
-	e1:SetValue(s.value1)
+	e1:SetTarget(s.target1)
+	e1:SetOperation(s.operation1)
+	e1:SetCountLimit(1,id)
 	c:RegisterEffect(e1)
-	--To Hand
-	local e2=Effect.CreateEffect(c)
-	e2:SetDescription(aux.Stringid(id,0))
-	e2:SetCategory(CATEGORY_TOHAND+CATEGORY_DESTROY)
-	e2:SetType(EFFECT_TYPE_IGNITION)
-	e2:SetRange(LOCATION_PZONE)
-	e2:SetTarget(s.target2)
-	e2:SetOperation(s.operation2)
-	e2:SetCountLimit(1)
-	c:RegisterEffect(e2)
 end
-function s.value1(e,re,rp)
-	return rp~=e:GetHandlerPlayer()
+function s.filter1a(c,tp)
+	return c:IsFaceup() and c:IsRace(RACE_INSECT) and c:IsSetCard(0xb06) and c:IsControler(tp)
 end
-function s.condition1(e)
-	local g=Duel.GetFieldGroup(e:GetHandlerPlayer(),LOCATION_PZONE,0)
-	local tc=(g-e:GetHandler()):GetFirst()
-	return tc and tc:IsSetCard(0xb06) and tc:IsRace(RACE_INSECT) and tc:GetLevel()==5
+function s.filter1b(c,code)
+	return c:IsRace(RACE_INSECT) and c:IsSetCard(0xb06) and not c:IsCode(code) and c:IsAbleToHand()
 end
-function s.filter2a(c)
-	return c:IsType(TYPE_PENDULUM) and c:IsSetCard(0xb06) and c:IsFaceup() and c:IsAbleToHand()
+function s.condition1(e,tp,eg,ep,ev,re,r,rp)
+	return eg:IsExists(s.filter1a,1,nil,tp)
 end
-function s.target2(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.IsExistingMatchingCard(s.filter2a,tp,LOCATION_EXTRA,0,1,nil) and Duel.IsExistingMatchingCard(Card.IsDestructable,tp,LOCATION_SZONE,0,1,nil) end
-	local g1=Duel.GetMatchingGroup(s.filter2a,tp,LOCATION_EXTRA,0,nil)
-	local g2=Duel.GetMatchingGroup(Card.IsDestructable,tp,LOCATION_PZONE,0,nil)
-	Duel.SetOperationInfo(0,CATEGORY_TOHAND,g1,1,0,0)
-	Duel.SetOperationInfo(0,CATEGORY_DESTROY,g2,1,0,0)
+function s.target1(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
+	if chkc then return chkc:IsFaceup() and chkc:IsLocation(LOCATION_MZONE) end
+	if chk==0 then return Duel.IsExistingTarget(Card.IsFaceup,tp,LOCATION_MZONE,LOCATION_MZONE,1,nil) end
+	local g=Duel.SelectTarget(tp,Card.IsFaceup,tp,LOCATION_MZONE,LOCATION_MZONE,1,1,nil)
+	Duel.SetOperationInfo(0,CATEGORY_DESTROY,g,1,0,0)
+	Duel.SetPossibleOperationInfo(0,CATEGORY_TOHAND,nil,1,tp,LOCATION_DECK)
 end
-function s.operation2(e,tp,eg,ep,ev,re,r,rp)
-	if e:GetHandler():IsRelateToEffect(e) then
-		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_ATOHAND)
-		local g1=Duel.SelectMatchingCard(tp,s.filter2a,tp,LOCATION_EXTRA,0,1,1,nil)
-		if g1:GetCount()>0 and Duel.SendtoHand(g1,nil,REASON_EFFECT) then
-			Duel.ConfirmCards(1-tp,g1)
-			Duel.BreakEffect()
-			Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_DESTROY)
-			local g2=Duel.SelectMatchingCard(tp,Card.IsDestructable,tp,LOCATION_PZONE,0,1,1,nil)
-			Duel.Destroy(g2,REASON_EFFECT)
+function s.operation1(e,tp,eg,ep,ev,re,r,rp)
+	local tc=Duel.GetFirstTarget()
+	if tc:IsRelateToEffect(e) and Duel.Destroy(tc,REASON_EFFECT)>0 then
+		if tc:IsSetCard(0xb06) and tc:IsRace(RACE_INSECT) and Duel.IsExistingMatchingCard(s.filter1b,tp,LOCATION_DECK,0,1,nil,tc:GetCode())
+			and Duel.SelectYesNo(tp,aux.Stringid(id,1)) then
+			Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_ATOHAND)
+			local g=Duel.SelectMatchingCard(tp,s.filter1b,tp,LOCATION_DECK,0,1,1,nil,tc:GetCode())
+			if #g>0 then
+				Duel.SendtoHand(g,nil,REASON_EFFECT)
+				Duel.ConfirmCards(1-tp,g)
+			end
 		end
 	end
 end
