@@ -23,46 +23,60 @@ function s.initial_effect(c)
 	e2:SetCountLimit(1,id)
 	c:RegisterEffect(e2)
 end
-function s.filter1(c)
-	return c:IsFaceup() and c:IsSetCard(0xb06) and c:IsDestructable()
-end
 function s.target1(e,tp,eg,ep,ev,re,r,rp,chk)	
-	if chk==0 then return Duel.IsExistingMatchingCard(s.filter1,tp,LOCATION_ONFIELD,0,1,e:GetHandler()) and Duel.IsExistingMatchingCard(Card.IsDestructable,tp,0,LOCATION_ONFIELD,1,nil) end
-	local g=Duel.GetMatchingGroup(s.filter1,tp,LOCATION_ONFIELD,0,e:GetHandler())
-	g:Merge(Duel.GetMatchingGroup(Card.IsDestructable,tp,0,LOCATION_ONFIELD,nil))
-	Duel.SetOperationInfo(0,CATEGORY_DESTROY,g,2,0,0)
+	if chk==0 then
+		return Duel.IsExistingMatchingCard(aux.FaceupFilter(Card.IsSetCard,0xb06),tp,LOCATION_ONFIELD,0,1,e:GetHandler())
+			and Duel.IsExistingMatchingCard(Card.IsAbleToGrave,tp,0,LOCATION_ONFIELD,1,nil)
+	end
+	Duel.SetOperationInfo(0,CATEGORY_DESTROY,nil,1,tp,LOCATION_ONFIELD)
+	Duel.SetOperationInfo(0,CATEGORY_TOGRAVE,nil,1,1-tp,LOCATION_ONFIELD)
 end
 function s.operation1(e,tp,eg,ep,ev,re,r,rp)
-	local n=math.min(Duel.GetMatchingGroupCount(s.filter1,tp,LOCATION_ONFIELD,0,e:GetHandler()), Duel.GetMatchingGroupCount(Card.IsDestructable,tp,0,LOCATION_ONFIELD,nil))
+	local n=math.min(
+		Duel.GetMatchingGroupCount(aux.FaceupFilter(Card.IsSetCard,0xb06),tp,LOCATION_ONFIELD,0,e:GetHandler()),
+		Duel.GetMatchingGroupCount(Card.IsAbleToGrave,tp,0,LOCATION_ONFIELD,nil)
+	)
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_DESTROY)
-	local g1=Duel.SelectMatchingCard(tp,s.filter1,tp,LOCATION_ONFIELD,0,1,n,e:GetHandler())
-	if g1:GetCount()>0 and Duel.Destroy(g1,REASON_EFFECT) then
-		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_DESTROY)
-		local g2=Duel.SelectMatchingCard(tp,Card.IsDestructable,tp,0,LOCATION_ONFIELD,g1:GetCount(),g1:GetCount(),nil)
-		if g2:GetCount()>0 then
-			Duel.Destroy(g2,REASON_EFFECT)
+	local g1=Duel.SelectMatchingCard(tp,aux.FaceupFilter(Card.IsSetCard,0xb06),tp,LOCATION_ONFIELD,0,1,n,e:GetHandler())
+	local ct=Duel.Destroy(g1,REASON_EFFECT)
+	if ct>0 then
+		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TOGRAVE)
+		local g2=Duel.SelectMatchingCard(tp,Card.IsAbleToGrave,tp,0,LOCATION_ONFIELD,ct,ct,nil)
+		if #g2>0 then
+			Duel.HintSelection(g2,true)
+			Duel.SendtoGrave(g2,REASON_EFFECT)
 		end
 	end
 end
-function s.filter2(c)
-	return c:IsType(TYPE_MONSTER) and c:IsSetCard(0xb06) and c:IsAbleToRemoveAsCost()
+function s.filter2a(c)
+	return c:IsMonster() and c:IsSetCard(0xb06) and c:IsAbleToRemoveAsCost()
+end
+function s.filter2b(c)
+	return c:IsSetCard(0xb06) and c:IsType(TYPE_SYNCHRO)
 end
 function s.cost2(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return e:GetHandler():IsAbleToRemoveAsCost() and Duel.IsExistingMatchingCard(s.filter2,tp,LOCATION_GRAVE,0,1,nil) end
+	local c=e:GetHandler()
+	if chk==0 then return c:IsAbleToRemoveAsCost() and Duel.IsExistingMatchingCard(s.filter2a,tp,LOCATION_GRAVE,0,1,nil) end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_REMOVE)
-	local g=Duel.SelectMatchingCard(tp,s.filter2,tp,LOCATION_GRAVE,0,1,1,nil)
-	g:AddCard(e:GetHandler())	
+	local g=Duel.SelectMatchingCard(tp,s.filter2a,tp,LOCATION_GRAVE,0,1,1,nil)
+	g:AddCard(c)
 	Duel.Remove(g,POS_FACEUP,REASON_COST)
 end
-function s.target2(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.IsExistingTarget(Card.IsAbleToRemove,tp,LOCATION_ONFIELD,LOCATION_ONFIELD,1,nil) end
-	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_REMOVE)
-	local g=Duel.SelectTarget(tp,Card.IsAbleToRemove,tp,LOCATION_ONFIELD,LOCATION_ONFIELD,1,1,nil)
-	Duel.SetOperationInfo(0,CATEGORY_REMOVE,g,1,0,0)
+function s.target2(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
+	if chkc then return chkc:IsLocation(LOCATION_ONFIELD) end
+	if chk==0 then return Duel.IsExistingTarget(aux.TRUE,tp,LOCATION_ONFIELD,LOCATION_ONFIELD,1,nil) end
+	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_DESTROY)
+	local g=Duel.SelectTarget(tp,aux.TRUE,tp,LOCATION_ONFIELD,LOCATION_ONFIELD,1,1,nil)
+	Duel.SetOperationInfo(0,CATEGORY_DESTROY,g,1,0,0)
+	Duel.SetPossibleOperationInfo(0,CATEGORY_REMOVE,g,1,0,0)
 end
-function s.operation2(e,tp,eg,ep,ev,re,r,rp)	
+function s.operation2(e,tp,eg,ep,ev,re,r,rp)
 	local tc=Duel.GetFirstTarget()
-	if tc then	
-		Duel.Remove(tc,POS_FACEUP,REASON_EFFECT)
-	end	
+	if tc:IsRelateToEffect(e) then
+		if Duel.IsExistingMatchingCard(s.filter2b,tp,LOCATION_MZONE,0,1,nil) and Duel.SelectYesNo(tp,aux.Stringid(id,1)) then
+			Duel.Remove(tc,POS_FACEUP,REASON_EFFECT)
+		else
+			Duel.Destroy(tc,REASON_EFFECT)
+		end
+	end
 end
