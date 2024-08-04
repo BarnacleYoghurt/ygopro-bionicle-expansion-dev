@@ -4,57 +4,70 @@ function s.initial_effect(c)
 	--synchro summon
 	Synchro.AddProcedure(c,aux.FilterBoolFunction(Card.IsSetCard,0xb06),1,1,Synchro.NonTuner(nil),1,99)
 	c:EnableReviveLimit()
-	--Take control
+	--To hand or GY
 	local e1=Effect.CreateEffect(c)
 	e1:SetDescription(aux.Stringid(id,0))
-	e1:SetCategory(CATEGORY_CONTROL+CATEGORY_SPECIAL_SUMMON)
-	e1:SetType(EFFECT_TYPE_IGNITION)
-	e1:SetRange(LOCATION_MZONE)
+	e1:SetCategory(CATEGORY_SEARCH+CATEGORY_TOHAND+CATEGORY_TOGRAVE)
+	e1:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
+	e1:SetProperty(EFFECT_FLAG_DELAY)
+	e1:SetCode(EVENT_SPSUMMON_SUCCESS)
 	e1:SetTarget(s.target1)
 	e1:SetOperation(s.operation1)
-	e1:SetCountLimit(1)
+	e1:SetCountLimit(1,id)
 	c:RegisterEffect(e1)
+	--Special Summon
+	local e2=Effect.CreateEffect(c)
+	e2:SetDescription(aux.Stringid(id,1))
+	e2:SetCategory(CATEGORY_SPECIAL_SUMMON)
+	e2:SetType(EFFECT_TYPE_QUICK_O)
+	e2:SetRange(LOCATION_MZONE)
+	e2:SetCode(EVENT_FREE_CHAIN)
+	e2:SetCondition(function () return Duel.IsMainPhase() end)
+	e2:SetCost(s.cost2)
+	e2:SetTarget(s.target2)
+	e2:SetOperation(s.operation2)
+	e2:SetCountLimit(1,{id,1})
+	c:RegisterEffect(e2)
 end
 function s.filter1(c)
-	return c:IsType(TYPE_MONSTER) and c:IsSetCard(0xb06)
+	return c:IsSetCard(0xb06) and c:IsSpellTrap() and (c:IsAbleToHand() or c:IsAbleToGrave())
 end
 function s.target1(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.IsExistingTarget(Card.IsFaceup,tp,0,LOCATION_MZONE,1,nil) and Duel.IsExistingMatchingCard(s.filter1,tp,LOCATION_DECK,0,1,nil) end
-	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TARGET)
-	local g1=Duel.SelectTarget(tp,Card.IsFaceup,tp,0,LOCATION_MZONE,1,1,nil)
-	local g2=Duel.GetMatchingGroup(s.filter1,tp,LOCATION_DECK,0,nil)
-	Duel.SetOperationInfo(0,CATEGORY_CONTROL,g1,1,0,0)
-	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,g2,1,tp,LOCATION_DECK)
+	if chk==0 then return Duel.IsExistingMatchingCard(s.filter1,tp,LOCATION_DECK,0,1,nil) end
+	Duel.SetPossibleOperationInfo(0,CATEGORY_TOHAND,nil,1,tp,LOCATION_DECK)
+	Duel.SetPossibleOperationInfo(0,CATEGORY_TOGRAVE,nil,1,tp,LOCATION_DECK)
 end
 function s.operation1(e,tp,eg,ep,ev,re,r,rp)
-	local cc=Duel.GetFirstTarget()
-	local g=Duel.GetMatchingGroup(s.filter1,tp,LOCATION_DECK,0,nil)
-	local dcount=Duel.GetFieldGroupCount(tp,LOCATION_DECK,0)
-	local seq=-1
-	local tc=g:GetFirst()
-	local spcard=nil
-	while tc do
-		if tc:GetSequence()>seq then 
-			seq=tc:GetSequence()
-			spcard=tc	
+	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_ATOHAND)
+	local g=Duel.SelectMatchingCard(tp,s.filter1,tp,LOCATION_DECK,0,1,1,nil)
+	aux.ToHandOrElse(g,tp)
+end
+function s.filter2a(c,ft,tp)
+	return ft>0 or (c:IsControler(tp) and c:GetSequence()<5)
+end
+function s.filter2b(c,e,tp)
+	return c:IsSetCard(0xb06) and c:IsLevelBelow(2) and c:IsType(TYPE_TUNER) and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
+end
+function s.cost2(e,tp,eg,ep,ev,re,r,rp,chk)
+	local ft=Duel.GetLocationCount(tp,LOCATION_MZONE)
+	if chk==0 then return ft>-1 and Duel.CheckReleaseGroupCost(tp,s.filter2a,1,false,nil,nil,ft,tp) end
+	local g=Duel.SelectReleaseGroupCost(tp,s.filter2a,1,1,false,nil,nil,ft,tp)
+	Duel.Release(g,REASON_COST)
+end
+function s.target2(e,tp,eg,ep,ev,re,r,rp,chk)
+	if chk==0 then return Duel.IsExistingMatchingCard(s.filter2b,tp,LOCATION_HAND+LOCATION_DECK,0,1,nil,e,tp) end
+	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,1,tp,LOCATION_HAND+LOCATION_DECK)
+end
+function s.operation2(e,tp,eg,ep,ev,re,r,rp)
+	if Duel.GetLocationCount(tp,LOCATION_MZONE)>0 then
+		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
+		local g=Duel.SelectMatchingCard(tp,s.filter2b,tp,LOCATION_HAND+LOCATION_DECK,0,1,1,nil,e,tp)
+		if #g>0 then
+			local tc=g:GetFirst()
+			if Duel.SpecialSummonStep(tc,0,tp,tp,false,false,POS_FACEUP)~=0 then
+				tc:NegateEffects(e:GetHandler())
+			end
+			Duel.SpecialSummonComplete()
 		end
-		tc=g:GetNext()
-	end
-	if seq==-1 then
-		Duel.ConfirmDecktop(tp,dcount)
-		Duel.ShuffleDeck(tp)
-		return
-	end
-	Duel.ConfirmDecktop(tp,dcount-seq)
-	Duel.BreakEffect()
-	if spcard:GetAttack()>cc:GetAttack() then
-		if cc:IsRelateToEffect(e) and Duel.DiscardDeck(tp,dcount-seq,REASON_EFFECT+REASON_REVEAL) and not Duel.GetControl(cc,tp,PHASE_END,1) then
-			if not cc:IsImmuneToEffect(e) and cc:IsAbleToChangeControler() then
-				Duel.Destroy(cc,REASON_EFFECT)
-			end		
-		end
-	elseif Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and spcard:IsCanBeSpecialSummoned(e,0,tp,false,false) then
-		Duel.SpecialSummon(spcard,0,tp,tp,false,false,POS_FACEUP)		
-		Duel.ShuffleDeck(tp)
 	end
 end
