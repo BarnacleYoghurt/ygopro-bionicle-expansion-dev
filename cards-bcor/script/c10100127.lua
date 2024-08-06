@@ -50,10 +50,7 @@ function s.cost2(e,tp,eg,ep,ev,re,r,rp,chk)
 end
 function s.target2(e,tp,eg,ep,ev,re,r,rp,chk)
 	local c=e:GetHandler()
-	if chk==0 then
-		return Duel.IsExistingMatchingCard(s.filter2b,tp,LOCATION_DECK,0,1,nil,e,tp)
-			and ((c:IsLocation(LOCATION_MZONE) and Duel.GetMZoneCount(tp,c)>0) or Duel.GetLocationCount(tp,LOCATION_MZONE)>0)
-	end
+	if chk==0 then return Duel.IsExistingMatchingCard(s.filter2b,tp,LOCATION_DECK,0,1,nil,e,tp) and Duel.GetMZoneCount(tp,c)>0 end
 	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,1,tp,LOCATION_DECK)
 end
 function s.operation2(e,tp,eg,ep,ev,re,r,rp)

@@ -7,7 +7,6 @@ function s.initial_effect(c)
 	e1:SetDescription(aux.Stringid(id,0))
 	e1:SetType(EFFECT_TYPE_IGNITION)
 	e1:SetRange(LOCATION_PZONE)
-	e1:SetCost(s.cost1)
 	e1:SetOperation(s.operation1)
 	e1:SetCountLimit(1)
 	c:RegisterEffect(e1)
@@ -16,17 +15,17 @@ function s.initial_effect(c)
 	e2:SetDescription(aux.Stringid(id,1))
 	e2:SetCategory(CATEGORY_SPECIAL_SUMMON)
 	e2:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
-	e2:SetProperty(EFFECT_FLAG_DELAY+EFFECT_FLAG_DAMAGE_STEP)
+	e2:SetProperty(EFFECT_FLAG_DELAY)
 	e2:SetCode(EVENT_TO_GRAVE)
 	e2:SetTarget(s.target2)
 	e2:SetOperation(s.operation2)
 	e2:SetCountLimit(1,id)
 	c:RegisterEffect(e2)	
-	--To Hand
+	--Draw
 	local e3=Effect.CreateEffect(c)
 	e3:SetDescription(aux.Stringid(id,2))
-	e3:SetCategory(CATEGORY_SPECIAL_SUMMON)
-	e3:SetProperty(EFFECT_FLAG_DELAY+EFFECT_FLAG_DAMAGE_STEP)
+	e3:SetCategory(CATEGORY_REMOVE+CATEGORY_DRAW)
+	e3:SetProperty(EFFECT_FLAG_DELAY+EFFECT_FLAG_CARD_TARGET)
 	e3:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
 	e3:SetCode(EVENT_REMOVE)
 	e3:SetTarget(s.target3)
@@ -34,66 +33,58 @@ function s.initial_effect(c)
 	e3:SetCountLimit(1,id)
 	c:RegisterEffect(e3)
 end
-function s.cost1(e,tp,eg,ep,ev,re,r,rp,chk)
-	local seq=e:GetHandler():GetSequence()
-	local g=Duel.GetFieldGroup(e:GetHandlerPlayer(),LOCATION_PZONE,0)
-	local tc=(g-e:GetHandler()):GetFirst()
-	if chk==0 then return tc and tc:GetLeftScale()>1 end
-	local e1=Effect.CreateEffect(e:GetHandler())
-	e1:SetType(EFFECT_TYPE_SINGLE)
-	e1:SetCode(EFFECT_UPDATE_LSCALE)
-	e1:SetValue(-1)
-	e1:SetReset(RESET_PHASE+PHASE_END+RESET_EVENT+RESETS_STANDARD_DISABLE)
-	tc:RegisterEffect(e1)
-	local e2=e1:Clone()
-	e2:SetCode(EFFECT_UPDATE_RSCALE)
-	tc:RegisterEffect(e2)
-end
 function s.operation1(e,tp,eg,ep,ev,re,rp)
   local c=e:GetHandler()
-	if c:IsRelateToEffect(e) then
-    local e1=Effect.CreateEffect(c)
-    e1:SetType(EFFECT_TYPE_FIELD)
-    e1:SetDescription(aux.Stringid(id,3))
-    e1:SetCode(EFFECT_SPSUMMON_PROC_G)
-    e1:SetProperty(EFFECT_FLAG_UNCOPYABLE+EFFECT_FLAG_CANNOT_DISABLE)
-    e1:SetRange(LOCATION_PZONE)
-    e1:SetCondition(s.condition1_1)
-    e1:SetOperation(s.operation1_1)
-    e1:SetValue(SUMMON_TYPE_PENDULUM)
-    e1:SetReset(RESET_EVENT+RESETS_STANDARD_DISABLE+RESET_PHASE+PHASE_END)
-    
-    if c:IsSequence(0) then
-      c:RegisterEffect(e1)
+  local e1=Effect.CreateEffect(c)
+  e1:SetDescription(aux.Stringid(id,3))
+  e1:SetType(EFFECT_TYPE_FIELD)
+  e1:SetProperty(EFFECT_FLAG_UNCOPYABLE+EFFECT_FLAG_CANNOT_DISABLE)
+  e1:SetCode(EFFECT_SPSUMMON_PROC_G)
+  e1:SetRange(LOCATION_PZONE)
+  e1:SetCondition(s.condition1_1)
+  e1:SetOperation(s.operation1_1)
+  e1:SetValue(SUMMON_TYPE_PENDULUM)
+  e1:SetReset(RESET_EVENT+RESETS_STANDARD+RESET_PHASE+PHASE_END)
+  --Always register on left scale (while keeping it tied to this card)
+  local e2=Effect.CreateEffect(c)
+  e2:SetDescription(aux.Stringid(id,4))
+  e2:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_GRANT)
+  e2:SetProperty(EFFECT_FLAG_CLIENT_HINT)
+  e2:SetRange(LOCATION_PZONE)
+  e2:SetTargetRange(LOCATION_SZONE,0)
+  e2:SetTarget(s.target1_2)
+  e2:SetLabelObject(e1)
+  e2:SetReset(RESET_EVENT+RESETS_STANDARD+RESET_PHASE+PHASE_END)
+  c:RegisterEffect(e2)
+  c:RegisterFlagEffect(id,RESET_EVENT+RESETS_STANDARD+RESET_PHASE+PHASE_END,0,1)
+end
+function s.filter1_1(c,e,tp,lscale,rscale,lvchk)
+  if c:IsLocation(LOCATION_GRAVE) then
+    -- Duplicated from proc_pendulum
+    -- Sadly cannot just use Pendulum.Filter, since that strictly rules out non-Pendulums outside the hand
+    if lscale>rscale then lscale,rscale=rscale,lscale end
+    local lv=0
+    if c.pendulum_level then
+      lv=c.pendulum_level
     else
-      local e2=Effect.CreateEffect(c)
-      e2:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_GRANT)
-      e2:SetRange(LOCATION_PZONE)
-      e2:SetTargetRange(LOCATION_SZONE,0)
-      e2:SetTarget(s.target1_2)
-      e2:SetLabelObject(e1)
-      e2:SetReset(RESET_EVENT+RESETS_STANDARD_DISABLE+RESET_PHASE+PHASE_END)
-      c:RegisterEffect(e2)
+      lv=c:GetLevel()
     end
-    
-    --Destroy monsters summoned from GY in EP
-    local e3=Effect.CreateEffect(c)
-    e3:SetCategory(CATEGORY_DESTROY)
-    e3:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
-    e3:SetCode(EVENT_SPSUMMON_SUCCESS)
-    e3:SetRange(LOCATION_PZONE)
-    e3:SetTarget(s.target1_3)
-    e3:SetOperation(s.operation1_3)
-    e3:SetReset(RESET_PHASE+PHASE_END+RESET_EVENT+RESETS_STANDARD_DISABLE)
-    e3:SetCountLimit(1)
-    c:RegisterEffect(e3)
-	end
+    return c:IsRace(RACE_BEAST|RACE_WINGEDBEAST) and c:IsSetCard(0xb06)
+      and (lvchk or (lv>lscale and lv<rscale)) and c:IsCanBeSpecialSummoned(e,SUMMON_TYPE_PENDULUM,tp,false,false)
+      and not c:IsForbidden()
+  else
+    return Pendulum.Filter(c,e,tp,lscale,rscale,lvchk)
+  end
 end
 function s.condition1_1(e,c,ischain,re,rp) --Duplicated from proc_pendulum
   if c==nil then return true end
   local tp=c:GetControler()
   local rpz=Duel.GetFieldCard(tp,LOCATION_PZONE,1)
   if rpz==nil or c==rpz or (not inchain and Duel.GetFlagEffect(tp,10000000)>0) then return false end
+
+  -- custom addition: only if the scales are this card and another Rahi
+  if not ((c:GetFlagEffect(id)>0 and rpz:IsSetCard(0xb06)) or (rpz:GetFlagEffect(id)>0 and c:IsSetCard(0xb06))) then return false end
+
   local lscale=c:GetLeftScale()
   local rscale=rpz:GetRightScale()
   local loc=0
@@ -106,7 +97,7 @@ function s.condition1_1(e,c,ischain,re,rp) --Duplicated from proc_pendulum
   else
     g=Duel.GetFieldGroup(tp,loc,0)
   end
-  return g:IsExists(Pendulum.Filter,1,nil,e,tp,lscale,rscale,c:IsHasEffect(511007000) and rpz:IsHasEffect(511007000))
+  return g:IsExists(s.filter1_1,1,nil,e,tp,lscale,rscale,c:IsHasEffect(511007000) and rpz:IsHasEffect(511007000))
 end
 function s.operation1_1(e,tp,eg,ep,ev,re,r,rp,c,sg,inchain) --Duplicated from proc_pendulum
   local rpz=Duel.GetFieldCard(tp,LOCATION_PZONE,1)
@@ -125,13 +116,14 @@ function s.operation1_1(e,tp,eg,ep,ev,re,r,rp,c,sg,inchain) --Duplicated from pr
   if ft2>0 then loc=loc+LOCATION_EXTRA end
   local tg=nil
   if og then
-    tg=og:Filter(Card.IsLocation,nil,loc):Filter(Pendulum.Filter,nil,e,tp,lscale,rscale,c:IsHasEffect(511007000) and rpz:IsHasEffect(511007000))
+    tg=og:Filter(Card.IsLocation,nil,loc):Filter(s.filter1_1,nil,e,tp,lscale,rscale,c:IsHasEffect(511007000) and rpz:IsHasEffect(511007000))
   else
-    tg=Duel.GetMatchingGroup(Pendulum.Filter,tp,loc,0,nil,e,tp,lscale,rscale,c:IsHasEffect(511007000) and rpz:IsHasEffect(511007000))
+    tg=Duel.GetMatchingGroup(s.filter1_1,tp,loc,0,nil,e,tp,lscale,rscale,c:IsHasEffect(511007000) and rpz:IsHasEffect(511007000))
   end
   ft1=math.min(ft1,tg:FilterCount(Card.IsLocation,nil,LOCATION_HAND+LOCATION_GRAVE))
   ft2=math.min(ft2,tg:FilterCount(Card.IsLocation,nil,LOCATION_EXTRA))
   ft2=math.min(ft2,aux.CheckSummonGate(tp) or ft2)
+  local gy_sel=false
   while true do
     local ct1=tg:FilterCount(Card.IsLocation,nil,LOCATION_HAND+LOCATION_GRAVE)
     local ct2=tg:FilterCount(Card.IsLocation,nil,LOCATION_EXTRA)
@@ -139,7 +131,10 @@ function s.operation1_1(e,tp,eg,ep,ev,re,r,rp,c,sg,inchain) --Duplicated from pr
     if ct1>ft1 then ct=math.min(ct,ft1) end
     if ct2>ft2 then ct=math.min(ct,ft2) end
     local loc=0
-    if ft1>0 then loc=loc+LOCATION_HAND+LOCATION_GRAVE end
+    if ft1>0 then
+      loc=loc+LOCATION_HAND
+      if not gy_sel then loc=loc+LOCATION_GRAVE end
+    end
     if ft2>0 then loc=loc+LOCATION_EXTRA end
     local g=tg:Filter(Card.IsLocation,sg,loc)
     if #g==0 or ft==0 then break end
@@ -150,6 +145,7 @@ function s.operation1_1(e,tp,eg,ep,ev,re,r,rp,c,sg,inchain) --Duplicated from pr
       sg:RemoveCard(tc)
       if tc:IsLocation(LOCATION_HAND+LOCATION_GRAVE) then
         ft1=ft1+1
+        if tc:IsLocation(LOCATION_GRAVE) then gy_sel=false end
       else
         ft2=ft2+1
       end
@@ -170,6 +166,7 @@ function s.operation1_1(e,tp,eg,ep,ev,re,r,rp,c,sg,inchain) --Duplicated from pr
           if #pg>0 then
             if pg:GetFirst():IsLocation(LOCATION_HAND+LOCATION_GRAVE) then
               ft1=ft1+1
+              if pg:GetFirst():IsLocation(LOCATION_GRAVE) then gy_sel=false end
             else
               ft2=ft2+1
             end
@@ -179,6 +176,7 @@ function s.operation1_1(e,tp,eg,ep,ev,re,r,rp,c,sg,inchain) --Duplicated from pr
       end
       if tc:IsLocation(LOCATION_HAND+LOCATION_GRAVE) then
         ft1=ft1-1
+        if tc:IsLocation(LOCATION_GRAVE) then gy_sel=true end
       else
         ft2=ft2-1
       end
@@ -196,61 +194,36 @@ end
 function s.target1_2(e,c)
   return c:IsLocation(LOCATION_PZONE) and c:IsSequence(0)
 end
-function s.filter1_3(c)
-  return c:IsSummonType(SUMMON_TYPE_PENDULUM) and c:IsPreviousLocation(LOCATION_GRAVE)
-end
-function s.target1_3(e,tp,eg,ep,ev,re,rp,chk)
-    return eg:IsExists(s.filter1_3,1,nil)
-end
-function s.operation1_3(e,tp,eg,ep,ev,re,rp)
-    local g=eg:Filter(s.filter1_3,nil)
-    for tc in aux.Next(g) do
-      local e1=Effect.CreateEffect(e:GetHandler())
-      e1:SetCategory(CATEGORY_DESTROY)
-      e1:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
-      e1:SetCode(EVENT_PHASE+PHASE_END)
-      e1:SetRange(LOCATION_MZONE)
-      e1:SetTarget(s.target1_3_1)
-      e1:SetOperation(s.operation1_3_1)
-      e1:SetReset(RESET_PHASE+PHASE_END+RESET_EVENT+RESETS_STANDARD)
-      e1:SetCountLimit(1)
-      tc:RegisterEffect(e1)
-    end
-end
-function s.target1_3_1(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return true end
-	Duel.SetOperationInfo(0,CATEGORY_DESTROY,e:GetHandler(),1,0,0)
-end
-function s.operation1_3_1(e,tp,eg,ep,ev,re,r,rp)
-	Duel.Destroy(e:GetHandler(),REASON_EFFECT)
-end
 function s.filter2(c,e,tp)
-	return c:IsAttribute(ATTRIBUTE_EARTH) and c:IsLevelBelow(4) and c~=e:GetHandler() and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
+	return c:IsAttribute(ATTRIBUTE_EARTH) and c:IsLevelBelow(4) and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
 end
 function s.target2(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.IsExistingMatchingCard(s.filter2,tp,LOCATION_GRAVE,0,1,nil,e,tp) end
-	local g=Duel.GetMatchingGroup(s.filter2,tp,LOCATION_GRAVE,0,nil,e,tp)
-	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,g,1,tp,LOCATION_GRAVE)
+	if chk==0 then return Duel.IsExistingMatchingCard(s.filter2,tp,LOCATION_GRAVE,0,1,e:GetHandler(),e,tp) end
+	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,1,tp,LOCATION_GRAVE)
 end
 function s.operation2(e,tp,eg,ep,ev,re,r,rp)
-	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
-	local g=Duel.SelectMatchingCard(tp,s.filter2,tp,LOCATION_GRAVE,0,1,1,nil,e,tp)
-	if g:GetCount()>0 then
-		Duel.SpecialSummon(g,0,tp,tp,false,false,POS_FACEUP)
-	end
+  if Duel.GetLocationCount(tp,LOCATION_MZONE)>0 then
+    Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
+    local tc=Duel.SelectMatchingCard(tp,s.filter2,tp,LOCATION_GRAVE,0,1,1,e:GetHandler(),e,tp):GetFirst()
+    if tc and Duel.SpecialSummonStep(tc,0,tp,tp,false,false,POS_FACEUP)~=0 then
+      tc:NegateEffects(e:GetHandler())
+    end
+    Duel.SpecialSummonComplete()
+  end
 end
-function s.filter3(c,e,tp)
-	return c:IsSetCard(0xb06) and c:IsLevelBelow(3) and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
+function s.filter3(c)
+	return c:IsSetCard(0xb06) and c:IsRace(RACE_BEAST|RACE_WINGEDBEAST) and c:IsAbleToRemove()
 end
 function s.target3(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.IsExistingMatchingCard(s.filter3,tp,LOCATION_GRAVE,0,1,nil,e,tp) end
-	local g=Duel.GetMatchingGroup(s.filter3,tp,LOCATION_GRAVE,0,nil,e,tp)
-	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,g,1,tp,LOCATION_GRAVE)
+	if chk==0 then return Duel.IsExistingTarget(s.filter3,tp,LOCATION_GRAVE,0,1,nil) and Duel.IsPlayerCanDraw(tp,1) end
+  Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_REMOVE)
+	local g=Duel.SelectTarget(tp,s.filter3,tp,LOCATION_GRAVE,0,1,1,nil)
+	Duel.SetOperationInfo(0,CATEGORY_REMOVE,g,1,0,0)
+  Duel.SetOperationInfo(0,CATEGORY_DRAW,nil,0,tp,1)
 end
 function s.operation3(e,tp,eg,ep,ev,re,r,rp)
-	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
-	local g=Duel.SelectMatchingCard(tp,s.filter3,tp,LOCATION_GRAVE,0,1,1,nil,e,tp)
-	if g:GetCount()>0 then
-		Duel.SpecialSummon(g,0,tp,tp,false,false,POS_FACEUP)
+	local tc=Duel.GetFirstTarget()
+	if tc:IsRelateToEffect(e) and Duel.Remove(tc,POS_FACEUP,REASON_EFFECT)>0 then
+		Duel.Draw(tp,1,REASON_EFFECT)
 	end
 end
