@@ -1,4 +1,4 @@
-  --Infernavika, Lava Bird Rahi
+--Infernavika, Lava Bird Rahi
 local s,id=GetID()
 function s.initial_effect(c)
 	Pendulum.AddProcedure(c)
@@ -13,12 +13,12 @@ function s.initial_effect(c)
 	e1:SetOperation(s.operation1)
 	e1:SetCountLimit(1)
 	c:RegisterEffect(e1)
-	--Special Summon
+	--Destroy
 	local e2=Effect.CreateEffect(c)
-	e2:SetCategory(CATEGORY_SPECIAL_SUMMON)
+	e2:SetCategory(CATEGORY_DESTROY)
 	e2:SetDescription(aux.Stringid(id,1))
 	e2:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
-	e2:SetProperty(EFFECT_FLAG_DELAY+EFFECT_FLAG_DAMAGE_STEP)
+	e2:SetProperty(EFFECT_FLAG_DELAY+EFFECT_FLAG_CARD_TARGET)
 	e2:SetCode(EVENT_TO_GRAVE)
 	e2:SetTarget(s.target2)
 	e2:SetOperation(s.operation2)
@@ -28,7 +28,7 @@ function s.initial_effect(c)
 	local e3=Effect.CreateEffect(c)
 	e3:SetDescription(aux.Stringid(id,2))
 	e3:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
-	e3:SetProperty(EFFECT_FLAG_DELAY+EFFECT_FLAG_DAMAGE_STEP)
+	e3:SetProperty(EFFECT_FLAG_DELAY)
 	e3:SetCode(EVENT_REMOVE)
 	e3:SetCost(s.cost3)
 	e3:SetTarget(s.target3)
@@ -39,7 +39,7 @@ end
 function s.target1(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingTarget(Card.IsFaceup,tp,LOCATION_MZONE,0,1,nil) end
   Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_FACEUP)
-	local g = Duel.SelectTarget(tp,Card.IsFaceup,tp,LOCATION_MZONE,0,1,1,nil)
+	local g=Duel.SelectTarget(tp,Card.IsFaceup,tp,LOCATION_MZONE,0,1,1,nil)
 end
 function s.operation1(e,tp,eg,ep,ev,re,r,rp)
   local c=e:GetHandler()
@@ -80,18 +80,26 @@ end
 function s.filter2(c,e,tp)
 	return c:IsAttribute(ATTRIBUTE_FIRE) and c:IsLevelBelow(4) and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
 end
-function s.target2(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.IsExistingMatchingCard(s.filter2,tp,LOCATION_GRAVE,0,1,e:GetHandler(),e,tp) and Duel.GetLocationCount(tp,LOCATION_MZONE)>0 end
-	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,1,tp,LOCATION_GRAVE)
+function s.target2(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
+	if chkc then return false end
+	if chk==0 then
+		return Duel.IsExistingTarget(aux.FaceupFilter(Card.IsSetCard,0xb06),tp,LOCATION_MZONE,0,1,nil)
+			and Duel.IsExistingTarget(aux.TRUE,tp,0,LOCATION_ONFIELD,1,nil)
+	end
+	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_DESTROY)
+	local g=Duel.SelectTarget(tp,aux.FaceupFilter(Card.IsSetCard,0xb06),tp,LOCATION_MZONE,0,1,1,nil)
+	g:Merge(Duel.SelectTarget(tp,aux.TRUE,tp,0,LOCATION_ONFIELD,1,1,nil))
+	Duel.SetOperationInfo(0,CATEGORY_DESTROY,g,#g,0,0)
 end
 function s.operation2(e,tp,eg,ep,ev,re,r,rp)
-	if Duel.GetLocationCount(tp,LOCATION_MZONE)>0 then
-		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
-		local g=Duel.SelectMatchingCard(tp,s.filter2,tp,LOCATION_GRAVE,0,1,1,e:GetHandler(),e,tp)
-		if g:GetCount()>0 then
-			Duel.SpecialSummon(g,0,tp,tp,false,false,POS_FACEUP)
-		end
+	local g=Duel.GetTargetCards(e)
+	if #g>0 then
+		Duel.Destroy(g,REASON_EFFECT)
 	end
+end
+function s.filter3(c)
+	return c:IsFaceup() and c:IsRace(RACE_BEAST|RACE_WINGEDBEAST) and c:IsSetCard(0xb06)
+		and c:IsType(TYPE_PENDULUM) and c:IsAbleToExtra()
 end
 function s.cost3(e,tp,eg,ep,ev,re,r,rp,chk)
 	local g=Duel.GetDecktopGroup(tp,1)
@@ -102,10 +110,13 @@ function s.cost3(e,tp,eg,ep,ev,re,r,rp,chk)
 	end
 end
 function s.target3(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return e:GetHandler():IsAbleToExtra() end
+	if chk==0 then return Duel.IsExistingMatchingCard(s.filter3,tp,LOCATION_REMOVED,0,1,nil) end
+	Duel.SetOperationInfo(0,CATEGORY_TOEXTRA,nil,1,tp,LOCATION_REMOVED)
 end
 function s.operation3(e,tp,eg,ep,ev,re,r,rp)
-	if e:GetHandler():IsRelateToEffect(e) then
-		Duel.SendtoExtraP(e:GetHandler(),nil,REASON_EFFECT)
+	Duel.Hint(HINT_SELECTMSG,tp,aux.Stringid(id,3))
+	local g=Duel.SelectMatchingCard(tp,s.filter3,tp,LOCATION_REMOVED,0,1,1,nil)
+	if #g>0 then
+		Duel.SendtoExtraP(g,nil,REASON_EFFECT)
 	end
 end
