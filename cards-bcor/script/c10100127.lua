@@ -19,6 +19,7 @@ function s.initial_effect(c)
 	e2:SetProperty(EFFECT_FLAG_DELAY)
 	e2:SetRange(LOCATION_HAND+LOCATION_MZONE)
 	e2:SetCode(EVENT_CHAINING)
+	e2:SetCondition(s.condition2)
 	e2:SetCost(s.cost2)
 	e2:SetTarget(s.target2)
 	e2:SetOperation(s.operation2)
@@ -34,6 +35,9 @@ end
 function s.filter2b(c,e,tp)
 	return c:IsRace(RACE_FISH|RACE_SEASERPENT|RACE_AQUA) and c:IsSetCard(0xb06) and c:IsType(TYPE_TUNER) and not c:IsCode(id)
 		and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
+end
+function s.condition2(e,tp,eg,ep,ev,re,r,rp)
+	return ep==1-tp
 end
 function s.cost2(e,tp,eg,ep,ev,re,r,rp,chk)
 	local c=e:GetHandler()
