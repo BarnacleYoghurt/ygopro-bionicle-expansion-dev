@@ -18,7 +18,7 @@ function s.initial_effect(c)
     e1:SetCountLimit(1,id)
     c:RegisterEffect(e1)
     --Fusion Summon
-    local params={matfilter=Fusion.OnFieldMat(Card.IsAbleToRemove),extrafil=s.extrafil,extraop=Fusion.BanishMaterial,extratg=s.extratg}
+    local params={fusfilter=aux.FilterBoolFunction(Card.IsSetCard,0xb06),matfilter=Fusion.OnFieldMat(Card.IsAbleToRemove),extrafil=s.extrafil,extraop=Fusion.BanishMaterial,extratg=s.extratg}
     local e2=Effect.CreateEffect(c)
     e2:SetDescription(aux.Stringid(id,1))
     e2:SetCategory(CATEGORY_SPECIAL_SUMMON+CATEGORY_FUSION_SUMMON)
@@ -74,12 +74,15 @@ function s.operation1(e,tp,eg,ep,ev,re,r,rp)
         )
     end
 end
+function s.filter2(c)
+    return (c:IsFaceup() or not c:IsLocation(LOCATION_EXTRA)) and c:IsAbleToRemove()
+end
 function s.extrafil(e,tp,mg)
     local loc=LOCATION_EXTRA
     if not Duel.IsPlayerAffectedByEffect(tp,69832741) then
         loc=loc+LOCATION_GRAVE
     end
-    return Duel.GetMatchingGroup(Fusion.IsMonsterFilter(Card.IsAbleToRemove),tp,loc,0,nil)
+    return Duel.GetMatchingGroup(Fusion.IsMonsterFilter(s.filter2),tp,loc,0,nil)
 end
 function s.extratg(e,tp,eg,ep,ev,re,r,rp,chk)
     if chk==0 then return true end
