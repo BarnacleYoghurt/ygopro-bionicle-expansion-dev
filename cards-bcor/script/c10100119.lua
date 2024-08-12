@@ -113,7 +113,7 @@ function s.target3(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 	local c=e:GetHandler()
 	if chk==0 then
 		return Duel.IsExistingTarget(aux.TRUE,tp,LOCATION_ONFIELD,0,1,nil)
-			and c:IsAbleToExtra() or bcor.check_rahi_marine_isabletopzone(c,tp)
+			and (c:IsAbleToExtra() or bcor.check_rahi_marine_isabletopzone(c,tp))
 	end
 	local g=Duel.SelectTarget(tp,aux.TRUE,tp,LOCATION_ONFIELD,0,1,1,nil)
 	Duel.SetOperationInfo(0,CATEGORY_DESTROY,g,1,0,0)
