@@ -97,7 +97,7 @@ function s.target3(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 	if chkc then return s.filter3(chkc) and chck:IsControler(tp) and chkc:IsLocation(LOCATION_REMOVED) end
 	if chk==0 then
 		return Duel.IsExistingTarget(s.filter3,tp,LOCATION_REMOVED,0,1,nil)
-			and c:IsCanBeSpecialSummoned(e,0,0,false,false) and Duel.GetLocationCount(tp,LOCATION_MZONE)>0
+			and c:IsCanBeSpecialSummoned(e,0,tp,false,false) and Duel.GetLocationCount(tp,LOCATION_MZONE)>0
 	end
 	local g=Duel.SelectTarget(tp,s.filter3,tp,LOCATION_REMOVED,0,1,1,nil)
 	Duel.SetOperationInfo(0,CATEGORY_TODECK,g,1,0,0)
