@@ -19,6 +19,7 @@ function s.initial_effect(c)
     e2:SetCost(s.cost2)
     e2:SetTarget(s.target2)
     e2:SetOperation(s.operation2)
+    e2:SetHintTiming(TIMING_SUMMON+TIMING_SPSUMMON+TIMING_FLIPSUMMON)
     c:RegisterEffect(e2)
 end
 function s.cost2(e,tp,eg,ep,ev,re,r,rp,chk)
