@@ -58,7 +58,7 @@ function s.operation1(e,tp,eg,ep,ev,re,r,rp)
 	end
 end
 function s.filter2a(c)
-	return c:IsSetCard(0xb06) and c:IsMonsterCard() and c:HasLevel()
+	return c:IsFaceup() and c:IsSetCard(0xb06) and c:IsMonsterCard() and c:HasLevel()
 end
 function s.filter2b(c,e,tp,lv)
 	return c:IsRace(RACE_REPTILE) and c:IsSetCard(0xb06) and c:IsType(TYPE_SYNCHRO) and c:IsLevelBelow(lv)
