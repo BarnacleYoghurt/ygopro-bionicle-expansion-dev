@@ -62,7 +62,7 @@ function s.target2(e,tp,eg,ep,ev,re,r,rp,chk)
 	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,0,1,tp,LOCATION_GRAVE+LOCATION_REMOVED)
 end
 function s.operation2(e,tp,eg,ep,ev,re,r,rp)
-	local lc=Duel.GetLocationCount(tp,LOCATION_MZONE)
+	local lc=math.min(2,Duel.GetLocationCount(tp,LOCATION_MZONE))
 	if lc>0 then
 		if Duel.IsPlayerAffectedByEffect(tp,CARD_BLUEEYES_SPIRIT) then lc=1 end
 		local rg=Duel.GetMatchingGroup(s.filter2,tp,LOCATION_GRAVE+LOCATION_REMOVED,0,nil,e,tp)
