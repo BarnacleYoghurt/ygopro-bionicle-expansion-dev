@@ -57,10 +57,10 @@ function s.target1(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 	local tg=eg:Filter(s.filter1a,nil)
 	if chk==0 then
 		return Duel.IsExistingTarget(s.filter1b,tp,LOCATION_REMOVED,0,1,nil,tg)
-			and Duel.IsExistingTarget(Card.IsFaceup,tp,0,LOCATION_ONFIELD,1,nil)
+			and Duel.IsExistingTarget(aux.TRUE,tp,0,LOCATION_ONFIELD,1,nil)
 	end
 	local g1=Duel.SelectTarget(tp,s.filter1b,tp,LOCATION_REMOVED,0,1,1,nil,tg)
-	local g2=Duel.SelectTarget(tp,Card.IsFaceup,tp,0,LOCATION_ONFIELD,1,1,nil)
+	local g2=Duel.SelectTarget(tp,aux.TRUE,tp,0,LOCATION_ONFIELD,1,1,nil)
 	Duel.SetOperationInfo(0,CATEGORY_TODECK,g1,1,0,0)
 	Duel.SetOperationInfo(0,CATEGORY_DESTROY,g2,1,0,0)
 end
