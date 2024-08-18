@@ -24,7 +24,7 @@ function s.initial_effect(c)
 	e1:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_GRANT)
 	e1:SetRange(LOCATION_MZONE)
 	e1:SetTargetRange(LOCATION_EXTRA,0)
-	--e1:SetCondition(s.condition1)
+	e1:SetCondition(s.condition1)
 	e1:SetTarget(s.target1)
 	e1:SetLabelObject(synproc)
 	c:RegisterEffect(e1)
@@ -76,7 +76,7 @@ function s.synproc_target(e,tp,eg,ep,ev,re,r,rp,chk,c,smat,mg,min,max)
 	return fun(e,tp,eg,ep,ev,re,r,rp,chk,c,smat,mg,min,max)
 end
 function s.condition1(e)
-	return e:GetHandler():GetSummonType()==SUMMON_TYPE_SYNCHRO
+	return e:GetHandler():IsSummonType(SUMMON_TYPE_SYNCHRO)
 end
 function s.target1(e,c)
 	return not (c:IsFaceup() and c:IsType(TYPE_PENDULUM)) and c:IsSetCard(0xb06)
