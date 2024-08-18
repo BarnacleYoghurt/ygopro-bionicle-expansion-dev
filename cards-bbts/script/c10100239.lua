@@ -10,11 +10,11 @@ function s.initial_effect(c)
 	e1:SetCode(EFFECT_UPDATE_DEFENSE)
 	e1:SetTarget(aux.TargetBoolFunction(Card.IsSetCard,0xb06))
 	e1:SetValue(700)
-	c:RegisterEffect(e1)
+	--c:RegisterEffect(e1)
 	--Special Summon
 	local e2=Effect.CreateEffect(c)
 	e2:SetDescription(aux.Stringid(id,0))
-	e2:SetCategory(CATEGORY_SPECIAL_SUMMON+CATEGORY_POSITION)
+	e2:SetCategory(CATEGORY_TOHAND+CATEGORY_SPECIAL_SUMMON)
 	e2:SetType(EFFECT_TYPE_IGNITION)
 	e2:SetProperty(EFFECT_FLAG_CARD_TARGET)
 	e2:SetRange(LOCATION_PZONE)
@@ -44,27 +44,44 @@ function s.initial_effect(c)
 	e4:SetCountLimit(1,{id,2})
 	c:RegisterEffect(e4)
 end
-function s.filter2(c)
+function s.filter2a(c,e,tp)
+	local hg=e:GetHandler()+Duel.GetFieldGroup(tp,LOCATION_HAND,0)
+	if c:IsAbleToHandAsCost() then hg=c+hg end --c will be in hand after bounce
 	return c:IsFaceup() and c:IsLevelBelow(4) and c:IsRace(RACE_BEAST|RACE_WINGEDBEAST) and c:IsSetCard(0xb06)
-		and c:IsAttackPos() and c:IsCanChangePosition()
+		and c:IsAbleToHand() and hg:IsExists(s.filter2b,1,nil,e,tp) and Duel.GetMZoneCount(tp,c)>0
+end
+function s.filter2b(c,e,tp)
+	local sumchk=c:IsCanBeSpecialSummoned(e,0,tp,false,false)
+	if c:IsLocation(LOCATION_MZONE) then --not registered as summonable while still on the field!
+		--documentation says you could just pass the id, but in-game error says otherwise ...
+		--sumchk=Duel.IsPlayerCanSpecialSummonMonster(tp,c:GetOriginalCode())
+		sumchk=Duel.IsPlayerCanSpecialSummonMonster(tp,c:GetOriginalCode(),c:GetOriginalSetCard(),c:GetOriginalType(),
+			c:GetBaseAttack(),c:GetBaseDefense(),c:GetOriginalLevel(),c:GetOriginalRace(),c:GetOriginalAttribute())
+	end
+	return c:IsLevelBelow(4) and c:IsSetCard(0xb06) and sumchk
 end
 function s.target2(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 	local c=e:GetHandler()
 	if chkc then return s.filter2(chkc) and chkc:IsLocation(LOCATION_MZONE) and chkc:IsControler(tp) end
-	if chk==0 then
-		return Duel.IsExistingTarget(s.filter2,tp,LOCATION_MZONE,0,1,nil)
-			and c:IsCanBeSpecialSummoned(e,0,tp,false,false) and Duel.GetLocationCount(tp,LOCATION_MZONE)>0
-	end
-	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_POSCHANGE)
-	Duel.SelectTarget(tp,s.filter2,tp,LOCATION_MZONE,0,1,1,nil)
-	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,c,1,0,0)
+	if chk==0 then return Duel.IsExistingTarget(s.filter2a,tp,LOCATION_MZONE,0,1,nil,e,tp) end
+	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_RTOHAND)
+	local g=Duel.SelectTarget(tp,s.filter2a,tp,LOCATION_MZONE,0,1,1,nil,e,tp)
+	Duel.SetOperationInfo(0,CATEGORY_TOHAND,c+g,2,0,0)
+	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,1,tp,LOCATION_HAND)
 end
 function s.operation2(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
-	if Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and Duel.SpecialSummon(c,0,tp,tp,false,false,POS_FACEUP)>0 then
-		local tc=Duel.GetFirstTarget()
-		if tc:IsRelateToEffect(e) and tc:IsAttackPos() then
-			Duel.ChangePosition(tc,POS_FACEUP_DEFENSE)
+	local tc=Duel.GetFirstTarget()
+	if tc:IsRelateToEffect(e) then
+		local g1=Group.FromCards(c,tc)
+		if Duel.SendtoHand(g1,nil,REASON_EFFECT)==2 and g1:FilterCount(Card.IsLocation,nil,LOCATION_HAND)==2
+			and Duel.GetLocationCount(tp,LOCATION_MZONE)>0 then
+			Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
+			local g2=Duel.SelectMatchingCard(tp,s.filter2b,tp,LOCATION_HAND,0,1,1,nil,e,tp)
+			if #g2>0 then
+				Duel.BreakEffect()
+				Duel.SpecialSummon(g2,0,tp,tp,false,false,POS_FACEUP_DEFENSE)
+			end
 		end
 	end
 end
@@ -92,7 +109,7 @@ function s.target4(e,tp,eg,ep,ev,re,r,rp,chk)
 end
 function s.operation4(e,tp,eg,ep,ev,re,r,rp)
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TOGRAVE)
-	local g=Duel.SelectMatchingCard(tp,s.filter4,tp,LOCATION_REMOVED,0,1,2,nil)
+	local g=Duel.SelectMatchingCard(tp,s.filter4,tp,LOCATION_REMOVED,0,1,1,nil)
 	if #g>0 then
 		Duel.SendtoGrave(g,REASON_EFFECT+REASON_RETURN)
 	end
