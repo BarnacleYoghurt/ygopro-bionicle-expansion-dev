@@ -11,6 +11,7 @@ function s.initial_effect(c)
 	e1:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
 	e1:SetProperty(EFFECT_FLAG_DELAY)
 	e1:SetCode(EVENT_SPSUMMON_SUCCESS)
+	e1:SetCondition(s.condition1)
 	e1:SetCost(s.cost1)
 	e1:SetOperation(s.operation1)
 	e1:SetCountLimit(1,id)
@@ -29,12 +30,15 @@ end
 function s.filter1(c)
 	return c:IsSetCard(0xb06) and c:IsAbleToGraveAsCost()
 end
+function s.condition1(e,tp,eg,ep,ev,re,r,rp)
+	return e:GetHandler():IsSummonType(SUMMON_TYPE_SYNCHRO)
+end
 function s.cost1(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingMatchingCard(s.filter1,tp,LOCATION_DECK,0,1,nil) end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TOGRAVE)
-	local g=Duel.SelectMatchingCard(tp,s.filter1,tp,LOCATION_DECK,0,1,1,nil)	
+	local g=Duel.SelectMatchingCard(tp,s.filter1,tp,LOCATION_DECK,0,1,1,nil)
 	if g:GetCount()>0 then 
-		Duel.SendtoGrave(g,REASON_EFFECT) 
+		Duel.SendtoGrave(g,REASON_EFFECT)
 	end
 end
 function s.operation1(e,tp,eg,ep,ev,re,r,rp)
