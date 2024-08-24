@@ -83,7 +83,7 @@ function s.condition3(e,tp,eg,ep,ev,re,r,rp)
 	return e:GetHandler():GetFlagEffect(id)>0
 end
 function s.filter3(c)
-	return c:IsFaceup() and c:IsSetCard(0xb06) and c:IsLevelBelow(4) and c:IsAbleToHand()
+	return c:IsFaceup() and c:IsRace(RACE_BEAST|RACE_WINGEDBEAST) and c:IsSetCard(0xb06) and c:IsAbleToHand()
 end
 function s.target3(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingMatchingCard(s.filter3,tp,LOCATION_GRAVE+LOCATION_EXTRA,0,1,nil) end
