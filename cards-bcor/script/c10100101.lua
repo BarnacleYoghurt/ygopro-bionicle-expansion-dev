@@ -40,8 +40,19 @@ function s.operation1(e,tp,eg,ep,ev,re,r,rp)
 	local tc=Duel.GetFirstTarget()
 	if tc:IsRelateToEffect(e) and Duel.GetLocationCount(tp,LOCATION_MZONE)>0 then
 		local _,bc=Duel.GetBattleMonster(tp)
-		if Duel.SpecialSummon(tc,0,tp,tp,false,false,POS_FACEUP)>0 and bc and bc:IsRelateToBattle() then
-			Duel.Destroy(bc,REASON_EFFECT)
+		if Duel.SpecialSummon(tc,0,tp,tp,false,false,POS_FACEUP)~=0 then
+			--Cannot attack directly this turn
+			local e1=Effect.CreateEffect(e:GetHandler())
+			e1:SetDescription(3207)
+			e1:SetType(EFFECT_TYPE_SINGLE)
+			e1:SetProperty(EFFECT_FLAG_CANNOT_DISABLE+EFFECT_FLAG_CLIENT_HINT)
+			e1:SetCode(EFFECT_CANNOT_DIRECT_ATTACK)
+			e1:SetReset(RESET_EVENT+RESETS_STANDARD+RESET_PHASE+PHASE_END)
+			tc:RegisterEffect(e1)
+			if bc and bc:IsRelateToBattle() then
+				Duel.Destroy(bc,REASON_EFFECT)
+			end
 		end
+		Duel.SpecialSummonComplete()
 	end
 end
