@@ -6,17 +6,14 @@ function s.initial_effect(c)
 	--Reduce ATK/DEF
 	local e1=Effect.CreateEffect(c)
 	e1:SetDescription(aux.Stringid(id,0))
-	e1:SetCategory(CATEGORY_SPECIAL_SUMMON)
+	e1:SetCategory(CATEGORY_DESTROY)
 	e1:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O)
 	e1:SetProperty(EFFECT_FLAG_DELAY)
 	e1:SetRange(LOCATION_PZONE)
-	e1:SetCode(EVENT_SUMMON_SUCCESS)
+	e1:SetCode(EVENT_SPSUMMON_SUCCESS)
 	e1:SetTarget(s.target1)
 	e1:SetOperation(s.operation1)
 	c:RegisterEffect(e1)
-	local e1a=e1:Clone()
-	e1a:SetCode(EVENT_SPSUMMON_SUCCESS)
-	c:RegisterEffect(e1a)
 	--Search
 	local e2=Effect.CreateEffect(c)
 	e2:SetDescription(aux.Stringid(id,1))
@@ -43,25 +40,18 @@ function s.initial_effect(c)
 	e3:SetCountLimit(1,{id,1})
 	c:RegisterEffect(e3)
 end
-function s.condition1(e,tp,eg,ep,ev,re,r,rp,chk)
-	return Duel.GetFieldGroupCount(tp,LOCATION_MZONE,0)==0
-end
 function s.target1(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return true end
+	if chk==0 then return eg:IsExists(aux.FaceupFilter(Card.IsSummonPlayer,1-tp),1,nil) end
 	Duel.SetOperationInfo(0,CATEGORY_DESTROY,e:GetHandler(),1,0,0)
 end
 function s.operation1(e,tp,eg,ep,ev,re,r,rp)
-	if Duel.Destroy(e:GetHandler(),REASON_EFFECT)>0 then
-		local e1a=Effect.CreateEffect(e:GetHandler())
-		e1a:SetType(EFFECT_TYPE_FIELD)
-		e1a:SetCode(EFFECT_UPDATE_ATTACK)
-		e1a:SetTargetRange(0,LOCATION_MZONE)
-		e1a:SetValue(-1000)
-		e1a:SetReset(RESET_PHASE+PHASE_END)
-		Duel.RegisterEffect(e1a,tp)
-		local e1b=e1a:Clone()
-		e1b:SetCode(EFFECT_UPDATE_DEFENSE)
-		Duel.RegisterEffect(e1b,tp)
+	local c=e:GetHandler()
+	local g=eg:Filter(aux.FaceupFilter(Card.IsSummonPlayer,1-tp),nil)
+	if Duel.Destroy(c,REASON_EFFECT)>0 then
+		for tc in g:Iter() do
+			tc:UpdateAttack(-math.min(1200,tc:GetAttack()),RESET_EVENT+RESETS_STANDARD+RESET_PHASE+PHASE_END,c)
+			tc:UpdateDefense(-math.min(1200,tc:GetDefense()),RESET_EVENT+RESETS_STANDARD+RESET_PHASE+PHASE_END,c)
+		end
 	end
 end
 function s.filter2(c)
@@ -95,9 +85,11 @@ function s.target3(e,tp,eg,ep,ev,re,r,rp,chk)
 end
 function s.operation3(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
-	if c:IsRelateToEffect(e) and Duel.GetLocationCount(tp,LOCATION_MZONE)>0 then
-		Duel.SpecialSummon(c,0,tp,tp,false,false,POS_FACEUP)
+	if c:IsRelateToEffect(e) and Duel.GetLocationCount(tp,LOCATION_MZONE)>0
+		and Duel.SpecialSummonStep(c,0,tp,tp,false,false,POS_FACEUP)~=0 then
+		c:UpdateLevel(1,RESET_EVENT+RESETS_STANDARD)
 	end
+	Duel.SpecialSummonComplete()
 	-- Cannot activate non-Insect monster effects
 	local e1=Effect.CreateEffect(e:GetHandler())
 	e1:SetDescription(aux.Stringid(id,3))
