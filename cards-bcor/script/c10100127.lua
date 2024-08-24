@@ -29,8 +29,9 @@ end
 function s.target1(e,c)
 	return c:IsRace(RACE_FISH|RACE_SEASERPENT|RACE_AQUA) and c:IsSetCard(0xb06) and c:IsMonsterCard()
 end
-function s.filter2a(c)
-	return (c:IsFaceup() or c:IsLocation(LOCATION_GRAVE)) and c:IsType(TYPE_MONSTER) and c:IsSetCard(0xb06) and c:IsAbleToRemoveAsCost()
+function s.filter2a(c,e,tp)
+	return (c:IsFaceup() or c:IsLocation(LOCATION_HAND)) and c:IsSetCard(0xb06) and c:IsAbleToRemoveAsCost()
+		and Duel.GetMZoneCount(tp,Group.FromCards(c,e:GetHandler()))>0
 end
 function s.filter2b(c,e,tp)
 	return c:IsRace(RACE_FISH|RACE_SEASERPENT|RACE_AQUA) and c:IsSetCard(0xb06) and c:IsType(TYPE_TUNER)
@@ -41,12 +42,17 @@ function s.condition2(e,tp,eg,ep,ev,re,r,rp)
 end
 function s.cost2(e,tp,eg,ep,ev,re,r,rp,chk)
 	local c=e:GetHandler()
-	if chk==0 then return c:IsAbleToRemoveAsCost() end
-	Duel.Remove(c,POS_FACEUP,REASON_COST)
+	if chk==0 then
+		return c:IsAbleToRemoveAsCost() and Duel.IsExistingMatchingCard(s.filter2a,tp,LOCATION_HAND+LOCATION_ONFIELD,0,1,c,e,tp)
+	end
+	local g=Group.FromCards(c)
+	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_REMOVE)
+	g:Merge(Duel.SelectMatchingCard(tp,s.filter2a,tp,LOCATION_HAND+LOCATION_ONFIELD,0,1,1,c,e,tp))
+	Duel.Remove(g,POS_FACEUP,REASON_COST)
 end
 function s.target2(e,tp,eg,ep,ev,re,r,rp,chk)
 	local c=e:GetHandler()
-	if chk==0 then return Duel.IsExistingMatchingCard(s.filter2b,tp,LOCATION_DECK,0,1,nil,e,tp) and Duel.GetMZoneCount(tp,c)>0 end
+	if chk==0 then return Duel.IsExistingMatchingCard(s.filter2b,tp,LOCATION_DECK,0,1,nil,e,tp) end
 	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,1,tp,LOCATION_DECK)
 end
 function s.operation2(e,tp,eg,ep,ev,re,r,rp)
