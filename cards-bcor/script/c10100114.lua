@@ -41,6 +41,7 @@ function s.initial_effect(c)
 	e3:SetType(EFFECT_TYPE_IGNITION)
 	e3:SetProperty(EFFECT_FLAG_CARD_TARGET)
 	e3:SetRange(LOCATION_GRAVE)
+	e3:SetCondition(s.condition3)
 	e3:SetTarget(s.target3)
 	e3:SetOperation(s.operation3)
 	c:RegisterEffect(e3)
@@ -91,6 +92,9 @@ function s.operation2(e,tg,ntg,sg,lv,sc,tp)
 end
 function s.filter3(c)
 	return c:IsFaceup() and c:IsMonster() and c:IsAbleToDeck()
+end
+function s.condition3(e,tp,eg,ep,ev,re,r,rp)
+	return Duel.GetFieldGroupCount(tp,LOCATION_MZONE,0)==0
 end
 function s.target3(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 	local c=e:GetHandler()
