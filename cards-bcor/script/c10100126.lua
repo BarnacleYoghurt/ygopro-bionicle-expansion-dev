@@ -36,19 +36,17 @@ end
 function s.target1(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingMatchingCard(s.filter1a,tp,LOCATION_DECK,0,1,nil) end
 	Duel.SetOperationInfo(0,CATEGORY_TOHAND,nil,1,tp,LOCATION_DECK)
-	Duel.SetPossibleOperationInfo(0,CATEGORY_TOEXTRA,nil,1,tp,LOCATION_HAND)
+	Duel.SetOperationInfo(0,CATEGORY_TOEXTRA,nil,1,tp,LOCATION_HAND)
 end
 function s.operation1(e,tp,eg,ep,ev,re,r,rp,chk)
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_ATOHAND)
 	local g1=Duel.SelectMatchingCard(tp,s.filter1a,tp,LOCATION_DECK,0,1,1,nil)
 	if #g1>0 and Duel.SendtoHand(g1,nil,REASON_EFFECT)>0 and g1:FilterCount(Card.IsLocation,nil,LOCATION_HAND)>0 then
 		Duel.ConfirmCards(1-tp,g1)
-		if Duel.SelectYesNo(tp,aux.Stringid(id,2)) then
-			local g2=Duel.SelectMatchingCard(tp,s.filter1b,tp,LOCATION_HAND,0,1,1,nil)
-			if #g2>0 then
-				Duel.BreakEffect()
-				Duel.SendtoExtraP(g2,nil,REASON_EFFECT)
-			end
+		local g2=Duel.SelectMatchingCard(tp,s.filter1b,tp,LOCATION_HAND,0,1,1,nil)
+		if #g2>0 then
+			Duel.BreakEffect()
+			Duel.SendtoExtraP(g2,nil,REASON_EFFECT)
 		end
 	end
 end
