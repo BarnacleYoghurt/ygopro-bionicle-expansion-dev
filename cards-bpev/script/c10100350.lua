@@ -1,16 +1,15 @@
 --Lava Rat, Blazing Rahi
 local s,id=GetID()
 function s.initial_effect(c)
-    --Special Summon
+    --Reduce
     local e1=Effect.CreateEffect(c)
     e1:SetDescription(aux.Stringid(id,0))
-    e1:SetCategory(CATEGORY_SPECIAL_SUMMON+CATEGORY_LVCHANGE)
+    e1:SetCategory(CATEGORY_LVCHANGE+CATEGORY_ATKCHANGE)
     e1:SetType(EFFECT_TYPE_IGNITION)
-    e1:SetRange(LOCATION_HAND)
-    e1:SetCondition(s.condition1)
+    e1:SetRange(LOCATION_MZONE)
     e1:SetTarget(s.target1)
     e1:SetOperation(s.operation1)
-    e1:SetCountLimit(1,id)
+    e1:SetCountLimit(1)
     c:RegisterEffect(e1)
     --Destroy
     local e2=Effect.CreateEffect(c)
@@ -23,25 +22,17 @@ function s.initial_effect(c)
     e2:SetCost(aux.bfgcost)
     e2:SetTarget(s.target2)
     e2:SetOperation(s.operation2)
-    e2:SetCountLimit(1,{id,1})
+    e2:SetCountLimit(1,id)
     c:RegisterEffect(e2)
 end
-function s.filter1(c)
-    return c:IsFaceup() and c:IsRace(RACE_BEAST|RACE_WINGEDBEAST) and c:IsSetCard(0xb06)
-end
-function s.condition1(e,tp,eg,ep,ev,re,r,rp)
-    return Duel.IsExistingMatchingCard(s.filter1,tp,LOCATION_MZONE,0,1,nil)
-end
 function s.target1(e,tp,eg,ep,ev,re,r,rp,chk)
-    local c=e:GetHandler()
-    if chk==0 then return c:IsCanBeSpecialSummoned(e,0,tp,false,false) and Duel.GetLocationCount(tp,LOCATION_MZONE)>0 end
-    Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,c,1,0,0)
+    if chk==0 then return Duel.IsExistingMatchingCard(Card.IsFaceup,tp,LOCATION_MZONE,LOCATION_MZONE,1,e:GetHandler()) end
 end
 function s.operation1(e,tp,eg,ep,ev,re,r,rp)
-    local c=e:GetHandler()
-    if c:IsRelateToEffect(e) and Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and Duel.SpecialSummon(c,0,tp,tp,false,false,POS_FACEUP)>0 then
-        local g=Duel.GetMatchingGroup(Card.IsFaceup,tp,LOCATION_MZONE,0,c)
-        g:ForEach(Card.UpdateLevel,-1)
+    local g=Duel.GetMatchingGroup(Card.IsFaceup,tp,LOCATION_MZONE,LOCATION_MZONE,e:GetHandler())
+    for tc in g:Iter() do
+        tc:UpdateLevel(-1,RESET_EVENT+RESETS_STANDARD,e:GetHandler())
+        tc:UpdateAttack(-math.min(tc:GetAttack(),500),RESET_EVENT+RESETS_STANDARD,e:GetHandler())
     end
 end
 function s.condition2(e,tp,eg,ep,ev,re,r,rp)
