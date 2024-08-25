@@ -24,29 +24,37 @@ function s.initial_effect(c)
     e2:SetCountLimit(1,id)
     c:RegisterEffect(e2)
 end
+function s.filter1(c)
+    return c:IsFaceup() and (c:IsAttack(0) or c:IsDefense(0))
+end
 function s.target1(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
-    if chkc then return false end
+    if chkc then return chkc:IsFaceup() and chkc:IsSetCard(0xb06) and chkc:IsControler(tp) and chkc:IsLocation(LOCATION_MZONE) end
     if chk==0 then
         return Duel.IsExistingTarget(aux.FaceupFilter(Card.IsSetCard,0xb06),tp,LOCATION_MZONE,0,1,nil)
-            and Duel.IsExistingTarget(Card.IsFaceup,1-tp,LOCATION_MZONE,0,1,nil)
+            and Duel.IsExistingMatchingCard(Card.IsFaceup,1-tp,LOCATION_MZONE,0,1,nil)
     end
     local max=Duel.GetMatchingGroupCount(aux.FaceupFilter(Card.IsSetCard,0xb06),tp,LOCATION_MZONE,0,nil)
     Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TARGET)
-    local g1=Duel.SelectTarget(tp,aux.FaceupFilter(Card.IsSetCard,0xb06),tp,LOCATION_MZONE,0,1,max,nil)
-    local g2=Duel.SelectTarget(tp,Card.IsFaceup,1-tp,LOCATION_MZONE,0,1,1,nil)
-    Duel.SetPossibleOperationInfo(0,CATEGORY_DESTROY,g2,1,0,0)
+    Duel.SelectTarget(tp,aux.FaceupFilter(Card.IsSetCard,0xb06),tp,LOCATION_MZONE,0,1,max,nil)
+    Duel.SetPossibleOperationInfo(0,CATEGORY_DESTROY,nil,1,1-tp,LOCATION_MZONE)
 end
 function s.operation1(e,tp,eg,ep,ev,re,r,rp)
-    local g1,g2=Duel.GetTargetCards(e):Filter(Card.IsFaceup,nil):Split(Card.IsControler,nil,tp)
-    if #g1>0 and #g2>0 then
-        local tc=g2:GetFirst()
-        local val=g1:GetSum(Card.GetAttack)
-        tc:UpdateAttack(-math.min(val,tc:GetAttack()),RESET_EVENT+RESETS_STANDARD,e:GetHandler())
-        tc:UpdateDefense(-math.min(val,tc:GetDefense()),RESET_EVENT+RESETS_STANDARD,e:GetHandler())
-        Duel.Readjust()
-        if (tc:IsAttack(0) or tc:IsDefense(0)) and Duel.SelectYesNo(tp,aux.Stringid(id,1)) then
-            Duel.BreakEffect()
-            Duel.Destroy(tc,REASON_EFFECT)
+    local tg=Duel.GetTargetCards(e):Filter(aux.FaceupFilter(Card.IsControler,tp),nil)
+    local og=Duel.GetMatchingGroup(Card.IsFaceup,1-tp,LOCATION_MZONE,0,nil)
+    if #tg>0 and #og>0 then
+        local val=tg:GetSum(Card.GetAttack)
+        for tc in og:Iter() do
+            tc:UpdateAttack(-math.min(val,tc:GetAttack()),RESET_EVENT+RESETS_STANDARD,e:GetHandler())
+            tc:UpdateDefense(-math.min(val,tc:GetDefense()),RESET_EVENT+RESETS_STANDARD,e:GetHandler())
+            --Hack: highlight any who hit 0 so player can tell before ATK/DEF is redrawn
+            if s.filter1(tc) then Duel.HintSelection(tc,true) end
+        end
+        if og:IsExists(s.filter1,1,nil) and Duel.SelectYesNo(tp,aux.Stringid(id,1)) then
+            local dg=og:FilterSelect(tp,s.filter1,1,1,nil)
+            if #dg>0 then
+                Duel.BreakEffect()
+                Duel.Destroy(dg,REASON_EFFECT)
+            end
         end
     end
 end
