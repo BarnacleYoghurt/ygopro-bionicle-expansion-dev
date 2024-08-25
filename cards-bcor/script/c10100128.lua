@@ -28,6 +28,7 @@ function s.initial_effect(c)
 	e2:SetCost(s.cost2)
 	e2:SetTarget(s.target2)
 	e2:SetOperation(s.operation2)
+	e2:SetCountLimit(1)
 	local e2_grant=bcor.rahi_beast_granteff(c,e2,aux.Stringid(id,2))
 	c:RegisterEffect(e2_grant)
 end
