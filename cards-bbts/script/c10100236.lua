@@ -70,6 +70,6 @@ function s.operation2(e,tp,eg,ep,ev,re,r,rp)
 	local val=Duel.GetMatchingGroupCount(s.filter2,tp,LOCATION_REMOVED,0,nil)*500
 	local tg=Duel.GetMatchingGroup(Card.IsFaceup,tp,0,LOCATION_MZONE,nil)
 	for tc in tg:Iter() do
-		tc:UpdateAttack(-val,RESET_EVENT+RESETS_STANDARD+RESET_PHASE+PHASE_END)
+		tc:UpdateAttack(-math.min(tc:GetAttack(),val),RESET_EVENT+RESETS_STANDARD+RESET_PHASE+PHASE_END)
 	end
 end
