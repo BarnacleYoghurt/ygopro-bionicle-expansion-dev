@@ -25,7 +25,7 @@ function s.initial_effect(c)
 	e2:SetCost(s.cost2)
 	e2:SetTarget(s.target2)
 	e2:SetOperation(s.operation2)
-	e2:SetCountLimit(1,{id,1})
+	e2:SetCountLimit(1,id)
 	c:RegisterEffect(e2)
 end
 function s.filter1(c)
