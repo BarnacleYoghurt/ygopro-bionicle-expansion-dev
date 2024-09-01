@@ -37,9 +37,10 @@ function s.operation1(e,tp,eg,ep,ev,re,r,rp)
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_ATOHAND)
 	local g=Duel.SelectMatchingCard(tp,s.filter1a,tp,LOCATION_DECK,0,1,1,nil,tp)
 	if #g>0 then
-		if Duel.SelectYesNo(tp,aux.Stringid(id,1)) then
+		local race,code=g:GetFirst():GetRace(),g:GetFirst():GetCode()
+		if Duel.IsExistingMatchingCard(s.filter1b,tp,LOCATION_DECK,0,1,nil,race,code) and Duel.SelectYesNo(tp,aux.Stringid(id,1)) then
 			Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_ATOHAND)
-			g:Merge(Duel.SelectMatchingCard(tp,s.filter1b,tp,LOCATION_DECK,0,1,1,nil,g:GetFirst():GetRace(),g:GetFirst():GetCode()))
+			g:Merge(Duel.SelectMatchingCard(tp,s.filter1b,tp,LOCATION_DECK,0,1,1,nil,race,code))
 		end
 		Duel.SendtoHand(g,nil,REASON_EFFECT)
 		Duel.ConfirmCards(1-tp,g)
