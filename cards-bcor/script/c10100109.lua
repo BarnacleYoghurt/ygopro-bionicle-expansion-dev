@@ -16,15 +16,16 @@ function s.initial_effect(c)
 	e1:SetOperation(s.operation1)
 	e1:SetCountLimit(1,id)
 	c:RegisterEffect(e1)
-	--Block effects
+	--Bonus attack
 	local e2=Effect.CreateEffect(c)
-	e2:SetType(EFFECT_TYPE_FIELD)
-	e2:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
-	e2:SetCode(EFFECT_CANNOT_ACTIVATE)
+	e2:SetDescription(aux.Stringid(id,1))
+	e2:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O)
+	e2:SetCode(EVENT_DAMAGE_STEP_END)
 	e2:SetRange(LOCATION_MZONE)
-	e2:SetTargetRange(0,1)
 	e2:SetCondition(s.condition2)
-	e2:SetValue(1)
+	e2:SetTarget(s.target2)
+	e2:SetOperation(s.operation2)
+	e2:SetCountLimit(1)
 	local e2_grant=bcor.rahi_beast_granteff(c,e2,aux.Stringid(id,2),aux.Stringid(id,3))
 	c:RegisterEffect(e2_grant)
 end
@@ -50,5 +51,13 @@ function s.operation1(e,tp,eg,ep,ev,re,r,rp)
 	end
 end
 function s.condition2(e,tp,eg,ep,ev,re,r,rp)
-	return Duel.GetAttacker()==e:GetHandler() or Duel.GetAttackTarget()==e:GetHandler()
+	return Duel.GetAttacker()==e:GetHandler() and Duel.GetAttackTarget()~=nil
+end
+function s.target2(e,tp,eg,ep,ev,re,r,rp,chk)
+	if chk==0 then return e:GetHandler():CanChainAttack(0) end
+end
+function s.operation2(e,tp,eg,ep,ev,re,r,rp)
+	if e:GetHandler():IsRelateToBattle() then
+		Duel.ChainAttack()
+	end
 end
