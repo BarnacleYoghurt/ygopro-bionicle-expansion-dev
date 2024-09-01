@@ -22,24 +22,29 @@ function s.initial_effect(c)
 	e2:SetCountLimit(1,id)
 	c:RegisterEffect(e2)
 end
-function s.filter1a(c,e,tp)
-	return c:IsFaceup()	and Duel.IsExistingMatchingCard(s.filter1b,tp,LOCATION_PZONE+LOCATION_GRAVE+LOCATION_EXTRA,0,1,nil,e,tp,c:GetRace(),c:GetAttribute())
+function s.filter1a(c,e,tp,loc)
+	return c:IsFaceup() and Duel.IsExistingMatchingCard(s.filter1b,tp,loc,0,1,nil,e,tp,c:GetRace(),c:GetAttribute())
 end
 function s.filter1b(c,e,tp,r,a)
+	if c:IsLocation(LOCATION_EXTRA) and Duel.GetLocationCountFromEx(tp,tp,nil,c)==0 then return false end
 	return c:IsFaceup() and c:IsSetCard(0xb06) and c:IsType(TYPE_PENDULUM) and (c:IsRace(r) or c:IsAttribute(a))
 		and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
 end
 function s.target1(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
-	if chkc then return s.filter1a(chkc,e,tp) and chkc:IsControler(tp) and chkc:IsLocation(LOCATION_MZONE) end
-	if chk==0 then return Duel.IsExistingTarget(s.filter1a,tp,LOCATION_MZONE,0,1,nil,e,tp) and Duel.GetLocationCount(tp,LOCATION_MZONE)>0 end
-	Duel.SelectTarget(tp,s.filter1a,tp,LOCATION_MZONE,0,1,1,nil,e,tp)
-	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,1,tp,LOCATION_PZONE+LOCATION_GRAVE+LOCATION_EXTRA)
+	local loc=LOCATION_EXTRA
+	if Duel.GetLocationCount(tp,LOCATION_MZONE)>0 then loc=loc+LOCATION_PZONE+LOCATION_GRAVE end
+	if chkc then return s.filter1a(chkc,e,tp,loc) and chkc:IsControler(tp) and chkc:IsLocation(LOCATION_MZONE) end
+	if chk==0 then return Duel.IsExistingTarget(s.filter1a,tp,LOCATION_MZONE,0,1,nil,e,tp,loc) end
+	Duel.SelectTarget(tp,s.filter1a,tp,LOCATION_MZONE,0,1,1,nil,e,tp,loc)
+	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,1,tp,loc)
 end
 function s.operation1(e,tp,eg,ep,ev,re,r,rp)
 	local tc=Duel.GetFirstTarget()
-	if tc:IsRelateToEffect(e) and tc:IsFaceup() and Duel.GetLocationCount(tp,LOCATION_MZONE)>0 then
+	local loc=LOCATION_EXTRA
+	if Duel.GetLocationCount(tp,LOCATION_MZONE)>0 then loc=loc+LOCATION_PZONE+LOCATION_GRAVE end
+	if tc:IsRelateToEffect(e) and tc:IsFaceup() then
 		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
-		local g=Duel.SelectMatchingCard(tp,s.filter1b,tp,LOCATION_PZONE+LOCATION_GRAVE+LOCATION_EXTRA,0,1,1,nil,e,tp,tc:GetRace(),tc:GetAttribute())
+		local g=Duel.SelectMatchingCard(tp,s.filter1b,tp,loc,0,1,1,nil,e,tp,tc:GetRace(),tc:GetAttribute(),loc)
 		if #g>0 and Duel.SpecialSummon(g,0,tp,tp,false,false,POS_FACEUP)>0 then
 			g:GetFirst():RegisterFlagEffect(id,RESET_EVENT+RESETS_STANDARD,0,1)
 			local e1=Effect.CreateEffect(e:GetHandler())
