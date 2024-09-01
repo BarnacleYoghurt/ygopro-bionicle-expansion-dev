@@ -37,10 +37,12 @@ end
 function s.target1(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 	if chkc then return false end
 	local c=e:GetHandler()
-	local g=Duel.GetMatchingGroup(s.filter1,tp,LOCATION_MZONE,LOCATION_MZONE,nil,e)
-	if chk==0 then return c:IsCanBeEffectTarget(e) and Duel.GetLocationCount(c:GetOwner(),LOCATION_SZONE)>0 end
+	if chk==0 then
+		return c:IsCanBeEffectTarget(e) and Duel.GetLocationCount(c:GetOwner(),LOCATION_SZONE)>0
+			and Duel.IsExistingTarget(s.filter1,tp,LOCATION_MZONE,LOCATION_MZONE,1,c,e)
+	end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TOFIELD)
-	local g=Duel.SelectMatchingCard(tp,s.filter1,tp,LOCATION_MZONE,LOCATION_MZONE,1,1,c,e)
+	local g=Duel.SelectTarget(tp,s.filter1,tp,LOCATION_MZONE,LOCATION_MZONE,1,1,c,e)
 	Duel.SetTargetCard(g+c)
 end
 function s.operation1(e,tp,eg,ep,ev,re,r,rp)
