@@ -43,7 +43,14 @@ function s.operation1(e,tp,eg,ep,ev,re,r,rp)
 			g=g:Select(tp,1,1,nil)
 			Duel.HintSelection(g)
 		end
-		Duel.GetControl(g,tp)
+		if Duel.GetControl(g,tp)~=0 then
+			local e2=Effect.CreateEffect(e:GetHandler())
+			e2:SetType(EFFECT_TYPE_SINGLE)
+			e2:SetCode(EFFECT_CANNOT_TRIGGER)
+			e2:SetCondition(function (e) return e:GetHandler():IsControler(tp) end)
+			e2:SetReset(RESET_EVENT+RESETS_STANDARD-RESET_TURN_SET)
+			g:GetFirst():RegisterEffect(e2)
+		end
 	end
 end
 function s.filter2(c)
