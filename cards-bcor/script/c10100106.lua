@@ -35,7 +35,7 @@ function s.initial_effect(c)
 	c:RegisterEffect(e3)
 end
 function s.value1(e)
-	return 400*Duel.GetMatchingGroupCount(aux.FaceupFilter(Card.IsSpellTrap),e:GetHandlerPlayer(),LOCATION_ONFIELD,0,nil)
+	return 400*Duel.GetMatchingGroupCount(aux.FaceupFilter(Card.IsSpellTrap),e:GetHandlerPlayer(),LOCATION_ONFIELD,LOCATION_ONFIELD,nil)
 end
 function s.filter2(c)
 	return c:IsSetCard(0xb06) and c:IsType(TYPE_NORMAL) and c:IsAbleToHand()
