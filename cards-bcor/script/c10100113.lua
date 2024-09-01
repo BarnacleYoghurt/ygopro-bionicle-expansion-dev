@@ -11,24 +11,29 @@ function s.initial_effect(c)
 	e1:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
 	e1:SetProperty(EFFECT_FLAG_CARD_TARGET+EFFECT_FLAG_DELAY)
 	e1:SetCode(EVENT_SPSUMMON_SUCCESS)
-	e1:SetCondition(s.condition1)
 	e1:SetTarget(s.target1)
 	e1:SetOperation(s.operation1)
 	e1:SetCountLimit(1,id)
 	c:RegisterEffect(e1)
-	--Protection
+	--ATK loss
 	local e2=Effect.CreateEffect(c)
-	e2:SetType(EFFECT_TYPE_FIELD)
-	e2:SetRange(LOCATION_SZONE)
-	e2:SetCode(EFFECT_INDESTRUCTABLE_EFFECT)
-	e2:SetTargetRange(LOCATION_ONFIELD,0)
-	e2:SetCondition(function (e) return e:GetHandler():IsContinuousSpell() end)
-	e2:SetTarget(s.target2)
-	e2:SetValue(aux.indoval)
+	e2:SetType(EFFECT_TYPE_SINGLE)
+	e2:SetProperty(EFFECT_FLAG_SINGLE_RANGE)
+	e2:SetRange(LOCATION_MZONE)
+	e2:SetCode(EFFECT_UPDATE_ATTACK)
+	e2:SetCondition(s.condition2)
+	e2:SetValue(-1000)
 	c:RegisterEffect(e2)
-end
-function s.condition1(e,tp,eg,ep,ev,re,r,rp)
-	return not (Duel.IsTurnPlayer(tp) and Duel.IsMainPhase())
+	--Protection
+	local e3=Effect.CreateEffect(c)
+	e3:SetType(EFFECT_TYPE_FIELD)
+	e3:SetRange(LOCATION_SZONE)
+	e3:SetCode(EFFECT_INDESTRUCTABLE_EFFECT)
+	e3:SetTargetRange(LOCATION_ONFIELD,0)
+	e3:SetCondition(function (e) return e:GetHandler():IsContinuousSpell() end)
+	e3:SetTarget(s.target3)
+	e3:SetValue(aux.indoval)
+	c:RegisterEffect(e3)
 end
 function s.target1(e,tp,eg,ep,ev,re,r,rp,chk)
 	local max=math.floor(e:GetHandler():GetAttack()/1000)
@@ -47,6 +52,9 @@ function s.operation1(e,tp,eg,ep,ev,re,r,rp)
 		end
 	end
 end
-function s.target2(e,c)
+function s.condition2(e)
+	return Duel.IsTurnPlayer(e:GetHandlerPlayer()) and Duel.IsMainPhase()
+end
+function s.target3(e,c)
 	return c:IsFaceup() and c:IsSetCard(0xb06)
 end
