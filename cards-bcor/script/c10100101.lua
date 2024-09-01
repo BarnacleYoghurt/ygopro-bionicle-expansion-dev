@@ -14,7 +14,7 @@ function s.initial_effect(c)
 	e1:SetCondition(s.condition1)
 	e1:SetTarget(s.target1)
 	e1:SetOperation(s.operation1)
-	e1:SetCountLimit(1)
+	e1:SetCountLimit(1,id)
 	c:RegisterEffect(e1)
 end
 function s.filter1(c,e,tp)
