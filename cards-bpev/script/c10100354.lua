@@ -15,7 +15,7 @@ function s.initial_effect(c)
     e1:SetCost(s.cost1)
     e1:SetTarget(s.target1)
     e1:SetOperation(s.operation1)
-    e1:SetCountLimit(1,id)
+    e1:SetCountLimit(1)
     c:RegisterEffect(e1)
     --Fusion Summon
     local params={fusfilter=aux.FilterBoolFunction(Card.IsSetCard,0xb06),matfilter=Fusion.OnFieldMat(Card.IsAbleToRemove),extrafil=s.extrafil,extraop=Fusion.BanishMaterial,extratg=s.extratg}
@@ -28,7 +28,7 @@ function s.initial_effect(c)
     e2:SetCondition(function(e) return Duel.GetCurrentPhase()~=PHASE_DAMAGE end)
     e2:SetTarget(Fusion.SummonEffTG(params))
     e2:SetOperation(Fusion.SummonEffOP(params))
-    e2:SetCountLimit(1,{id,1})
+    e2:SetCountLimit(1,id)
     c:RegisterEffect(e2)
 end
 function s.spcheck1(sg,tp,_,e)
