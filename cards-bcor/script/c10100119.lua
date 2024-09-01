@@ -79,11 +79,11 @@ function s.filter2a(c)
 	return c:IsSetCard(0xb06) and c:IsMonsterCard() and c:IsAbleToRemoveAsCost()
 end
 function s.filter2b(c)
-	return c:IsRace(RACE_FISH|RACE_SEASERPENT|RACE_AQUA) and c:IsSetCard(0xb06) and c:IsAbleToHand()
+	return c:IsRace(RACE_FISH|RACE_SEASERPENT|RACE_AQUA) and c:IsSetCard(0xb06) and c:IsAbleToHand() and not c:IsCode(id)
 end
 function s.cost2(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingMatchingCard(s.filter2a,tp,LOCATION_HAND+LOCATION_ONFIELD,0,1,nil) end
-	local max=math.min(2,Duel.GetMatchingGroupCount(s.filter2b,tp,LOCATION_DECK,0,nil))
+	local max=math.min(2,Duel.GetMatchingGroup(s.filter2b,tp,LOCATION_DECK,0,nil):GetClassCount(Card.GetCode))
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_REMOVE)
 	local g=Duel.SelectMatchingCard(tp,s.filter2a,tp,LOCATION_HAND+LOCATION_ONFIELD,0,1,max,nil)
 	e:SetLabel(Duel.Remove(g,POS_FACEUP,REASON_COST))
@@ -93,12 +93,13 @@ function s.target2(e,tp,eg,ep,ev,re,r,rp,chk)
 	Duel.SetOperationInfo(0,CATEGORY_TOHAND,nil,e:GetLabel(),tp,LOCATION_DECK)
 end
 function s.operation2(e,tp,eg,ep,ev,re,r,rp)
-	if Duel.GetMatchingGroupCount(s.filter2b,tp,LOCATION_DECK,0,nil)>=e:GetLabel() then
+	local g=Duel.GetMatchingGroup(s.filter2b,tp,LOCATION_DECK,0,nil)
+	if g:GetClassCount(Card.GetCode)>=e:GetLabel() then
 		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_ATOHAND)
-		local g=Duel.SelectMatchingCard(tp,s.filter2b,tp,LOCATION_DECK,0,e:GetLabel(),e:GetLabel(),nil)
-		if #g>0 then
-			Duel.SendtoHand(g,nil,REASON_EFFECT)
-			Duel.ConfirmCards(1-tp,g)
+		local sg=aux.SelectUnselectGroup(g,e,tp,e:GetLabel(),e:GetLabel(),aux.dncheck,1,tp,HINTMSG_ATOHAND)
+		if #sg>0 then
+			Duel.SendtoHand(sg,nil,REASON_EFFECT)
+			Duel.ConfirmCards(1-tp,sg)
 		end
 	end
 end
