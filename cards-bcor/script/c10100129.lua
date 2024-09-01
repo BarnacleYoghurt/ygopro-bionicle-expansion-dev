@@ -30,10 +30,14 @@ function s.initial_effect(c)
 	local e2b=e2:Clone()
 	e2b:SetCode(EVENT_SPSUMMON_SUCCESS)
 	c:RegisterEffect(e2b)
-	--Attack all monsters
+	--Block effects
 	local e3=Effect.CreateEffect(c)
-	e3:SetType(EFFECT_TYPE_SINGLE)
-	e3:SetCode(EFFECT_ATTACK_ALL)
+	e3:SetType(EFFECT_TYPE_FIELD)
+	e3:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
+	e3:SetCode(EFFECT_CANNOT_ACTIVATE)
+	e3:SetRange(LOCATION_MZONE)
+	e3:SetTargetRange(0,1)
+	e3:SetCondition(s.condition3)
 	e3:SetValue(1)
 	local e3_grant=bcor.rahi_beast_granteff(c,e3,aux.Stringid(id,2),aux.Stringid(id,3))
 	c:RegisterEffect(e3_grant)
@@ -70,4 +74,7 @@ function s.operation2(e,tp,eg,ep,ev,re,r,rp)
 	if #g>0 then
 		Duel.SendtoGrave(g,REASON_EFFECT)
 	end
+end
+function s.condition3(e,tp,eg,ep,ev,re,r,rp)
+	return Duel.GetAttacker()==e:GetHandler() or Duel.GetAttackTarget()==e:GetHandler()
 end
