@@ -32,12 +32,10 @@ function s.initial_effect(c)
 	c:RegisterEffect(e2b)
 	--Attack all monsters
 	local e3=Effect.CreateEffect(c)
-	e3:SetDescription(aux.Stringid(id,2))
 	e3:SetType(EFFECT_TYPE_SINGLE)
-	e3:SetProperty(EFFECT_FLAG_CLIENT_HINT)
 	e3:SetCode(EFFECT_ATTACK_ALL)
 	e3:SetValue(1)
-	local e3_grant=bcor.rahi_beast_granteff(c,e3,aux.Stringid(id,3))
+	local e3_grant=bcor.rahi_beast_granteff(c,e3,aux.Stringid(id,2),aux.Stringid(id,3))
 	c:RegisterEffect(e3_grant)
 end
 function s.filter1(c,tp)

@@ -11,6 +11,7 @@
 !util-bcot.lua
 # BCOR
 !cards-bcor/**/*.lua
+!util-bcor.lua
 # BBTS
 !cards-bbts/**/*.lua
 !util-bbts.lua
