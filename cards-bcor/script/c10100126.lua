@@ -43,11 +43,9 @@ function s.operation1(e,tp,eg,ep,ev,re,r,rp,chk)
 	local g1=Duel.SelectMatchingCard(tp,s.filter1a,tp,LOCATION_DECK,0,1,1,nil)
 	if #g1>0 and Duel.SendtoHand(g1,nil,REASON_EFFECT)>0 and g1:FilterCount(Card.IsLocation,nil,LOCATION_HAND)>0 then
 		Duel.ConfirmCards(1-tp,g1)
-		local g2=Duel.SelectMatchingCard(tp,s.filter1b,tp,LOCATION_HAND,0,1,1,nil)
-		if #g2>0 then
-			Duel.BreakEffect()
-			Duel.SendtoExtraP(g2,nil,REASON_EFFECT)
-		end
+		Duel.BreakEffect()
+		Duel.ShuffleHand(tp)
+		Duel.DiscardHand(tp,aux.TRUE,1,1,REASON_EFFECT+REASON_DISCARD)
 	end
 end
 function s.filter2(c)
