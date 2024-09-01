@@ -55,6 +55,5 @@ function s.operation1(e,tp,eg,ep,ev,re,r,rp)
 	end
 end
 function s.target2(e,c)
-	local g=e:GetHandler():GetColumnGroup()
-	return c:IsSetCard(0xb06) and c:IsRace(RACE_REPTILE) and g:IsContains(c)
+	return c:IsSetCard(0xb06) and c:IsRace(RACE_REPTILE) and (c:GetSequence()==0 or c:GetSequence()==4)
 end
