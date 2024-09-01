@@ -7,7 +7,7 @@ function s.initial_effect(c)
 	e1:SetCategory(CATEGORY_SPECIAL_SUMMON+CATEGORY_DESTROY)
 	e1:SetDescription(aux.Stringid(id,0))
 	e1:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O)
-	e1:SetProperty(EFFECT_FLAG_CARD_TARGET+EFFECT_FLAG_DELAY)
+	e1:SetProperty(EFFECT_FLAG_CARD_TARGET+EFFECT_FLAG_DELAY+EFFECT_FLAG_DAMAGE_STEP)
 	e1:SetRange(LOCATION_PZONE)
 	e1:SetCode(EVENT_REMOVE)
 	e1:SetTarget(s.target1)
@@ -34,6 +34,7 @@ function s.initial_effect(c)
 	e3:SetRange(LOCATION_MZONE)
 	e3:SetCode(EVENT_BATTLE_CONFIRM)
 	e3:SetCondition(s.condition3)
+	e3:SetCost(s.cost3)
 	e3:SetTarget(s.target3)
 	e3:SetOperation(s.operation3)
 	c:RegisterEffect(e3)
@@ -87,7 +88,15 @@ function s.operation2(e,tp,eg,ep,ev,re,r,rp,c)
 	e:GetLabelObject():DeleteGroup()
 end
 function s.filter3(c)
-  return c:IsFaceup() and c:IsSetCard(0xb06) and c:IsAbleToRemove()
+  return c:IsFaceup() and c:IsSetCard(0xb06) and c:IsAbleToRemoveAsCost()
+end
+function s.cost3(e,tp,eg,ep,ev,re,r,rp,chk)
+	if chk==0 then return Duel.IsExistingMatchingCard(s.filter3,tp,LOCATION_MZONE,0,1,nil) end
+	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_REMOVE)
+	local g=Duel.SelectMatchingCard(tp,s.filter3,tp,LOCATION_MZONE,0,1,1,nil)
+	if #g>0 then
+		Duel.Remove(g,POS_FACEUP,REASON_COST)
+	end
 end
 function s.condition3(e,tp,eg,ep,ev,re,r,rp)
 	local a=Duel.GetAttacker()
@@ -95,17 +104,12 @@ function s.condition3(e,tp,eg,ep,ev,re,r,rp)
 end
 function s.target3(e,tp,eg,ep,ev,re,r,rp,chk)
 	local d=Duel.GetAttackTarget()
-	if chk==0 then return d and d:IsDefensePos() and Duel.IsExistingMatchingCard(s.filter3,tp,LOCATION_MZONE,0,1,nil) end
+	if chk==0 then return d and d:IsDefensePos() end
 	Duel.SetOperationInfo(0,CATEGORY_DESTROY,d,1,0,0)
-	Duel.SetOperationInfo(0,CATEGORY_REMOVE,nil,1,tp,LOCATION_MZONE)
 end
 function s.operation3(e,tp,eg,ep,ev,re,r,rp)
 	local d=Duel.GetAttackTarget()
-	if d:IsRelateToBattle() and d:IsDefensePos() and Duel.Destroy(d,REASON_EFFECT) then
-		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_REMOVE)
-		local g=Duel.SelectMatchingCard(tp,s.filter3,tp,LOCATION_MZONE,0,1,1,nil)
-		if #g>0 then
-			Duel.Remove(g,POS_FACEUP,REASON_EFFECT)
-		end
+	if d:IsRelateToBattle() and d:IsDefensePos() then
+		Duel.Destroy(d,REASON_EFFECT)
 	end
 end
