@@ -53,6 +53,7 @@ function s.filter2b(c)
 end
 function s.target2(e,tp,eg,ep,ev,re,r,rp,chk)
     if chk==0 then return Duel.IsExistingMatchingCard(s.filter2a,tp,LOCATION_MZONE,0,1,nil) end
+	Duel.SetChainLimit(aux.FALSE)
 end
 function s.operation2(e,tp,eg,ep,ev,re,r,rp)
     local g=Duel.GetMatchingGroup(s.filter2a,tp,LOCATION_MZONE,0,nil)
