@@ -78,19 +78,12 @@ function s.operation1(e,tp,eg,ep,ev,re,r,rp)
       end
     end
   end
-  local e1=Effect.CreateEffect(e:GetHandler())
-	e1:SetType(EFFECT_TYPE_FIELD)
-	e1:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
-	e1:SetTargetRange(1,0)
-	e1:SetCode(EFFECT_CANNOT_SPECIAL_SUMMON)
-	e1:SetReset(RESET_PHASE+PHASE_END)
-	Duel.RegisterEffect(e1,tp)
 end
 function s.filter2(c)
   return c:IsFaceup() and c:IsCode(10100250)
 end
 function s.condition2(e,tp,eg,ep,ev,re,r,rp)
-  return aux.exccon(e) and Duel.IsExistingMatchingCard(s.filter2,tp,LOCATION_ONFIELD,0,1,nil)
+  return Duel.IsExistingMatchingCard(s.filter2,tp,LOCATION_ONFIELD,0,1,nil)
 end
 function s.cost2(e,tp,eg,ep,ev,re,r,rp,chk)
   local c=e:GetHandler()
