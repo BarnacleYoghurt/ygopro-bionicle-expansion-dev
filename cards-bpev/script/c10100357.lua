@@ -45,26 +45,23 @@ function s.operation1(e,tp,eg,ep,ev,re,r,rp)
         end
     end
 end
-function s.filter2a(c)
-    return c:IsSetCard(0xb08) and c:IsType(TYPE_XYZ) and c:GetOverlayGroup():IsExists(s.filter2b,1,nil)
-end
-function s.filter2b(c)
-    return c:IsSetCard(0xb09) and c:IsType(TYPE_LINK)
-end
 function s.target2(e,tp,eg,ep,ev,re,r,rp,chk)
-    if chk==0 then return Duel.IsExistingMatchingCard(s.filter2a,tp,LOCATION_MZONE,0,1,nil) end
+    if chk==0 then return true end
 	Duel.SetChainLimit(aux.FALSE)
 end
 function s.operation2(e,tp,eg,ep,ev,re,r,rp)
-    local g=Duel.GetMatchingGroup(s.filter2a,tp,LOCATION_MZONE,0,nil)
-    for tc in g:Iter() do
-        local e1=Effect.CreateEffect(e:GetHandler())
-        e1:SetDescription(3100)
-        e1:SetType(EFFECT_TYPE_SINGLE)
-        e1:SetProperty(EFFECT_FLAG_CLIENT_HINT)
-        e1:SetCode(EFFECT_IMMUNE_EFFECT)
-        e1:SetValue(function (e_,re_) return e_:GetHandler()~=re_:GetOwner() end)
-		e1:SetReset(RESET_EVENT+RESETS_STANDARD+RESET_PHASE+PHASE_END)
-		tc:RegisterEffect(e1)
-    end
+    local e1=Effect.CreateEffect(e:GetHandler())
+    e1:SetType(EFFECT_TYPE_FIELD)
+    e1:SetTargetRange(LOCATION_MZONE,0)
+    e1:SetCode(EFFECT_IMMUNE_EFFECT)
+    e1:SetTarget(aux.TargetBoolFunction(s.filter2_1a))
+    e1:SetValue(function (e_,re_) return e_:GetHandler()~=re_:GetOwner() end)
+    e1:SetReset(RESET_EVENT+RESETS_STANDARD+RESET_PHASE+PHASE_END)
+    Duel.RegisterEffect(e1,tp)
+end
+function s.filter2_1a(c)
+    return c:IsSetCard(0xb08) and c:IsType(TYPE_XYZ) and c:GetOverlayGroup():IsExists(s.filter2_1b,1,nil)
+end
+function s.filter2_1b(c)
+    return c:IsSetCard(0xb09) and c:IsType(TYPE_LINK)
 end
