@@ -8,6 +8,17 @@ function s.initial_effect(c)
 	e1:SetTarget(s.target1)
 	e1:SetOperation(s.operation1)
     c:RegisterEffect(e1)
+    --Draw
+    local e2=Effect.CreateEffect(c)
+    e2:SetDescription(aux.Stringid(id,2))
+    e2:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
+    e2:SetProperty(EFFECT_FLAG_DELAY)
+    e2:SetCode(EVENT_TO_GRAVE)
+    e2:SetCondition(s.condition2)
+    e2:SetTarget(s.target2)
+    e2:SetOperation(s.operation2)
+    e2:SetCountLimit(1,id)
+    c:RegisterEffect(e2)
 end
 function s.filter1a(c)
     return c:IsSetCard(0xb0d) and c:IsEquipSpell() and c:IsAbleToHand()
@@ -68,4 +79,29 @@ function s.operation1(e,tp,eg,ep,ev,re,r,rp)
             tc:RegisterEffect(e1b)
         end
     end
+end
+function s.condition2(e,tp,eg,ep,ev,re,r,rp)
+    return e:GetHandler():IsPreviousLocation(LOCATION_ONFIELD)
+end
+function s.target2(e,tp,eg,ep,ev,re,r,rp,chk)
+    if chk==0 then return Duel.IsPlayerCanDraw(tp,1) end
+    Duel.SetTargetPlayer(tp)
+    Duel.SetTargetParam(1)
+    Duel.SetOperationInfo(0,CATEGORY_DRAW,nil,0,tp,1)
+end
+function s.operation2(e,tp,eg,ep,ev,re,r,rp)
+    local p,d=Duel.GetChainInfo(0,CHAININFO_TARGET_PLAYER,CHAININFO_TARGET_PARAM)
+	Duel.Draw(p,d,REASON_EFFECT)
+
+    local e1=Effect.CreateEffect(e:GetHandler())
+    e1:SetType(EFFECT_TYPE_FIELD)
+    e1:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
+    e1:SetCode(EFFECT_SKIP_DP)
+    e1:SetTargetRange(1,0)
+    if Duel.GetTurnPlayer()==tp and Duel.GetCurrentPhase()==PHASE_DRAW then 
+        e1:SetReset(RESET_PHASE+PHASE_DRAW+RESET_SELF_TURN,2)
+    else
+        e1:SetReset(RESET_PHASE+PHASE_DRAW+RESET_SELF_TURN)
+    end
+    Duel.RegisterEffect(e1,tp)
 end
