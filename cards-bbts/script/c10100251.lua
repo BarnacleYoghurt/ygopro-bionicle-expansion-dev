@@ -74,6 +74,14 @@ function s.operation1(e,tp,eg,ep,ev,re,r,rp)
         Duel.BreakEffect()
         if Duel.Equip(tp,g2:GetFirst(),g1:GetFirst()) then
           aux.SetUnionState(g2:GetFirst())
+          --Cannot activate
+          local e1=Effect.CreateEffect(e:GetHandler())
+          e1:SetDescription(3302)
+          e1:SetType(EFFECT_TYPE_SINGLE)
+          e1:SetProperty(EFFECT_FLAG_CLIENT_HINT)
+          e1:SetCode(EFFECT_CANNOT_TRIGGER)
+          e1:SetReset(RESET_EVENT+RESETS_STANDARD+RESET_PHASE+PHASE_END)
+          g2:GetFirst():RegisterEffect(e1)
         end
       end
     end
