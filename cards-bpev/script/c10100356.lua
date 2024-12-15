@@ -17,8 +17,7 @@ function s.initial_effect(c)
     e2:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O)
     e2:SetRange(LOCATION_GRAVE)
     e2:SetCode(EVENT_PHASE+PHASE_END)
-    e2:SetCondition(s.condition2)
-    e2:SetCost(aux.bfgcost)
+    e2:SetCost(s.cost2)
     e2:SetTarget(s.target2)
     e2:SetOperation(s.operation2)
     e2:SetCountLimit(1)
@@ -80,8 +79,18 @@ end
 function s.filter2b(c)
     return c:IsCode(10100251) and c:IsSSetable() and not (c:IsLocation(LOCATION_REMOVED) and c:IsFacedown())
 end
-function s.condition2(e,tp,eg,ep,ev,re,r,rp)
-    return e:GetHandler():GetTurnID()==Duel.GetTurnCount()
+function s.filter2c(c)
+    return c:IsCode(10100250) and c:IsAbleToDeckAsCost()
+end
+function s.cost2(e,tp,eg,ep,ev,re,r,rp,chk)
+    local c=e:GetHandler()
+    if chk==0 then
+        return c:IsAbleToRemoveAsCost() and Duel.IsExistingMatchingCard(s.filter2c,tp,LOCATION_GRAVE+LOCATION_REMOVED,0,1,nil)
+    end
+    Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TODECK)
+    local g=Duel.SelectMatchingCard(tp,s.filter2c,tp,LOCATION_GRAVE+LOCATION_REMOVED,0,1,1,nil)
+	Duel.Remove(c,POS_FACEUP,REASON_COST)
+    Duel.SendtoDeck(g,tp,SEQ_DECKSHUFFLE,REASON_COST)
 end
 function s.target2(e,tp,eg,ep,ev,re,r,rp,chk)
     if chk==0 then return Duel.IsExistingMatchingCard(s.filter2a,tp,LOCATION_DECK,0,1,nil) end
