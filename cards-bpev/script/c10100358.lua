@@ -30,7 +30,7 @@ function s.initial_effect(c)
     e3:SetCategory(CATEGORY_SEARCH+CATEGORY_TOHAND)
     e3:SetType(EFFECT_TYPE_IGNITION)
     e3:SetRange(LOCATION_SZONE)
-    e3:SetCondition(bcot.greatkanohi_con)
+    e3:SetCondition(s.condition3)
     e3:SetTarget(s.target3)
     e3:SetOperation(s.operation3)
     e3:SetCountLimit(1)
@@ -53,6 +53,10 @@ function s.filter0(c)
 end
 function s.filter3(c)
     return c:IsSetCard(0xb0d) and not c:IsEquipSpell() and c:IsAbleToHand()
+end
+function s.condition3(e,tp,eg,ep,ev,re,r,rp)
+    local ec=e:GetHandler():GetEquipTarget()
+    return bcot.greatkanohi_con(e) and ec:IsControler(e:GetOwnerPlayer())
 end
 function s.target3(e,tp,eg,ep,ev,re,r,rp,chk)
     if chk==0 then return Duel.IsExistingMatchingCard(s.filter3,tp,LOCATION_DECK+LOCATION_GRAVE,0,1,nil) end
