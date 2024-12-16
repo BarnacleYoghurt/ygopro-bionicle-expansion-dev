@@ -66,7 +66,7 @@ function s.operation2(e,tp,eg,ep,ev,re,r,rp)
     e1:SetTargetRange(LOCATION_MZONE,0)
     e1:SetCode(EFFECT_IMMUNE_EFFECT)
     e1:SetTarget(aux.TargetBoolFunction(s.filter2_1a))
-    e1:SetValue(function (e_,re_) return e_:GetHandler()~=re_:GetOwner() end)
+    e1:SetValue(function (_,re_,c) return c~=re_:GetOwner() end)
     e1:SetReset(RESET_EVENT+RESETS_STANDARD+RESET_PHASE+PHASE_END)
     Duel.RegisterEffect(e1,tp)
 end
