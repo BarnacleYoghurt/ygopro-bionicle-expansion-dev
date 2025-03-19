@@ -64,8 +64,8 @@ function BPEV.toa_nuva_kaita_search(baseC)
   return e
 end
 --Kanohi Nuva
-function BPEV.kanohi_nuva_search_spell(baseC,aoeop,id)
-  return bpev.kanohi_nuva_search(baseC,aoeop,id,
+function BPEV.kanohi_nuva_search_spell(baseC,aoetg,aoeop,id)
+  return bpev.kanohi_nuva_search(baseC,aoetg,aoeop,id,
     function (c,tp)
       return c:IsSetCard(0xb0c) and c:IsType(TYPE_CONTINUOUS) and c:IsType(TYPE_SPELL) and not c:IsForbidden() and c:CheckUniqueOnField(tp)
     end,
@@ -73,8 +73,8 @@ function BPEV.kanohi_nuva_search_spell(baseC,aoeop,id)
     HINTMSG_TOFIELD
   )
 end
-function BPEV.kanohi_nuva_search_trap(baseC,aoeop,id)
-  return bpev.kanohi_nuva_search(baseC,aoeop,id,
+function BPEV.kanohi_nuva_search_trap(baseC,aoetg,aoeop,id)
+  return bpev.kanohi_nuva_search(baseC,aoetg,aoeop,id,
     function (c,tp)
       return c:IsSetCard(0xb0c) and c:IsType(TYPE_TRAP) and c:IsSSetable()
     end,
@@ -82,7 +82,7 @@ function BPEV.kanohi_nuva_search_trap(baseC,aoeop,id)
     HINTMSG_SET
   )
 end
-function BPEV.kanohi_nuva_search(baseC,aoeop,id,searchfilter,searchop,hintmsg)
+function BPEV.kanohi_nuva_search(baseC,aoetg,aoeop,id,searchfilter,searchop,hintmsg)
   local function filterA(c)
     return c:IsType(TYPE_MONSTER) and c:IsAbleToRemoveAsCost()
   end
@@ -90,7 +90,7 @@ function BPEV.kanohi_nuva_search(baseC,aoeop,id,searchfilter,searchop,hintmsg)
     return c:IsFaceup() and c:IsSetCard(0x3b02)
   end
   local function cost(e,tp,eg,ep,ev,re,r,rp,chk)
-    if chk==0 then 
+    if chk==0 then
       return Duel.IsExistingMatchingCard(filterA,tp,LOCATION_GRAVE,0,1,nil) and
         Duel.GetCustomActivityCount(id,tp,ACTIVITY_CHAIN)==0 --need to check in cost so it updates after every trigger
     end
@@ -99,9 +99,11 @@ function BPEV.kanohi_nuva_search(baseC,aoeop,id,searchfilter,searchop,hintmsg)
     Duel.Remove(g,POS_FACEUP,REASON_COST)
   end
   local function target(e,tp,eg,ep,ev,re,r,rp,chk)
-    if chk==0 then 
+    if chk==0 then
       return Duel.GetLocationCount(tp,LOCATION_SZONE)>0 and Duel.IsExistingMatchingCard(searchfilter,tp,LOCATION_DECK,0,1,nil,tp)
+        and (not aoetg or aoetg(e,tp,eg,ep,ev,re,r,rp,chk))
     end
+    if aoetg then aoetg(e,tp,eg,ep,ev,re,r,rp,chk) end
   end
   local function operation(e,tp,eg,ep,ev,re,r,rp)
     if Duel.GetLocationCount(tp,LOCATION_SZONE)>0 then

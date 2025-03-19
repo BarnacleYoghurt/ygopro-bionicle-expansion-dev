@@ -26,7 +26,7 @@ function s.initial_effect(c)
   e3:SetCondition(function(e) return bcot.kanohi_con(e,{0x3b02}) end)
   c:RegisterEffect(e3)
   --Place Nuva Symbol & boost field
-  local e4,chainfilter=bpev.kanohi_nuva_search_spell(c,s.operation4,id)
+  local e4,chainfilter=bpev.kanohi_nuva_search_spell(c,nil,s.operation4,id)
   Duel.AddCustomActivityCounter(id,ACTIVITY_CHAIN,chainfilter)
   e4:SetDescription(aux.Stringid(id,0))
   c:RegisterEffect(e4)

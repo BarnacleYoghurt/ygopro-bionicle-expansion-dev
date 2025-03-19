@@ -19,7 +19,7 @@ function s.initial_effect(c)
     e2:SetValue(1)
     c:RegisterEffect(e2)
     --Place Nuva Symbol & allow direct attacks
-    local e4,chainfilter=bpev.kanohi_nuva_search_trap(c,s.operation4,id)
+    local e4,chainfilter=bpev.kanohi_nuva_search_trap(c,nil,s.operation4,id)
     Duel.AddCustomActivityCounter(id,ACTIVITY_CHAIN,chainfilter)
     e4:SetDescription(aux.Stringid(id,0))
     c:RegisterEffect(e4)
