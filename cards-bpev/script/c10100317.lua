@@ -1,39 +1,41 @@
 if not bcot then
-	Duel.LoadScript("util-bcot.lua")
+  Duel.LoadScript("util-bcot.lua")
 end
 if not bpev then
-	Duel.LoadScript("util-bpev.lua")
+  Duel.LoadScript("util-bpev.lua")
 end
 --Great Kanohi Miru Nuva
 local s,id=GetID()
-function s.initial_effect(c) aux.AddEquipProcedure(c)
+function s.initial_effect(c)
+  aux.AddEquipProcedure(c)
   --Destroy if replaced
   local e1=bcot.kanohi_selfdestruct(c)
   c:RegisterEffect(e1)
   --Negate targeting effects
-	local e2=Effect.CreateEffect(c)
-	e2:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
+  local e2=Effect.CreateEffect(c)
+  e2:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
   e2:SetRange(LOCATION_SZONE)
-	e2:SetCode(EVENT_CHAIN_SOLVING)
-	e2:SetCondition(s.condition2)
+  e2:SetCode(EVENT_CHAIN_SOLVING)
+  e2:SetCondition(s.condition2)
   e2:SetOperation(s.operation2)
-	c:RegisterEffect(e2)
+  c:RegisterEffect(e2)
   --Place Nuva Symbol & protect field
   local e3,chainfilter=bpev.kanohi_nuva_search_trap(c,nil,s.operation3,id)
   Duel.AddCustomActivityCounter(id,ACTIVITY_CHAIN,chainfilter)
   e3:SetDescription(aux.Stringid(id,0))
   c:RegisterEffect(e3)
 end
+s.listed_series={0xb02,0x3b02,0xb04,0xb0c}
 function s.condition2(e,tp,eg,ep,ev,re,r,rp)
-	if not (bcot.kanohi_con(e,{0x3b02}) and re:IsHasProperty(EFFECT_FLAG_CARD_TARGET)) then return false end
-	local g=Duel.GetChainInfo(ev,CHAININFO_TARGET_CARDS)
-	return g and g:IsContains(e:GetHandler():GetEquipTarget()) and ep~=tp
+  if not (bcot.kanohi_con(e,{0x3b02}) and re:IsHasProperty(EFFECT_FLAG_CARD_TARGET)) then return false end
+  local g=Duel.GetChainInfo(ev,CHAININFO_TARGET_CARDS)
+  return g and g:IsContains(e:GetHandler():GetEquipTarget()) and ep~=tp
 end
 function s.operation2(e,tp,eg,ep,ev,re,r,rp)
-	Duel.NegateEffect(ev)
+  Duel.NegateEffect(ev)
 end
 function s.operation3(e,tp,eg,ep,ev,re,r,rp)
-  local g=Duel.GetMatchingGroup(aux.TRUE,tp,LOCATION_MZONE,0,nil)
+  local g=Duel.GetMatchingGroup(Card.IsFaceup,tp,LOCATION_MZONE,0,nil)
   for tc in aux.Next(g) do
     local e1=Effect.CreateEffect(e:GetHandler())
     e1:SetDescription(3061)
