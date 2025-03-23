@@ -1,14 +1,14 @@
 if not bpev then
-	Duel.LoadScript("util-bpev.lua")
+  Duel.LoadScript("util-bpev.lua")
 end
 --Nuva Symbol of Soaring Vitality
 local s,id=GetID()
 function s.initial_effect(c)
   --Activate
   local e0=Effect.CreateEffect(c)
-	e0:SetType(EFFECT_TYPE_ACTIVATE)
-	e0:SetCode(EVENT_FREE_CHAIN)
-	c:RegisterEffect(e0)
+  e0:SetType(EFFECT_TYPE_ACTIVATE)
+  e0:SetCode(EVENT_FREE_CHAIN)
+  c:RegisterEffect(e0)
   --Search EP or Lewa
   local e1=bpev.nuva_symbol_search(c,10100006,aux.Stringid(id,3))
   e1:SetDescription(aux.Stringid(id,0))
@@ -19,21 +19,24 @@ function s.initial_effect(c)
   e2:SetDescription(aux.Stringid(id,1))
   e2:SetCategory(CATEGORY_SPECIAL_SUMMON)
   e2:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O)
-  e2:SetProperty(EFFECT_FLAG_DELAY)
-	e2:SetCode(EVENT_LEAVE_FIELD)
-	e2:SetRange(LOCATION_SZONE)
-	e2:SetCondition(s.condition2)
+  e2:SetProperty(EFFECT_FLAG_DELAY+EFFECT_FLAG_CARD_TARGET)
+  e2:SetRange(LOCATION_SZONE)
+  e2:SetCode(EVENT_LEAVE_FIELD)
+  e2:SetCondition(s.condition2)
   e2:SetTarget(s.target2)
-	e2:SetOperation(s.operation2)
+  e2:SetOperation(s.operation2)
   e2:SetCountLimit(1,{id,1})
-	c:RegisterEffect(e2)
+  c:RegisterEffect(e2)
   --Leave field
   local e3=bpev.nuva_symbol_punish(c,s.operation3)
   e3:SetDescription(aux.Stringid(id,2))
   c:RegisterEffect(e3)
 end
+s.listed_names={10100006}
+s.listed_series={0xb02,0x3b02,0xb0b}
 function s.filter2a(c,tp)
-  return c:IsPreviousPosition(POS_FACEUP) and c:IsSetCard(0x3b02) and c:IsPreviousControler(tp) and c:IsReason(REASON_EFFECT)
+  return c:IsPreviousSetCard(0x3b02) and c:IsPreviousPosition(POS_FACEUP) and c:IsPreviousControler(tp)
+     and c:IsPreviousLocation(LOCATION_MZONE) and c:IsReason(REASON_EFFECT)
 end
 function s.filter2b(c,e,tp)
   return c:IsLevelBelow(8) and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
@@ -43,14 +46,17 @@ function s.condition2(e,tp,eg,ep,ev,re,r,rp)
 end
 function s.target2(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
   if chkc then return s.filter2b(chkc,e,tp) and chkc:IsControler(tp) and chkc:IsLocation(LOCATION_GRAVE) end
-  if chk==0 then return Duel.IsExistingTarget(s.filter2b,tp,LOCATION_GRAVE,0,1,nil,e,tp) end
+  if chk==0 then
+    return Duel.GetLocationCount(tp,LOCATION_MZONE)>0
+      and Duel.IsExistingTarget(s.filter2b,tp,LOCATION_GRAVE,0,1,nil,e,tp)
+  end
   Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
   local tc=Duel.SelectTarget(tp,s.filter2b,tp,LOCATION_GRAVE,0,1,1,nil,e,tp)
   Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,tc,1,0,0)
 end
 function s.operation2(e,tp,eg,ep,ev,re,r,rp)
-	local tc=Duel.GetFirstTarget()
-  if e:GetHandler():IsRelateToEffect(e) and tc:IsRelateToEffect(e) then
+  local tc=Duel.GetFirstTarget()
+  if tc:IsRelateToEffect(e) then
     Duel.SpecialSummon(tc,0,tp,tp,false,false,POS_FACEUP)
   end
 end

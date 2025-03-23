@@ -1,5 +1,5 @@
 if not bpev then
-	Duel.LoadScript("util-bpev.lua")
+    Duel.LoadScript("util-bpev.lua")
 end
 --Nuva Symbol of Granite Tenacity
 local s,id=GetID()
@@ -19,8 +19,8 @@ function s.initial_effect(c)
     e2:SetDescription(aux.Stringid(id,1))
     e2:SetCategory(CATEGORY_SPECIAL_SUMMON)
     e2:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_TRIGGER_O)
-    e2:SetRange(LOCATION_SZONE)
     e2:SetProperty(EFFECT_FLAG_DELAY)
+    e2:SetRange(LOCATION_SZONE)
     e2:SetCode(EVENT_SPSUMMON_SUCCESS)
     e2:SetCondition(s.condition2)
     e2:SetTarget(s.target2)
@@ -28,10 +28,12 @@ function s.initial_effect(c)
     e2:SetCountLimit(1,{id,1})
     c:RegisterEffect(e2)
     --Leave field
-    local e3=bpev.nuva_symbol_punish(c,s.operation3)
+    local e3=bpev.nuva_symbol_punish(c,s.operation3,s.target3)
     e3:SetDescription(aux.Stringid(id,2))
     c:RegisterEffect(e3)
 end
+s.listed_names={10100004}
+s.listed_series={0xb02,0x3b02,0xb0b}
 function s.filter2a(c)
     return c:IsFaceup() and c:IsSetCard(0x3b02)
 end
@@ -44,15 +46,24 @@ end
 function s.target2(e,tp,eg,ep,ev,re,r,rp,chk)
    if chk==0 then
     return Duel.GetLocationCount(tp,LOCATION_MZONE)>0
-        and Duel.IsExistingMatchingCard(aux.NecroValleyFilter(s.filter2b),tp,LOCATION_HAND+LOCATION_GRAVE,0,1,nil,e,tp)
+        and Duel.IsExistingMatchingCard(s.filter2b,tp,LOCATION_HAND+LOCATION_GRAVE,0,1,nil,e,tp)
    end
    Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,1,tp,LOCATION_HAND+LOCATION_GRAVE)
 end
 function s.operation2(e,tp,eg,ep,ev,re,r,rp)
-    Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
-    local g=Duel.SelectMatchingCard(tp,aux.NecroValleyFilter(s.filter2b),tp,LOCATION_HAND+LOCATION_GRAVE,0,1,1,nil,e,tp)
+    if Duel.GetLocationCount(tp,LOCATION_MZONE)>0 then
+        Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
+        local g=Duel.SelectMatchingCard(tp,aux.NecroValleyFilter(s.filter2b),tp,LOCATION_HAND+LOCATION_GRAVE,0,1,1,nil,e,tp)
+        if #g>0 then
+            Duel.SpecialSummon(g,0,tp,tp,false,false,POS_FACEUP)
+        end
+    end
+end
+function s.target3(e,tp,eg,ep,ev,re,r,rp,chk)
+    if chk==0 then return true end
+    local g=Duel.GetChainInfo(0,CHAININFO_TARGET_CARDS)
     if #g>0 then
-        Duel.SpecialSummon(g,0,tp,tp,false,false,POS_FACEUP)
+        Duel.SetOperationInfo(0,CATEGORY_RELEASE,nil,1,tp,LOCATION_MZONE)
     end
 end
 function s.operation3(e,tp,eg,ep,ev,re,r,rp)
@@ -60,6 +71,7 @@ function s.operation3(e,tp,eg,ep,ev,re,r,rp)
     local tc=Duel.GetFirstTarget() --Neat, we still get it
     local rg=Duel.SelectMatchingCard(tp,Card.IsReleasableByEffect,tp,LOCATION_MZONE,0,1,1,tc)
     if #rg>0 then
+        Duel.BreakEffect()
         Duel.Release(rg,REASON_EFFECT)
     end
 end

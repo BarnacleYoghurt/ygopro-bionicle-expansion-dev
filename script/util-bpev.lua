@@ -137,11 +137,12 @@ function BPEV.nuva_symbol_search(baseC,targetCode,qStr)
   local function filterA(c)
     return c:IsCode(targetCode) and c:IsAbleToHand()
   end
-  local function filterB(c,tp)
-    return c:IsCode(targetCode) and not c:IsPublic() and Duel.IsExistingMatchingCard(filterC,tp,LOCATION_DECK,0,1,nil)
-  end
   local function filterC(c)
     return c:IsSetCard(0xb0b) and c:IsAbleToHand()
+  end
+  -- load-bearing misordering: filterC MUST be defined before filterB!
+  local function filterB(c,tp)
+    return c:IsCode(targetCode) and not c:IsPublic() and Duel.IsExistingMatchingCard(filterC,tp,LOCATION_DECK,0,1,nil)
   end
   local function cost(e,tp,eg,ep,ev,re,r,rp,chk)
     local c=e:GetHandler()
@@ -157,8 +158,7 @@ function BPEV.nuva_symbol_search(baseC,targetCode,qStr)
   end
   local function operation(e,tp,eg,ep,ev,re,r,rp)
     local addFilter=filterA
-    if Duel.IsExistingMatchingCard(filterB,tp,LOCATION_HAND,0,1,nil,tp)
-    and Duel.IsExistingMatchingCard(filterC,tp,LOCATION_DECK,0,1,nil) then
+    if Duel.IsExistingMatchingCard(filterB,tp,LOCATION_HAND,0,1,nil,tp) then
       if (not Duel.IsExistingMatchingCard(filterA,tp,LOCATION_DECK,0,1,nil)) or Duel.SelectYesNo(tp,qStr) then
         Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_CONFIRM)
         local rg=Duel.SelectMatchingCard(tp,filterB,tp,LOCATION_HAND,0,1,1,nil,tp)
@@ -189,41 +189,29 @@ function BPEV.nuva_symbol_punish(baseC,punish,punishtg)
     return c:IsFaceup() and c:IsSetCard(0x3b02)
   end
   local function condition(e,tp,eg,ep,ev,re,r,rp)
-    return e:GetHandler():IsFaceup() and not e:GetHandler():IsLocation(LOCATION_DECK)
+    local c=e:GetHandler()
+    return c:IsPreviousPosition(POS_FACEUP) and not c:IsLocation(LOCATION_DECK)
   end
   local function target(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
     if chkc then return filter(chkc) and chkc:IsLocation(LOCATION_MZONE) and chkc:IsControler(tp) end
     if chk==0 then return not punishtg or punishtg(e,tp,eg,ep,ev,re,r,rp,chk,chkc) end
     Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TARGET)
-    local g=Duel.SelectTarget(tp,filter,tp,LOCATION_MZONE,0,1,1,nil)
-    if #g>0 then
-      Duel.SetOperationInfo(0,CATEGORY_REMOVE,nil,1,tp,LOCATION_HAND)
-    end
+    Duel.SelectTarget(tp,filter,tp,LOCATION_MZONE,0,1,1,nil)
     if punishtg then
       punishtg(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
     end
   end
   local function operation(e,tp,eg,ep,ev,re,r,rp)
     local tc=Duel:GetFirstTarget()
-    if tc and tc:IsRelateToEffect(e) and tc:IsFaceup() then
-      Duel.NegateRelatedChain(tc,RESET_TURN_SET)
-      local e1=Effect.CreateEffect(e:GetHandler())
-      e1:SetType(EFFECT_TYPE_SINGLE)
-      e1:SetCode(EFFECT_DISABLE)
-      e1:SetReset(RESET_EVENT+RESETS_STANDARD)
-      tc:RegisterEffect(e1)
-      local e2=Effect.CreateEffect(e:GetHandler())
-      e2:SetType(EFFECT_TYPE_SINGLE)
-      e2:SetCode(EFFECT_DISABLE_EFFECT)
-      e2:SetValue(RESET_TURN_SET)
-      e2:SetReset(RESET_EVENT+RESETS_STANDARD)
-      tc:RegisterEffect(e2)
-      if (not tc:IsImmuneToEffect(e1)) and (not tc:IsImmuneToEffect(e2)) and punish then
+    if tc and tc:IsRelateToEffect(e) and tc:IsNegatableMonster() and tc:IsCanBeDisabledByEffect(e) then
+      tc:NegateEffects(e:GetHandler())
+      Duel.AdjustInstantly(tc)
+      if tc:IsDisabled() and punish then
         punish(e,tp,eg,ep,ev,re,r,rp)
       end
     end
   end
-  
+
   local e=Effect.CreateEffect(baseC)
   e:SetCategory(CATEGORY_REMOVE)
   e:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_F)
