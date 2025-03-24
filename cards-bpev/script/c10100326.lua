@@ -1,5 +1,5 @@
 if not bpev then
-	Duel.LoadScript("util-bpev.lua")
+    Duel.LoadScript("util-bpev.lua")
 end
 --Wairuha, Toa Nuva Kaita of Wisdom
 local s,id=GetID()
@@ -10,33 +10,33 @@ function s.initial_effect(c)
     --Negate
     local e1=Effect.CreateEffect(c)
     e1:SetDescription(aux.Stringid(id,1))
-	e1:SetCategory(CATEGORY_DISABLE+CATEGORY_REMOVE+CATEGORY_DRAW)
-	e1:SetType(EFFECT_TYPE_QUICK_O)
-	e1:SetProperty(EFFECT_FLAG_DAMAGE_STEP+EFFECT_FLAG_DAMAGE_CAL)
-	e1:SetRange(LOCATION_MZONE)
+    e1:SetCategory(CATEGORY_DISABLE+CATEGORY_REMOVE+CATEGORY_DRAW)
+    e1:SetType(EFFECT_TYPE_QUICK_O)
+    e1:SetProperty(EFFECT_FLAG_DAMAGE_STEP+EFFECT_FLAG_DAMAGE_CAL)
+    e1:SetRange(LOCATION_MZONE)
     e1:SetCode(EVENT_CHAINING)
-	e1:SetCondition(s.condition1)
-	e1:SetCost(aux.dxmcostgen(1,1))
-	e1:SetTarget(s.target1)
-	e1:SetOperation(s.operation1)
-	e1:SetCountLimit(1,id)
-	c:RegisterEffect(e1)
+    e1:SetCondition(s.condition1)
+    e1:SetCost(aux.dxmcostgen(1,1))
+    e1:SetTarget(s.target1)
+    e1:SetOperation(s.operation1)
+    e1:SetCountLimit(1,id)
+    c:RegisterEffect(e1)
     --Search
     local e2=bpev.toa_nuva_kaita_search(c)
-    e2:SetDescription(aux.Stringid(id,2))
-    e2:SetCountLimit(1,id)
+    e2:SetDescription(aux.Stringid(id,0))
+    e2:SetCountLimit(1,{id,1})
     c:RegisterEffect(e2)
 end
+s.listed_series={0xb02,0xb0c}
 function s.filter1(c)
-    return c:IsSetCard(0xb02) and c:IsType(TYPE_MONSTER)
+    return c:IsSetCard(0xb02) and c:IsMonster()
 end
 function s.condition1(e,tp,eg,ep,ev,re,r,rp)
-	return e:GetHandler():GetOverlayGroup():IsExists(s.filter1,1,nil)
+    return e:GetHandler():GetOverlayGroup():IsExists(s.filter1,1,nil)
 end
 function s.target1(e,tp,eg,ep,ev,re,r,rp,chk)
     local rc=re:GetHandler()
-    local relation=rc:IsRelateToEffect(re)
-    if chk==0 then return rc:IsAbleToRemove(tp) or (not relation and Duel.IsPlayerCanRemove(tp)) end
+    if chk==0 then return true end
     Duel.SetOperationInfo(0,CATEGORY_NEGATE,eg,1,0,0)
     if rc:IsRelateToEffect(re) then
         Duel.SetPossibleOperationInfo(0,CATEGORY_REMOVE,rc,1,rc:GetControler(),rc:GetLocation())
@@ -60,10 +60,10 @@ function s.operation1(e,tp,eg,ep,ev,re,r,rp)
             rg=eg+Duel.GetDecktopGroup(tp,1)
         end
         if rg then
+            Duel.BreakEffect()
             Duel.DisableShuffleCheck()
             if Duel.Remove(rg,POS_FACEUP,REASON_EFFECT)==2
                 and rg:GetClassCount(function (c) return c:GetType()&(TYPE_MONSTER|TYPE_SPELL|TYPE_TRAP) end)==2 then
-                Duel.BreakEffect()
                 Duel.Draw(tp,1,REASON_EFFECT)
             end
         end
