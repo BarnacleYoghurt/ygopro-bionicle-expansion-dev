@@ -1,5 +1,5 @@
 if not bpev then
-	Duel.LoadScript("util-bpev.lua")
+    Duel.LoadScript("util-bpev.lua")
 end
 --Krana Yo-Kal, Excavator
 local s,id=GetID()
@@ -28,18 +28,22 @@ function s.initial_effect(c)
     c:RegisterEffect(e3a)
     --Block activations
     local e3b=Effect.CreateEffect(c)
-	e3b:SetType(EFFECT_TYPE_XMATERIAL+EFFECT_TYPE_FIELD)
-	e3b:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
-	e3b:SetCode(EFFECT_CANNOT_ACTIVATE)
-	e3b:SetRange(LOCATION_MZONE)
-	e3b:SetTargetRange(0,1)
-	e3b:SetValue(1)
-	e3b:SetCondition(aux.AND(s.condition3, function(e) return Duel.GetAttacker()==e:GetHandler() end))
-	c:RegisterEffect(e3b)
+    e3b:SetType(EFFECT_TYPE_XMATERIAL+EFFECT_TYPE_FIELD)
+    e3b:SetProperty(EFFECT_FLAG_PLAYER_TARGET)
+    e3b:SetRange(LOCATION_MZONE)
+    e3b:SetTargetRange(0,1)
+    e3b:SetCode(EFFECT_CANNOT_ACTIVATE)
+    e3b:SetCondition(aux.AND(s.condition3, function(e) return Duel.GetAttacker()==e:GetHandler() end))
+    e3b:SetValue(s.value3)
+    c:RegisterEffect(e3b)
 end
+s.listed_series={0xb08,0xb09}
 function s.filter0(c)
     return c:IsSetCard(0xb08) or c:IsSetCard(0xb09)
 end
 function s.condition3(e,tp,eg,ep,ev,re,r,rp)
     return e:GetHandler():IsSetCard(0xb08)
+end
+function s.value3(e,re,tp)
+    return re:IsActiveType(TYPE_MONSTER)
 end
