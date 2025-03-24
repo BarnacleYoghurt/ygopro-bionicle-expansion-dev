@@ -307,23 +307,26 @@ function BPEV.krana_kal_ssummon(baseC)
   end
   local function target(e,tp,eg,ep,ev,re,r,rp,chk)
     if chk==0 then
-      return Duel.GetMZoneCount(tp,e:GetHandler())>0 and Duel.IsExistingMatchingCard(filter,tp,LOCATION_HAND+LOCATION_GRAVE,0,1,nil,e,tp);
+      return Duel.GetMZoneCount(tp,e:GetHandler())>0 and Duel.IsExistingMatchingCard(filter,tp,LOCATION_HAND+LOCATION_GRAVE,0,1,nil,e,tp)
     end
     Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,1,tp,LOCATION_HAND+LOCATION_GRAVE)
   end
   local function operation(e,tp,eg,ep,ev,re,r,rp)
-    Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
-    local g=Duel.SelectMatchingCard(tp,aux.NecroValleyFilter(filter),tp,LOCATION_HAND+LOCATION_GRAVE,0,1,1,nil,e,tp)
-    if #g>0 and Duel.SpecialSummon(g,0,tp,tp,false,false,POS_DEFENSE)>0 then
-      --Return it to deck if it leaves the field
-      local e1=Effect.CreateEffect(e:GetHandler())
-      e1:SetDescription(3301)
-      e1:SetType(EFFECT_TYPE_SINGLE)
-      e1:SetCode(EFFECT_LEAVE_FIELD_REDIRECT)
-      e1:SetProperty(EFFECT_FLAG_CANNOT_DISABLE+EFFECT_FLAG_CLIENT_HINT)
-      e1:SetReset(RESET_EVENT+RESETS_REDIRECT)
-      e1:SetValue(LOCATION_DECKSHF)
-      g:GetFirst():RegisterEffect(e1,true)
+    if Duel.GetLocationCount(tp,LOCATION_MZONE)>0 then
+      Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
+      local sc=Duel.SelectMatchingCard(tp,aux.NecroValleyFilter(filter),tp,LOCATION_HAND+LOCATION_GRAVE,0,1,1,nil,e,tp):GetFirst()
+      if sc and Duel.SpecialSummonStep(sc,0,tp,tp,false,false,POS_DEFENSE) then
+        --Return it to deck if it leaves the field
+        local e1=Effect.CreateEffect(e:GetHandler())
+        e1:SetDescription(3301)
+        e1:SetType(EFFECT_TYPE_SINGLE)
+        e1:SetProperty(EFFECT_FLAG_CANNOT_DISABLE+EFFECT_FLAG_CLIENT_HINT)
+        e1:SetCode(EFFECT_LEAVE_FIELD_REDIRECT)
+        e1:SetValue(LOCATION_DECKBOT)
+        e1:SetReset(RESET_EVENT+RESETS_REDIRECT)
+        sc:RegisterEffect(e1,true)
+      end
+      Duel.SpecialSummonComplete()
     end
   end
 

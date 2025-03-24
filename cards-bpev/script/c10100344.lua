@@ -1,5 +1,5 @@
 if not bpev then
-	Duel.LoadScript("util-bpev.lua")
+    Duel.LoadScript("util-bpev.lua")
 end
 --Krana Bo-Kal, Visionary
 local s,id=GetID()
@@ -28,6 +28,7 @@ function s.initial_effect(c)
     e3:SetCountLimit(1)
     c:RegisterEffect(e3)
 end
+s.listed_series={0xb08,0xb09}
 function s.filter0(c)
   return c:IsSetCard(0xb08) or c:IsSetCard(0xb09)
 end
@@ -35,7 +36,10 @@ function s.condition3(e,tp,eg,ep,ev,re,r,rp)
     return e:GetHandler():IsSetCard(0xb08)
 end
 function s.target3(e,tp,eg,ep,ev,re,r,rp,chk)
-    if chk==0 then return Duel.IsExistingMatchingCard(Card.IsFacedown,tp,0,LOCATION_ONFIELD,1,nil) or Duel.GetFieldGroupCount(tp,0,LOCATION_HAND)>0 end
+    if chk==0 then
+        return Duel.IsExistingMatchingCard(Card.IsFacedown,tp,0,LOCATION_ONFIELD,1,nil)
+            or Duel.GetFieldGroupCount(tp,0,LOCATION_HAND)>0
+    end
 end
 function s.operation3(e,tp,eg,ep,ev,re,r,rp)
     --Set Cards
