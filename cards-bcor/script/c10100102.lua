@@ -18,8 +18,7 @@ function s.initial_effect(c)
 	c:RegisterEffect(e1)
 end
 function s.filter1a(c,tp)
-	return (c:IsMonster() or c:IsPreviousLocation(LOCATION_MZONE)) and not c:IsPreviousLocation(LOCATION_SZONE)
-		and c:IsPreviousControler(tp)
+	return c:IsPreviousLocation(LOCATION_MZONE) and c:IsPreviousControler(tp) and c:IsReason(REASON_BATTLE|REASON_EFFECT)
 end
 function s.filter1b(c,e,tp)
 	return c:IsRace(RACE_BEAST|RACE_WINGEDBEAST) and c:IsSetCard(0xb06)
