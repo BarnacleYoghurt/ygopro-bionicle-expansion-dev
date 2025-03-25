@@ -5,7 +5,7 @@ function s.initial_effect(c)
 	Pendulum.AddProcedure(c)
 	--Synchro
 	local e1=Effect.CreateEffect(c)
-	e1:SetDescription(aux.Stringid(id,1))
+	e1:SetDescription(aux.Stringid(id,0))
 	e1:SetCategory(CATEGORY_SPECIAL_SUMMON)
 	e1:SetType(EFFECT_TYPE_IGNITION)
 	e1:SetRange(LOCATION_PZONE)
@@ -15,7 +15,7 @@ function s.initial_effect(c)
 	c:RegisterEffect(e1)
 	--Damage
 	local e2=Effect.CreateEffect(c)
-	e2:SetDescription(aux.Stringid(id,0))
+	e2:SetDescription(aux.Stringid(id,1))
 	e2:SetCategory(CATEGORY_DAMAGE)
 	e2:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
 	e2:SetProperty(EFFECT_FLAG_DELAY)
@@ -23,9 +23,8 @@ function s.initial_effect(c)
 	e2:SetCode(EVENT_ATTACK_ANNOUNCE)
 	e2:SetTarget(s.target2)
 	e2:SetOperation(s.operation2)
-	e2:SetCountLimit(1,id)
 	c:RegisterEffect(e2)
-	--To S/T
+	--To Pend
 	local e3=Effect.CreateEffect(c)
 	e3:SetDescription(aux.Stringid(id,2))
 	e3:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
@@ -33,7 +32,6 @@ function s.initial_effect(c)
 	e3:SetCode(EVENT_DESTROYED)
 	e3:SetTarget(s.target3)
 	e3:SetOperation(s.operation3)
-	e3:SetCountLimit(1,{id,1})
 	c:RegisterEffect(e3)
 end
 function s.filter1a(c)
@@ -90,29 +88,36 @@ function s.operation2(e,tp,eg,ep,ev,re,r,rp)
 	Duel.Damage(p,d,REASON_EFFECT)
 end
 function s.filter3(c,tp)
-	return (c:IsFaceup() or c:IsLocation(LOCATION_GRAVE)) and c:IsRace(RACE_REPTILE) and c:IsSetCard(0xb06)
+	return c:IsFaceup() and c:IsRace(RACE_REPTILE) and c:IsSetCard(0xb06) and c:IsType(TYPE_PENDULUM)
 		and c:CheckUniqueOnField(tp) and not c:IsForbidden()
 end
 function s.target3(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then
-		return Duel.IsExistingMatchingCard(aux.NecroValleyFilter(s.filter3),tp,LOCATION_GRAVE+LOCATION_EXTRA,0,1,nil,tp)
-			and Duel.GetLocationCount(tp,LOCATION_SZONE)>0
+		return Duel.IsExistingMatchingCard(s.filter3,tp,LOCATION_EXTRA,0,1,nil,tp)
+			and Duel.CheckPendulumZones(tp)
 	end
 	Duel.SetPossibleOperationInfo(0,CATEGORY_LEAVE_GRAVE,nil,1,0,0)
 end
 function s.operation3(e,tp,eg,ep,ev,re,r,rp)
-	if Duel.GetLocationCount(tp,LOCATION_SZONE)>0 then
+	--Cannot activate Bog Snake effects
+	local e1=Effect.CreateEffect(e:GetHandler())
+	e1:SetDescription(aux.Stringid(id,3))
+	e1:SetType(EFFECT_TYPE_FIELD)
+	e1:SetProperty(EFFECT_FLAG_PLAYER_TARGET+EFFECT_FLAG_CLIENT_HINT)
+	e1:SetTargetRange(1,0)
+	e1:SetCode(EFFECT_CANNOT_ACTIVATE)
+	e1:SetValue(s.value3_1)
+	e1:SetReset(RESET_PHASE+PHASE_END)
+	Duel.RegisterEffect(e1,tp)
+
+	if Duel.CheckPendulumZones(tp) then
 		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TOFIELD)
-		local g=Duel.SelectMatchingCard(tp,aux.NecroValleyFilter(s.filter3),tp,LOCATION_GRAVE+LOCATION_EXTRA,0,1,1,nil,tp)
-		if #g>0 and Duel.MoveToField(g:GetFirst(),tp,tp,LOCATION_SZONE,POS_FACEUP,true) then
-			-- as a Continuous Spell
-			local e1=Effect.CreateEffect(e:GetHandler())
-			e1:SetType(EFFECT_TYPE_SINGLE)
-			e1:SetProperty(EFFECT_FLAG_CANNOT_DISABLE)
-			e1:SetCode(EFFECT_CHANGE_TYPE)
-			e1:SetValue(TYPE_SPELL|TYPE_CONTINUOUS)
-			e1:SetReset(RESET_EVENT+(RESETS_STANDARD-RESET_TURN_SET))
-			g:GetFirst():RegisterEffect(e1)
+		local g=Duel.SelectMatchingCard(tp,s.filter3,tp,LOCATION_EXTRA,0,1,1,nil,tp)
+		if #g>0 then
+			Duel.MoveToField(g:GetFirst(),tp,tp,LOCATION_PZONE,POS_FACEUP,true)
 		end
 	end
+end
+function s.value3_1(e,re,tp)
+	return re:GetHandler():IsCode(id) and not re:IsHasType(EFFECT_TYPE_ACTIVATE)
 end
