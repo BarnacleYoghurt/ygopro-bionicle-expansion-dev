@@ -24,18 +24,19 @@ function s.initial_effect(c)
     e2:SetCountLimit(1,id)
     c:RegisterEffect(e2)
 end
+s.listed_series={0xb06}
 function s.filter1(c)
-    return c:IsFaceup() and (c:IsAttack(0) or c:IsDefense(0))
+    return c:IsFaceup() and c:IsSetCard(0xb06) and c:GetAttack()>0
 end
 function s.target1(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
-    if chkc then return chkc:IsFaceup() and chkc:IsSetCard(0xb06) and chkc:IsControler(tp) and chkc:IsLocation(LOCATION_MZONE) end
+    if chkc then return s.filter1(chkc) and chkc:IsControler(tp) and chkc:IsLocation(LOCATION_MZONE) end
     if chk==0 then
-        return Duel.IsExistingTarget(aux.FaceupFilter(Card.IsSetCard,0xb06),tp,LOCATION_MZONE,0,1,nil)
+        return Duel.IsExistingTarget(s.filter1,tp,LOCATION_MZONE,0,1,nil)
             and Duel.IsExistingMatchingCard(Card.IsFaceup,1-tp,LOCATION_MZONE,0,1,nil)
     end
-    local max=Duel.GetMatchingGroupCount(aux.FaceupFilter(Card.IsSetCard,0xb06),tp,LOCATION_MZONE,0,nil)
+    local max=Duel.GetMatchingGroupCount(s.filter1,tp,LOCATION_MZONE,0,nil)
     Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TARGET)
-    Duel.SelectTarget(tp,aux.FaceupFilter(Card.IsSetCard,0xb06),tp,LOCATION_MZONE,0,1,max,nil)
+    Duel.SelectTarget(tp,s.filter1,tp,LOCATION_MZONE,0,1,max,nil)
     Duel.SetPossibleOperationInfo(0,CATEGORY_DESTROY,nil,1,1-tp,LOCATION_MZONE)
 end
 function s.operation1(e,tp,eg,ep,ev,re,r,rp)
@@ -44,13 +45,13 @@ function s.operation1(e,tp,eg,ep,ev,re,r,rp)
     if #tg>0 and #og>0 then
         local val=tg:GetSum(Card.GetAttack)
         for tc in og:Iter() do
-            tc:UpdateAttack(-math.min(val,tc:GetAttack()),RESET_EVENT+RESETS_STANDARD,e:GetHandler())
-            tc:UpdateDefense(-math.min(val,tc:GetDefense()),RESET_EVENT+RESETS_STANDARD,e:GetHandler())
+            tc:UpdateAttack(-math.min(val,tc:GetAttack()),RESET_EVENT+RESETS_STANDARD+RESET_PHASE+PHASE_END,e:GetHandler())
+            tc:UpdateDefense(-math.min(val,tc:GetDefense()),RESET_EVENT+RESETS_STANDARD+RESET_PHASE+PHASE_END,e:GetHandler())
             --Hack: highlight any who hit 0 so player can tell before ATK/DEF is redrawn
-            if s.filter1(tc) then Duel.HintSelection(tc,true) end
+            if tc:IsAttack(0) then Duel.HintSelection(tc,true) end
         end
-        if og:IsExists(s.filter1,1,nil) and Duel.SelectYesNo(tp,aux.Stringid(id,1)) then
-            local dg=og:FilterSelect(tp,s.filter1,1,1,nil)
+        if og:IsExists(Card.IsAttack,1,nil,0) and Duel.SelectYesNo(tp,aux.Stringid(id,1)) then
+            local dg=og:FilterSelect(tp,Card.IsAttack,1,1,nil,0)
             if #dg>0 then
                 Duel.BreakEffect()
                 Duel.Destroy(dg,REASON_EFFECT)
@@ -72,8 +73,8 @@ end
 function s.operation2(e,tp,eg,ep,ev,re,r,rp)
     if Duel.GetLocationCount(tp,LOCATION_MZONE)>0 then
         Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
-        local tc=Duel.SelectMatchingCard(tp,s.filter2,tp,LOCATION_GRAVE+LOCATION_REMOVED,0,1,1,nil,e,tp):GetFirst()
-        if tc and Duel.SpecialSummonStep(tc,0,tp,tp,false,false,POS_FACEUP)~=0 then
+        local tc=Duel.SelectMatchingCard(tp,aux.NecroValleyFilter(s.filter2),tp,LOCATION_GRAVE+LOCATION_REMOVED,0,1,1,nil,e,tp):GetFirst()
+        if tc and Duel.SpecialSummonStep(tc,0,tp,tp,false,false,POS_FACEUP) then
             local e1=Effect.CreateEffect(e:GetHandler())
             e1:SetType(EFFECT_TYPE_SINGLE)
             e1:SetCode(EFFECT_SET_ATTACK_FINAL)
