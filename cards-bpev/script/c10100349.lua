@@ -4,7 +4,7 @@ function s.initial_effect(c)
 	c:EnableReviveLimit()
 	--Fusion Material
 	Fusion.AddProcCode3(c,10100332,10100335,10100336,true,true)
-	Fusion.AddContactProc(c,s.contactgroup,s.contactop,s.contactsumcon)
+	Fusion.AddContactProc(c,s.contactgroup,s.contactop,s.contactsumcon,nil,nil,nil,false)
 	--Equip
 	local e1=Effect.CreateEffect(c)
 	e1:SetDescription(aux.Stringid(id,0))
@@ -18,6 +18,7 @@ function s.initial_effect(c)
 	e1:SetOperation(s.operation1)
 	e1:SetCountLimit(1,id)
 	c:RegisterEffect(e1)
+	aux.AddEREquipLimit(c,nil,aux.FilterBoolFunction(Card.IsMonster),Card.EquipByEffectAndLimitRegister,e1)
 	--Special Summon
 	local e2=Effect.CreateEffect(c)
 	e2:SetDescription(aux.Stringid(id,1))
@@ -30,6 +31,8 @@ function s.initial_effect(c)
 	e2:SetCountLimit(1,{id,1})
 	c:RegisterEffect(e2)
 end
+s.listed_names={10100332,10100335,10100336}
+s.listed_series={0xb08}
 function s.contactgroup(tp)
 	return Duel.GetReleaseGroup(tp)
 end
@@ -37,52 +40,40 @@ function s.contactop(g)
 	Duel.Release(g,REASON_COST+REASON_MATERIAL)
 end
 function s.contactsumcon(e,se,sp,st)
-	return (st&SUMMON_TYPE_FUSION)==SUMMON_TYPE_FUSION
+	return (st&SUMMON_TYPE_FUSION)==SUMMON_TYPE_FUSION or not e:GetHandler():IsLocation(LOCATION_EXTRA)
 end
-function s.filter1a(c)
+--- Because we can, in theory, target the same monsters that can be banished for cost,
+--- cost selection already needs to check if it leaves a target available.
+function s.filter1a(c,e,tp)
+	local range=LOCATION_GRAVE+LOCATION_MZONE
+	local ex=Group.FromCards(c,e:GetHandler())
 	return c:IsSetCard(0xb08) and c:IsAbleToRemoveAsCost()
+		and Duel.IsExistingTarget(s.filter1b,tp,range,range,1,ex)
 end
 function s.filter1b(c)
-	return (c:IsLocation(LOCATION_MZONE) or c:IsMonster()) and not c:IsForbidden()
-end
--- Because we can, in theory, target the same monsters that can be banished for cost, a special check is needed
--- A cost selection is valid iff it leaves a target available in the locations its size permits
-function s.rescon1(sg,e,tp,mg)
-	local range=LOCATION_GRAVE+(#sg>1 and LOCATION_MZONE or 0)
-	return Duel.IsExistingTarget(s.filter1b,tp,range,range,1,sg+e:GetHandler())
+	return (c:IsLocation(LOCATION_MZONE) or c:IsMonster()) and c:IsFaceup() and not c:IsForbidden()
 end
 function s.cost1(e,tp,eg,ep,ev,re,r,rp,chk)
-	e:SetLabel(0)
-	local cg=Duel.GetMatchingGroup(s.filter1a,tp,LOCATION_GRAVE,0,nil)
-	if chk==0 then return aux.SelectUnselectGroup(cg,e,tp,1,3,s.rescon1,0,tp,0,s.rescon1) end
+	if chk==0 then return Duel.IsExistingMatchingCard(s.filter1a,tp,LOCATION_GRAVE,0,1,nil,e,tp) end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_REMOVE)
-	local g=aux.SelectUnselectGroup(cg,e,tp,1,3,s.rescon1,1,tp,HINTMSG_REMOVE,s.rescon1)
-	local ct=Duel.Remove(g,POS_FACEUP,REASON_COST)
-	e:SetLabel(ct)
+	local g=Duel.SelectMatchingCard(tp,s.filter1a,tp,LOCATION_GRAVE,0,1,1,nil,e,tp)
+	Duel.Remove(g,POS_FACEUP,REASON_COST)
 end
 function s.target1(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 	local c=e:GetHandler()
-	local range=LOCATION_GRAVE+(e:GetLabel()>1 and LOCATION_MZONE or 0)
+	local range=LOCATION_GRAVE+LOCATION_MZONE
 	if chkc then return s.filter1b(chkc) and chkc:IsLocation(range) and chkc~=c end
-	if chk==0 then return true end -- Target availability is already checked in cost processing
+	if chk==0 then return Duel.GetLocationCount(tp,LOCATION_SZONE)>0 end -- Target availability is already checked in cost processing
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_EQUIP)
 	local g=Duel.SelectTarget(tp,s.filter1b,tp,range,range,1,1,c)
 	Duel.SetOperationInfo(0,CATEGORY_EQUIP,g,1,0,0)
-	if e:GetLabel()>=3 then
-		Duel.SetChainLimit(function(e,ep,tp) return ep==tp end)
-	end
+	Duel.SetChainLimit(function(e,ep,tp) return ep==tp end)
 end
 function s.operation1(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
 	local tc=Duel.GetFirstTarget()
-	if tc:IsRelateToEffect(e) and c:IsRelateToEffect(e) and c:EquipByEffectAndLimitRegister(e,tp,tc,id) then
-		local e1=Effect.CreateEffect(c)
-        e1:SetType(EFFECT_TYPE_SINGLE)
-        e1:SetProperty(EFFECT_FLAG_CANNOT_DISABLE)
-        e1:SetCode(EFFECT_EQUIP_LIMIT)
-        e1:SetValue(1)
-        e1:SetReset(RESET_EVENT+RESETS_STANDARD)
-        tc:RegisterEffect(e1)
+	if tc:IsRelateToEffect(e) and c:IsRelateToEffect(e) then
+		c:EquipByEffectAndLimitRegister(e,tp,tc,id)
 	end
 end
 function s.filter2(c,e,tp)
