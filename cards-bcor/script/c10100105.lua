@@ -16,7 +16,8 @@ function s.initial_effect(c)
 	c:RegisterEffect(e1)
 end
 function s.filter1a(c,e,tp)
-	return c:IsFaceup() and c:HasLevel() and Duel.IsExistingMatchingCard(s.filter1b,tp,LOCATION_DECK,0,1,nil,e,tp,c:GetLevel())
+	return c:IsFaceup() and c:IsSetCard(0xb06) and c:HasLevel()
+		and Duel.IsExistingMatchingCard(s.filter1b,tp,LOCATION_DECK,0,1,nil,e,tp,c:GetLevel())
 end
 function s.filter1b(c,e,tp,l)
 	return c:IsSetCard(0xb06) and c:IsRace(RACE_INSECT) and c:IsLevelBelow(l) and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
