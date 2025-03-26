@@ -32,18 +32,21 @@ end
 function s.filter1(c,e)
 	local z=0
 	if c:GetOwner()==e:GetHandler():GetOwner() then z=1 end -- Need 1 extra zone for Ranama if targeting own monster
-	return c:IsFaceup() and c:IsCanBeEffectTarget(e) and Duel.GetLocationCount(c:GetOwner(),LOCATION_SZONE)>z
+	return c:IsFaceup() and c:IsMonster() and Duel.GetLocationCount(c:GetOwner(),LOCATION_SZONE)>z
 end
 function s.target1(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 	if chkc then return false end
 	local c=e:GetHandler()
 	if chk==0 then
 		return c:IsCanBeEffectTarget(e) and Duel.GetLocationCount(c:GetOwner(),LOCATION_SZONE)>0
-			and Duel.IsExistingTarget(s.filter1,tp,LOCATION_MZONE,LOCATION_MZONE,1,c,e)
+			and Duel.IsExistingTarget(s.filter1,tp,LOCATION_MZONE+LOCATION_GRAVE,LOCATION_MZONE,1,c,e)
 	end
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TOFIELD)
-	local g=Duel.SelectTarget(tp,s.filter1,tp,LOCATION_MZONE,LOCATION_MZONE,1,1,c,e)
+	local g=Duel.SelectTarget(tp,s.filter1,tp,LOCATION_MZONE+LOCATION_GRAVE,LOCATION_MZONE,1,1,c,e)
 	Duel.SetTargetCard(g+c)
+	if g:IsExists(Card.IsLocation,1,nil,LOCATION_GRAVE) then
+		Duel.SetOperationInfo(0,CATEGORY_LEAVE_GRAVE,g,1,0,0)
+	end
 end
 function s.operation1(e,tp,eg,ep,ev,re,r,rp)
 	local tg=Duel.GetTargetCards(e)
@@ -51,13 +54,14 @@ function s.operation1(e,tp,eg,ep,ev,re,r,rp)
 		-- Allow the player to select processing order (in case there are not enough zones)
 		local tc
 		if #tg>1 then
+			Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TOFIELD)
 			tc=tg:Select(tp,1,1,nil):GetFirst()
 		else
 			tc=tg:GetFirst()
 		end
 		tg:RemoveCard(tc)
 
-		if Duel.GetLocationCount(tc:GetOwner(),LOCATION_SZONE)==0 then
+		if Duel.GetLocationCount(tc:GetOwner(),LOCATION_SZONE)==0 and tc:IsLocation(LOCATION_MZONE) then
 			Duel.SendtoGrave(tc,REASON_RULE,nil,PLAYER_NONE)
 		elseif Duel.MoveToField(tc,tp,tc:GetOwner(),LOCATION_SZONE,POS_FACEUP,true) then
 			--Treat it as a Continuous Spell

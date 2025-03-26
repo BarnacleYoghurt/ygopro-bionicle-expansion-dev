@@ -96,7 +96,6 @@ function s.target3(e,tp,eg,ep,ev,re,r,rp,chk)
 		return Duel.IsExistingMatchingCard(s.filter3,tp,LOCATION_EXTRA,0,1,nil,tp)
 			and Duel.CheckPendulumZones(tp)
 	end
-	Duel.SetPossibleOperationInfo(0,CATEGORY_LEAVE_GRAVE,nil,1,0,0)
 end
 function s.operation3(e,tp,eg,ep,ev,re,r,rp)
 	--Cannot activate Bog Snake effects
