@@ -11,11 +11,14 @@ function s.initial_effect(c)
 	e1:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
 	e1:SetProperty(EFFECT_FLAG_DELAY)
 	e1:SetCode(EVENT_SPSUMMON_SUCCESS)
-	e1:SetCondition(s.condition1)
 	e1:SetCost(s.cost1)
 	e1:SetOperation(s.operation1)
 	e1:SetCountLimit(1,id)
 	c:RegisterEffect(e1)
+	local e1b=e1:Clone()
+	e1b:SetProperty(0)
+	e1b:SetCode(EVENT_ATTACK_ANNOUNCE)
+	c:RegisterEffect(e1b)
 	--Destroy
 	local e2=Effect.CreateEffect(c)
 	e2:SetDescription(aux.Stringid(id,1))
@@ -27,28 +30,20 @@ function s.initial_effect(c)
 	e2:SetOperation(s.operation2)
 	c:RegisterEffect(e2)
 end
-function s.filter1(c)
-	return c:IsSetCard(0xb06) and c:IsAbleToGraveAsCost()
-end
-function s.condition1(e,tp,eg,ep,ev,re,r,rp)
-	return e:GetHandler():IsSummonType(SUMMON_TYPE_SYNCHRO)
-end
 function s.cost1(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.IsExistingMatchingCard(s.filter1,tp,LOCATION_DECK,0,1,nil) end
-	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TOGRAVE)
-	local g=Duel.SelectMatchingCard(tp,s.filter1,tp,LOCATION_DECK,0,1,1,nil)
-	if g:GetCount()>0 then 
-		Duel.SendtoGrave(g,REASON_EFFECT)
-	end
+	if chk==0 then return Duel.IsPlayerCanDiscardDeckAsCost(tp,3) end
+	Duel.DiscardDeck(tp,3,REASON_COST)
+	local og=Duel.GetOperatedGroup()
+	e:SetLabel(og:FilterCount(Card.IsSetCard,nil,0xb06))
 end
 function s.operation1(e,tp,eg,ep,ev,re,r,rp)
 	local c=e:GetHandler()
-	if c:IsRelateToEffect(e) and c:IsFaceup() then
+	if c:IsRelateToEffect(e) and c:IsFaceup() and e:GetLabel()>0 then
 		local e1=Effect.CreateEffect(c)
 		e1:SetType(EFFECT_TYPE_SINGLE)
 		e1:SetCode(EFFECT_UPDATE_ATTACK)
-		e1:SetValue(500)
-		e1:SetReset(RESET_EVENT+RESETS_STANDARD_DISABLE)
+		e1:SetValue(500*e:GetLabel())
+		e1:SetReset(RESET_EVENT+RESETS_STANDARD_DISABLE+RESET_PHASE+PHASE_END)
 		c:RegisterEffect(e1)
 	end
 end
