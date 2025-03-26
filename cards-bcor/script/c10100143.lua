@@ -52,6 +52,20 @@ function s.operation1(e,tp,eg,ep,ev,re,r,rp)
 			end
 		end
 	end
+
+	--Cannot Pendulum Summon for the rest of the turn, except "Rahi" monsters
+	local e1=Effect.CreateEffect(e:GetHandler())
+	e1:SetDescription(aux.Stringid(id,2))
+	e1:SetType(EFFECT_TYPE_FIELD)
+	e1:SetTargetRange(1,0)
+	e1:SetProperty(EFFECT_FLAG_PLAYER_TARGET+EFFECT_FLAG_CLIENT_HINT)
+	e1:SetCode(EFFECT_CANNOT_SPECIAL_SUMMON)
+	e1:SetTarget(s.target1_1)
+	e1:SetReset(RESET_PHASE+PHASE_END)
+	Duel.RegisterEffect(e1,tp)
+end
+function s.target1_1(e,c,sump,sumtype,sumpos,targetp,se)
+	return not c:IsSetCard(0xb06) and aux.penlimit(e,se,sump,sumtype)
 end
 function s.filter2a(c,e,tp)
 	return c:IsFaceup() and c:IsMonsterCard()
