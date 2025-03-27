@@ -115,20 +115,18 @@ function s.target2(e,tp,eg,ep,ev,re,r,rp,chk)
 end
 function s.operation2(e,tp,eg,ep,ev,re,r,rp)
     local c=e:GetHandler()
-    if c:IsRelateToEffect(e) and c:IsSSetable() then
-        Duel.SSet(tp,c)
+    if c:IsRelateToEffect(e) and c:IsSSetable() and Duel.SSet(tp,c)>0 then
+        local e1=Effect.CreateEffect(e:GetHandler())
+        e1:SetDescription(aux.Stringid(id,4))
+        e1:SetType(EFFECT_TYPE_FIELD)
+        e1:SetProperty(EFFECT_FLAG_PLAYER_TARGET+EFFECT_FLAG_CLIENT_HINT)
+        e1:SetCode(EFFECT_SKIP_DP)
+        e1:SetTargetRange(1,0)
+        if Duel.GetTurnPlayer()==tp and Duel.GetCurrentPhase()==PHASE_DRAW then
+            e1:SetReset(RESET_PHASE+PHASE_DRAW+RESET_SELF_TURN,2)
+        else
+            e1:SetReset(RESET_PHASE+PHASE_DRAW+RESET_SELF_TURN)
+        end
+        Duel.RegisterEffect(e1,tp)
     end
-
-    local e1=Effect.CreateEffect(e:GetHandler())
-    e1:SetDescription(aux.Stringid(id,4))
-    e1:SetType(EFFECT_TYPE_FIELD)
-    e1:SetProperty(EFFECT_FLAG_PLAYER_TARGET+EFFECT_FLAG_CLIENT_HINT)
-    e1:SetCode(EFFECT_SKIP_DP)
-    e1:SetTargetRange(1,0)
-    if Duel.GetTurnPlayer()==tp and Duel.GetCurrentPhase()==PHASE_DRAW then
-        e1:SetReset(RESET_PHASE+PHASE_DRAW+RESET_SELF_TURN,2)
-    else
-        e1:SetReset(RESET_PHASE+PHASE_DRAW+RESET_SELF_TURN)
-    end
-    Duel.RegisterEffect(e1,tp)
 end
