@@ -12,8 +12,9 @@ function s.initial_effect(c)
     e1:SetOperation(s.operation1)
     c:RegisterEffect(e1)
 end
+s.listed_series={0xb02}
 function s.filter1a(c,e,tp)
-	local pg=aux.GetMustBeMaterialGroup(tp,Group.FromCards(c),tp,nil,nil,REASON_XYZ)
+    local pg=aux.GetMustBeMaterialGroup(tp,Group.FromCards(c),tp,nil,nil,REASON_XYZ)
     if not (#pg<=1 and c:IsFaceup() and c:IsRace(RACE_WARRIOR) and c:IsOriginalSetCard(0xb02)) then return end
     if c:GetRank()>0 or c:IsStatus(STATUS_NO_LEVEL) then
         return Duel.IsExistingMatchingCard(s.filter1b,tp,LOCATION_EXTRA,0,1,nil,e,tp,c,c:GetRank()+2,pg)
@@ -23,24 +24,30 @@ function s.filter1a(c,e,tp)
     end
 end
 function s.filter1b(c,e,tp,mc,rk,pg)
-	if c.rum_limit and not c.rum_limit(mc,e) or Duel.GetLocationCountFromEx(tp,tp,mc,c)<=0 then return false end
-	return c:IsType(TYPE_XYZ) and c:IsRank(rk) and c:IsRace(RACE_WARRIOR) and mc:IsCanBeXyzMaterial(c,tp) and (#pg<=0 or pg:IsContains(mc))
+    if c.rum_limit and not c.rum_limit(mc,e) or Duel.GetLocationCountFromEx(tp,tp,mc,c)<=0 then return false end
+    return c:IsType(TYPE_XYZ) and c:IsRank(rk) and c:IsRace(RACE_WARRIOR) and mc:IsCanBeXyzMaterial(c,tp) and (#pg<=0 or pg:IsContains(mc))
         and c:IsCanBeSpecialSummoned(e,SUMMON_TYPE_XYZ,tp,false,false)
 end
+function s.filter1c(c)
+    return c:IsFaceup() or c:IsLocation(LOCATION_HAND)
+end
 function s.condition1(e,tp,eg,ep,ev,re,r,rp)
-	return Duel.IsMainPhase()
+    return Duel.IsMainPhase()
 end
 function s.target1(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
-    if chkc then return s.filter1a(chkc) and chkc:IsLocation(LOCATION_MZONE) and chkc:IsControler(tp) end
+    if chkc then return s.filter1a(chkc,e,tp) and chkc:IsLocation(LOCATION_MZONE) and chkc:IsControler(tp) end
     if chk==0 then return Duel.IsExistingTarget(s.filter1a,tp,LOCATION_MZONE,0,1,nil,e,tp) end
     Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TARGET)
-	Duel.SelectTarget(tp,s.filter1a,tp,LOCATION_MZONE,0,1,1,nil,e,tp)
-	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,1,tp,LOCATION_EXTRA)
+    Duel.SelectTarget(tp,s.filter1a,tp,LOCATION_MZONE,0,1,1,nil,e,tp)
+    Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,1,tp,LOCATION_EXTRA)
 end
 function s.operation1(e,tp,eg,ep,ev,re,r,rp)
     local tc=Duel.GetFirstTarget()
     local pg=aux.GetMustBeMaterialGroup(tp,Group.FromCards(tc),tp,nil,nil,REASON_XYZ)
-    if not tc or tc:IsFacedown() or not tc:IsRelateToEffect(e) or tc:IsControler(1-tp) or not tc:IsRace(RACE_WARRIOR) or tc:IsImmuneToEffect(e) or #pg>1 or (#pg==1 and not pg:IsContains(tc)) then return end
+    if tc:IsFacedown() or not tc:IsRelateToEffect(e) or tc:IsControler(1-tp) or not tc:IsRace(RACE_WARRIOR) or tc:IsImmuneToEffect(e)
+        or #pg>1 or (#pg==1 and not pg:IsContains(tc)) then
+        return
+    end
     Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
     local g
     if tc:GetRank()>0 or tc:IsStatus(STATUS_NO_LEVEL) then
@@ -54,10 +61,12 @@ function s.operation1(e,tp,eg,ep,ev,re,r,rp)
         Duel.Overlay(sc,tc)
         if Duel.SpecialSummon(sc,SUMMON_TYPE_XYZ,tp,tp,false,false,POS_FACEUP)>0 then
             sc:CompleteProcedure()
-            if Duel.IsExistingMatchingCard(aux.TRUE,tp,LOCATION_HAND+LOCATION_ONFIELD,0,1,Group.FromCards(sc,e:GetHandler())) and Duel.SelectYesNo(tp,aux.Stringid(id,0)) then
-                local og=Duel.SelectMatchingCard(tp,aux.TRUE,tp,LOCATION_HAND+LOCATION_ONFIELD,0,1,1,Group.FromCards(sc,e:GetHandler()))
-                if #og>0 then
-                    Duel.Overlay(sc,og)
+            local ex=Group.FromCards(sc,e:GetHandler())
+            if Duel.IsExistingMatchingCard(s.filter1c,tp,LOCATION_HAND+LOCATION_ONFIELD,0,1,ex) and Duel.SelectYesNo(tp,aux.Stringid(id,0)) then
+                local oc=Duel.SelectMatchingCard(tp,s.filter1c,tp,LOCATION_HAND+LOCATION_ONFIELD,0,1,1,ex):GetFirst()
+                if oc then
+                    Duel.Overlay(sc,oc)
+                    if sc:GetOverlayGroup():IsContains(oc) then oc:CancelToGrave() end
                 end
             end
         end

@@ -35,17 +35,18 @@ function s.initial_effect(c)
     e2:SetCountLimit(1,{id,2})
     c:RegisterEffect(e3)
 end
+s.listed_series={0xb02,0x3b02,0xb0b,0xb0c}
 function s.filter1(c)
     return c:IsSetCard(0xb0b) and c:IsAbleToHand()
 end
 function s.operation1(e,tp,eg,ep,ev,re,r,rp)
-	if Duel.IsExistingMatchingCard(s.filter1,tp,LOCATION_DECK,0,1,nil) and Duel.SelectYesNo(tp,aux.Stringid(id,2)) then
-		Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_ATOHAND)
-		local sg=Duel.SelectMatchingCard(tp,s.filter1,tp,LOCATION_DECK,0,1,1,nil)
-		Duel.SendtoHand(sg,nil,REASON_EFFECT)
-		Duel.ConfirmCards(1-tp,sg)
-	end
-end
+    if Duel.IsExistingMatchingCard(s.filter1,tp,LOCATION_DECK,0,1,nil) and Duel.SelectYesNo(tp,aux.Stringid(id,2)) then
+        Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_ATOHAND)
+        local sg=Duel.SelectMatchingCard(tp,s.filter1,tp,LOCATION_DECK,0,1,1,nil)
+        Duel.SendtoHand(sg,nil,REASON_EFFECT)
+        Duel.ConfirmCards(1-tp,sg)
+    end
+    end
 function s.filter2(c,tp)
     return c:IsSetCard(0xb0c) and c:IsSpellTrap() and c:IsControler(tp) and c:IsPreviousLocation(LOCATION_HAND+LOCATION_DECK) and c:IsSSetable()
 end
@@ -56,6 +57,7 @@ function s.target2(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
     Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TARGET)
     local tg=pg:Select(tp,1,1,nil)
     Duel.SetTargetCard(tg)
+    Duel.SetOperationInfo(0,CATEGORY_LEAVE_GRAVE,tg,1,tp,0)
 end
 function s.operation2(e,tp,eg,ep,ev,re,r,rp)
     local tc=Duel.GetFirstTarget()
@@ -71,11 +73,11 @@ function s.filter3b(c,e,tp,code)
         and c:IsCanBeSpecialSummoned(e,tp,tp,false,false) and Duel.GetLocationCountFromEx(tp,tp,nil,c)>0
 end
 function s.condition3(e,tp,eg,ep,ev,re,r,rp)
-	return rp==1-tp and re:IsMonsterEffect()
+    return rp==1-tp and re:IsMonsterEffect()
 end
 function s.cost3(e,tp,eg,ep,ev,re,r,rp,chk)
     if chk==0 then return e:GetHandler():IsAbleToGraveAsCost() end
-	Duel.SendtoGrave(e:GetHandler(),REASON_COST)
+    Duel.SendtoGrave(e:GetHandler(),REASON_COST)
 end
 function s.target3(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
     if chkc then return s.filter3a(chkc) and chkc:IsLocation(LOCATION_GRAVE+LOCATION_MZONE) and chkc:IsControler(tp) end
