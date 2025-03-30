@@ -26,7 +26,9 @@ function s.initial_effect(c)
   e2:SetCountLimit(1,id)
   c:RegisterEffect(e2)
 end
-s.material_setcode={0xb02,0xb0b}
+s.material_setcode={0xb02,0x1b02,0xb0b}
+s.listed_series={0xb0b,0xb0c}
+s.listed_names={10100003}
 function s.condition2(e,tp,eg,ep,ev,re,r,rp)
   return Duel.IsMainPhase()
 end

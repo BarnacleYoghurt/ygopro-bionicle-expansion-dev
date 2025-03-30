@@ -1,24 +1,24 @@
 if not bcot then
-	Duel.LoadScript("util-bcot.lua")
+  Duel.LoadScript("util-bcot.lua")
 end
 if not bpev then
-	Duel.LoadScript("util-bpev.lua")
+  Duel.LoadScript("util-bpev.lua")
 end
 --Great Kanohi Pakari Nuva
 local s,id=GetID()
 function s.initial_effect(c)
-	aux.AddEquipProcedure(c)
+  aux.AddEquipProcedure(c)
   --Destroy if replaced
   local e1=bcot.kanohi_selfdestruct(c)
   c:RegisterEffect(e1)
   --ATK gain
-	local e2=Effect.CreateEffect(c)
-	e2:SetType(EFFECT_TYPE_EQUIP)
-	e2:SetProperty(EFFECT_FLAG_SINGLE_RANGE)
-	e2:SetCode(EFFECT_UPDATE_ATTACK)
+  local e2=Effect.CreateEffect(c)
+  e2:SetType(EFFECT_TYPE_EQUIP)
+  e2:SetProperty(EFFECT_FLAG_SINGLE_RANGE)
+  e2:SetCode(EFFECT_UPDATE_ATTACK)
   e2:SetCondition(function(e) return bcot.kanohi_con(e,{0x3b02}) end)
-	e2:SetValue(1000)
-	c:RegisterEffect(e2)
+  e2:SetValue(1000)
+  c:RegisterEffect(e2)
   --Piercing
   local e3=Effect.CreateEffect(c)
   e3:SetType(EFFECT_TYPE_EQUIP)
@@ -31,6 +31,7 @@ function s.initial_effect(c)
   e4:SetDescription(aux.Stringid(id,0))
   c:RegisterEffect(e4)
 end
+s.listed_series={0xb02,0x3b02,0xb04,0xb0c}
 function s.operation4(e,tp,eg,ep,ev,re,r,rp)
   local g=Duel.GetMatchingGroup(Card.IsFaceup,tp,LOCATION_MZONE,0,nil)
   for tc in aux.Next(g) do

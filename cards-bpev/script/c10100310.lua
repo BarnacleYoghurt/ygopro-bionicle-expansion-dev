@@ -16,8 +16,8 @@ function s.initial_effect(c)
 	e2:SetDescription(aux.Stringid(id,1))
 	e2:SetCategory(CATEGORY_REMOVE)
 	e2:SetType(EFFECT_TYPE_QUICK_O)
-	e2:SetRange(LOCATION_MZONE)
 	e2:SetProperty(EFFECT_FLAG_CARD_TARGET)
+	e2:SetRange(LOCATION_MZONE)
 	e2:SetCode(EVENT_FREE_CHAIN)
 	e2:SetHintTiming(TIMING_MAIN_END)
 	e2:SetCondition(s.condition2)
@@ -37,16 +37,18 @@ function s.initial_effect(c)
 	--Targeting protection
 	local e3b=Effect.CreateEffect(c)
 	e3b:SetType(EFFECT_TYPE_FIELD)
+	e3b:SetProperty(EFFECT_FLAG_IGNORE_IMMUNE+EFFECT_FLAG_SET_AVAILABLE)
 	e3b:SetRange(LOCATION_MZONE)
 	e3b:SetTargetRange(LOCATION_ONFIELD,0)
-	e3b:SetProperty(EFFECT_FLAG_IGNORE_IMMUNE+EFFECT_FLAG_SET_AVAILABLE)
 	e3b:SetCode(EFFECT_CANNOT_BE_EFFECT_TARGET)
 	e3b:SetCondition(s.condition3)
 	e3b:SetTarget(s.value3)
 	e3b:SetValue(aux.tgoval)
 	c:RegisterEffect(e3b)
 end
-s.material_setcode={0xb02,0xb0b}
+s.material_setcode={0xb02,0x1b02,0xb0b}
+s.listed_series={0xb0b,0xb0c}
+s.listed_names={10100005}
 function s.condition2(e,tp,eg,ep,ev,re,r,rp)
 	return Duel.GetFieldGroupCount(tp,LOCATION_MZONE,0)<=1 and Duel.IsMainPhase()
 end
