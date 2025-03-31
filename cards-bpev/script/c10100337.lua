@@ -1,5 +1,5 @@
 if not bpev then
-	Duel.LoadScript("util-bpev.lua")
+    Duel.LoadScript("util-bpev.lua")
 end
 --Krana Xa-Kal, Liberator
 local s,id=GetID()
@@ -26,12 +26,13 @@ function s.initial_effect(c)
     e3:SetType(EFFECT_TYPE_XMATERIAL+EFFECT_TYPE_TRIGGER_O)
     e3:SetProperty(EFFECT_FLAG_DELAY)
     e3:SetCode(EVENT_BATTLE_DAMAGE)
-    e3:SetCondition(function(e,tp,eg,ep,ev,re,r,rp) return ep~=tp end)
     e3:SetCondition(s.condition3)
     e3:SetTarget(s.target3)
     e3:SetOperation(s.operation3)
     c:RegisterEffect(e3)
 end
+s.listed_names={10100234}
+s.listed_series={0xb08,0xb09,0xb0a}
 function s.filter0(c)
     return c:IsSetCard(0xb08) or c:IsSetCard(0xb09)
 end
@@ -42,24 +43,29 @@ function s.filter3b(c)
     return c:IsCode(10100234) and c:IsAbleToHand()
 end
 function s.condition3(e,tp,eg,ep,ev,re,r,rp)
-    return e:GetHandler():IsSetCard(0xb08)
+    return e:GetHandler():IsSetCard(0xb08) and ep~=tp
 end
 function s.target3(e,tp,eg,ep,ev,re,r,rp,chk)
     if chk==0 then return Duel.IsExistingMatchingCard(s.filter3a,tp,LOCATION_REMOVED,0,1,nil) and Duel.CheckPendulumZones(tp) end
-	Duel.SetPossibleOperationInfo(0,CATEGORY_TOHAND,nil,1,tp,LOCATION_DECK+LOCATION_GRAVE)
+    Duel.SetPossibleOperationInfo(0,CATEGORY_TOHAND,nil,1,tp,LOCATION_DECK+LOCATION_GRAVE)
 end
 function s.operation3(e,tp,eg,ep,ev,re,r,rp)
-    if not Duel.CheckPendulumZones(tp) then return end
+    local ct=0
+    if Duel.CheckLocation(tp,LOCATION_PZONE,0) then ct=ct+1 end
+    if Duel.CheckLocation(tp,LOCATION_PZONE,1) then ct=ct+1 end
+    if ct==0 then return end
+
     Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TOFIELD)
-    local pg=Duel.SelectMatchingCard(tp,s.filter3a,tp,LOCATION_REMOVED,0,1,2,nil)
+    local pg=Duel.SelectMatchingCard(tp,s.filter3a,tp,LOCATION_REMOVED,0,1,ct,nil)
     if #pg>0 then
-        local ok=true
-        pg:ForEach(function(c) ok=ok and Duel.MoveToField(c,tp,tp,LOCATION_PZONE,POS_FACEUP,false) end)
-        if ok and Duel.IsExistingMatchingCard(s.filter3b,tp,LOCATION_DECK+LOCATION_GRAVE,0,1,nil) and Duel.SelectYesNo(tp,aux.Stringid(id,2)) then
-            Duel.BreakEffect()
+        local ok=false
+        pg:ForEach(function(c) ok=(Duel.MoveToField(c,tp,tp,LOCATION_PZONE,POS_FACEUP,false) or ok) end)
+        if ok and Duel.IsExistingMatchingCard(aux.NecroValleyFilter(s.filter3b),tp,LOCATION_DECK+LOCATION_GRAVE,0,1,nil)
+            and Duel.SelectYesNo(tp,aux.Stringid(id,2)) then
             Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_ATOHAND)
-            local ag=Duel.SelectMatchingCard(tp,s.filter3b,tp,LOCATION_DECK+LOCATION_GRAVE,0,1,1,nil)
+            local ag=Duel.SelectMatchingCard(tp,aux.NecroValleyFilter(s.filter3b),tp,LOCATION_DECK+LOCATION_GRAVE,0,1,1,nil)
             if #ag>0 then
+                Duel.BreakEffect()
                 Duel.SendtoHand(ag,tp,REASON_EFFECT)
                 Duel.ConfirmCards(1-tp,ag)
             end

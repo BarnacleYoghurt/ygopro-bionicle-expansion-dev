@@ -15,7 +15,7 @@ function s.initial_effect(c)
 	e1:SetValue(1)
 	c:RegisterEffect(e1)
   --ATK/DEF to 0
-  local e2a,e2b,e2c=bpev.krana_kal_debuff(c,aux.Stringid(id, 0))
+  local e2a,e2b,e2c=bpev.krana_kal_debuff(c,aux.Stringid(id,0))
   c:RegisterEffect(e2a)
   c:RegisterEffect(e2b)
   c:RegisterEffect(e2c)
@@ -39,6 +39,7 @@ function s.initial_effect(c)
   e3c:SetValue(1)
   c:RegisterEffect(e3c)
 end
+s.listed_series={0xb08,0xb09}
 function s.filter0(c)
   return c:IsSetCard(0xb08) or c:IsSetCard(0xb09)
 end

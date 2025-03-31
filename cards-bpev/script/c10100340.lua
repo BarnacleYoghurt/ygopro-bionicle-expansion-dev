@@ -1,5 +1,5 @@
 if not bpev then
-	Duel.LoadScript("util-bpev.lua")
+    Duel.LoadScript("util-bpev.lua")
 end
 --Krana Ca-Kal, Seeker
 local s,id=GetID()
@@ -23,8 +23,8 @@ function s.initial_effect(c)
     local e3=Effect.CreateEffect(c)
     e3:SetType(EFFECT_TYPE_XMATERIAL)
     e3:SetRange(LOCATION_MZONE)
+    e3:SetTargetRange(LOCATION_MZONE,0)
     e3:SetCode(EFFECT_INDESTRUCTABLE_BATTLE)
-	e3:SetTargetRange(LOCATION_MZONE,0)
     e3:SetCondition(s.make_condition(1))
     e3:SetValue(1)
     c:RegisterEffect(e3)
@@ -41,26 +41,28 @@ function s.initial_effect(c)
     e4:SetCountLimit(1)
     c:RegisterEffect(e4)
 end
+s.listed_series={0xb08,0xb09,0xb0a}
 function s.filter0(c)
-  return c:IsSetCard(0xb08) or c:IsSetCard(0xb09)
+    return c:IsSetCard(0xb08) or c:IsSetCard(0xb09)
 end
 function s.filter(c)
-    return c:IsSetCard(0xb0a) and c:IsOriginalType(TYPE_MONSTER) and c:IsFaceup()
+    return c:IsSetCard(0xb0a) and c:IsMonsterCard() and c:IsFaceup()
 end
 function s.make_condition(ct)
     return function(e)
-        return e:GetHandler():IsSetCard(0xb08) and Duel.GetMatchingGroup(s.filter,e:GetHandlerPlayer(),LOCATION_ONFIELD+LOCATION_REMOVED,0,nil):GetClassCount(Card.GetCode)>=ct
+        return e:GetHandler():IsSetCard(0xb08)
+            and Duel.GetMatchingGroup(s.filter,e:GetHandlerPlayer(),LOCATION_ONFIELD+LOCATION_REMOVED,0,nil):GetClassCount(Card.GetCode)>=ct
     end
 end
 function s.target4(e,tp,eg,ep,ev,re,r,rp,chk)
-	if chk==0 then return Duel.IsPlayerCanDraw(tp,1) end
-	Duel.SetOperationInfo(0,CATEGORY_HANDES,nil,0,tp,1)
-	Duel.SetOperationInfo(0,CATEGORY_DRAW,nil,0,tp,1)
+    if chk==0 then return Duel.IsPlayerCanDraw(tp,1) end
+    Duel.SetOperationInfo(0,CATEGORY_DRAW,nil,0,tp,1)
+    Duel.SetOperationInfo(0,CATEGORY_HANDES,nil,0,tp,1)
 end
 function s.operation4(e,tp,eg,ep,ev,re,r,rp)
-	if Duel.Draw(tp,1,REASON_EFFECT)~=0 then
-		Duel.ShuffleHand(tp)
-		Duel.BreakEffect()
-		Duel.DiscardHand(tp,nil,1,1,REASON_EFFECT+REASON_DISCARD)
-	end
+    if Duel.Draw(tp,1,REASON_EFFECT)~=0 then
+        Duel.ShuffleHand(tp)
+        Duel.BreakEffect()
+        Duel.DiscardHand(tp,nil,1,1,REASON_EFFECT+REASON_DISCARD)
+    end
 end

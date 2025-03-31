@@ -340,7 +340,7 @@ function BPEV.krana_kal_ssummon(baseC)
   return e
 end
 function BPEV.krana_kal_xsummon(baseC)
-  local function filterB(c,e,tp,mc,pg)
+  local function filterB(c,e,tp,mc)
     return c:IsSetCard(0xb08) and c:IsType(TYPE_XYZ)
       and Duel.GetLocationCountFromEx(tp,tp,mc,c)>0 and mc:IsCanBeXyzMaterial(c,tp)
       and c:IsCanBeSpecialSummoned(e,SUMMON_TYPE_XYZ,tp,false,false)
@@ -348,22 +348,20 @@ function BPEV.krana_kal_xsummon(baseC)
   local function filterA(c,e,tp)
     local pg=aux.GetMustBeMaterialGroup(tp,Group.FromCards(c),tp,nil,nil,REASON_XYZ)
     return #(pg-c)==0 and c:IsFaceup() and c:IsSetCard(0xb08) and c:IsLevel(4) and e:GetHandler():GetLinkedGroup():IsContains(c)
-      and Duel.IsExistingMatchingCard(filterB,tp,LOCATION_EXTRA,0,1,nil,e,tp,c,pg)
+      and Duel.IsExistingMatchingCard(filterB,tp,LOCATION_EXTRA,0,1,nil,e,tp,c)
   end
   local function target(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
     if chkc then return chkc:IsLocation(LOCATION_MZONE) and filterA(chkc,e) end
-    if chk==0 then return Duel.IsExistingTarget(filterA,tp,LOCATION_MZONE,0,1,nil,e,tp) end
+    if chk==0 then return Duel.IsExistingTarget(filterA,tp,LOCATION_MZONE,LOCATION_MZONE,1,nil,e,tp) end
     Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TARGET)
-    Duel.SelectTarget(tp,filterA,tp,LOCATION_MZONE,0,1,1,nil,e,tp)
+    Duel.SelectTarget(tp,filterA,tp,LOCATION_MZONE,LOCATION_MZONE,1,1,nil,e,tp)
     Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,1,tp,LOCATION_EXTRA)
   end
   local function operation(e,tp,eg,ep,ev,re,r,rp)
     local tc=Duel.GetFirstTarget()
     if tc and filterA(tc,e,tp) then
-      local pg=aux.GetMustBeMaterialGroup(tp,Group.FromCards(tc),tp,nil,nil,REASON_XYZ)
       Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
-      local g=Duel.SelectMatchingCard(tp,filterB,tp,LOCATION_EXTRA,0,1,1,nil,e,tp,tc,pg)
-      local sc=g:GetFirst()
+      local sc=Duel.SelectMatchingCard(tp,filterB,tp,LOCATION_EXTRA,0,1,1,nil,e,tp,tc):GetFirst()
       if sc then
         sc:SetMaterial(tc)
         Duel.Overlay(sc,tc)
