@@ -1,16 +1,16 @@
 if not bpev then
-	Duel.LoadScript("util-bpev.lua")
+  Duel.LoadScript("util-bpev.lua")
 end
 --Bohrok Tahnok-Kal
 local s,id=GetID()
 function s.initial_effect(c)
   Duel.EnableGlobalFlag(GLOBALFLAG_DETACH_EVENT)
-	c:EnableReviveLimit()
-	--Xyz Material
-	Xyz.AddProcedure(c,aux.FilterBoolFunctionEx(Card.IsSetCard,0xb08),4,2)
+  c:EnableReviveLimit()
+  --Xyz Material
+  Xyz.AddProcedure(c,aux.FilterBoolFunctionEx(Card.IsSetCard,0xb08),4,2)
   --Materials to Deck
   local e1=bpev.bohrok_kal_xmat(c)
-	c:RegisterEffect(e1)
+  c:RegisterEffect(e1)
   --Attach
   local e2=bpev.bohrok_kal_attach(c)
   e2:SetDescription(aux.Stringid(id,0))
@@ -19,7 +19,7 @@ function s.initial_effect(c)
   --Thunderbolt and Lightning
   local e3=Effect.CreateEffect(c)
   e3:SetDescription(aux.Stringid(id,1))
-  e3:SetCategory(CATEGORY_ATKCHANGE+CATEGORY_DEFCHANGE+CATEGORY_DESTROY)
+  e3:SetCategory(CATEGORY_DESTROY)
   e3:SetType(EFFECT_TYPE_QUICK_O)
   e3:SetProperty(EFFECT_FLAG_CARD_TARGET)
   e3:SetRange(LOCATION_MZONE)
@@ -30,6 +30,7 @@ function s.initial_effect(c)
   e3:SetCountLimit(1,id)
   c:RegisterEffect(e3)
 end
+s.listed_series={0xb08,0xb09}
 function s.filter3(c)
   return c:IsFaceup() and c:GetAttack()<2000
 end
@@ -60,7 +61,7 @@ function s.operation3(e,tp,eg,ep,ev,re,r,rp)
     e2:SetReset(RESET_EVENT+RESETS_STANDARD+RESET_PHASE+PHASE_END)
     tc:RegisterEffect(e2)
   end
-  if c:CheckRemoveOverlayCard(tp,1,REASON_EFFECT) then
+  if c:IsRelateToEffect(e) and c:CheckRemoveOverlayCard(tp,1,REASON_EFFECT) then
     local g=Duel.GetMatchingGroup(s.filter3,tp,0,LOCATION_MZONE,nil)
     if #g>0 and Duel.SelectYesNo(tp,aux.Stringid(id,2)) and c:RemoveOverlayCard(tp,1,1,REASON_EFFECT) then
       Duel.Destroy(g,REASON_EFFECT)

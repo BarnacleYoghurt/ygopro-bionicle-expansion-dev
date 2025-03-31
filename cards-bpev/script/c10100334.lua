@@ -1,5 +1,5 @@
 if not bpev then
-	Duel.LoadScript("util-bpev.lua")
+    Duel.LoadScript("util-bpev.lua")
 end
 --Bohrok Pahrak-Kal
 local s,id=GetID()
@@ -29,16 +29,21 @@ function s.initial_effect(c)
     e3:SetCountLimit(1,id)
     c:RegisterEffect(e3)
 end
-function s.target3(e,tp,eg,ep,ev,re,r,rp,chk)
+s.listed_series={0xb08,0xb09}
+function s.target3(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
+    if chkc then return chkc:IsAbleToRemove() and chkc:IsLocation(LOCATION_MZONE) and chkc:IsControler(1-tp) end
     if chk==0 then return Duel.IsExistingTarget(Card.IsAbleToRemove,tp,0,LOCATION_MZONE,1,nil) end
     local tc=Duel.SelectTarget(tp,Card.IsAbleToRemove,tp,0,LOCATION_MZONE,1,1,nil):GetFirst()
-    local tg=tc+tc:GetColumnGroup():Filter(Card.IsAbleToRemove,nil):Filter(Card.IsControler,nil,1-tp)
+    local tg=(tc+tc:GetColumnGroup()):Filter(Card.IsAbleToRemove,nil):Filter(Card.IsControler,nil,1-tp)
     Duel.SetOperationInfo(0,CATEGORY_REMOVE,tg,#tg,0,0)
+    if #tg==1 then
+        Duel.SetOperationInfo(0,CATEGORY_DAMAGE,nil,0,1-tp,1200)
+    end
 end
 function s.operation3(e,tp,eg,ep,ev,re,r,rp)
     local tc=Duel.GetFirstTarget()
     if tc:IsRelateToEffect(e) then
-        local tg=tc+tc:GetColumnGroup():Filter(Card.IsAbleToRemove,nil):Filter(Card.IsControler,nil,1-tp)
+        local tg=(tc+tc:GetColumnGroup()):Filter(Card.IsAbleToRemove,nil):Filter(Card.IsControler,nil,1-tp)
         if Duel.Remove(tg,POS_FACEUP,REASON_EFFECT)==1 and tg:FilterCount(Card.IsLocation,nil,LOCATION_REMOVED)==1 then
             Duel.BreakEffect()
             Duel.Damage(1-tp,1200,REASON_EFFECT)

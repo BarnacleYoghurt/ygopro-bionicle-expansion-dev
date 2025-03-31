@@ -230,25 +230,24 @@ function BPEV.bohrok_kal_xmat(baseC)
   
   local e=Effect.CreateEffect(baseC)
 	e:SetType(EFFECT_TYPE_FIELD)
-  e:SetProperty(EFFECT_FLAG_IGNORE_RANGE) --somehow required to affect Xyz Materials
+  e:SetProperty(EFFECT_FLAG_IGNORE_RANGE) --cannot individually target LOCATION_OVERLAY
 	e:SetRange(LOCATION_MZONE)
-	e:SetTargetRange(0xff,0)
 	e:SetCode(EFFECT_TO_GRAVE_REDIRECT)
 	e:SetTarget(target)
 	e:SetValue(LOCATION_DECKBOT)
 	return e
 end
 function BPEV.bohrok_kal_attach(baseC)
-  local function filter(c)
-    return c:IsSetCard(0xb09) and c:IsType(TYPE_MONSTER)
+  local function filter(c,xc,tp)
+    return c:IsSetCard(0xb09) and c:IsMonster() and c:IsCanBeXyzMaterial(xc,tp,REASON_EFFECT)
   end
   local function target(e,tp,eg,ep,ev,re,r,rp,chk)
-    if chk==0 then return Duel.IsExistingMatchingCard(filter,tp,LOCATION_HAND+LOCATION_MZONE+LOCATION_GRAVE,0,1,nil) end
+    if chk==0 then return Duel.IsExistingMatchingCard(filter,tp,LOCATION_HAND+LOCATION_MZONE+LOCATION_GRAVE,0,1,nil,e:GetHandler(),tp) end
   end
   local function operation(e,tp,eg,ep,ev,re,r,rp)
     local c=e:GetHandler()
     if c:IsRelateToEffect(e) then
-      local g=Duel.SelectMatchingCard(tp,aux.NecroValleyFilter(filter),tp,LOCATION_HAND+LOCATION_MZONE+LOCATION_GRAVE,0,1,1,nil)
+      local g=Duel.SelectMatchingCard(tp,aux.NecroValleyFilter(filter),tp,LOCATION_HAND+LOCATION_MZONE+LOCATION_GRAVE,0,1,1,nil,c,tp)
       if #g>0 then
         Duel.Overlay(c,g,true)
       end
