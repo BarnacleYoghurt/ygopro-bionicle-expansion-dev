@@ -1,5 +1,5 @@
 if not bcot then
-	Duel.LoadScript("util-bcot.lua")
+    Duel.LoadScript("util-bcot.lua")
 end
 --Great Kanohi Aki Nuva
 local s,id=GetID()
@@ -41,18 +41,19 @@ function s.initial_effect(c)
     local e6=Effect.CreateEffect(c)
     e6:SetDescription(aux.Stringid(id,0))
     e6:SetCategory(CATEGORY_DESTROY)
-	e6:SetType(EFFECT_TYPE_IGNITION)
+    e6:SetType(EFFECT_TYPE_IGNITION)
     e6:SetProperty(EFFECT_FLAG_CARD_TARGET)
-	e6:SetRange(LOCATION_SZONE)
-	e6:SetTarget(s.target6)
-	e6:SetOperation(s.operation6)
+    e6:SetRange(LOCATION_SZONE)
+    e6:SetTarget(s.target6)
+    e6:SetOperation(s.operation6)
     c:RegisterEffect(e6)
 end
+s.listed_series={0xb02,0x3b02,0xb04}
 function s.condition(e)
     return bcot.kanohi_con(e,{0x3b02}) and e:GetHandler():GetEquipTarget():IsType(TYPE_XYZ)
 end
 function s.filter6a(c,tp)
-    return c:IsSetCard(0xb02) and c:HasLevel()
+    return c:IsSetCard(0xb02) and c:HasLevel() and not c:IsPublic()
         and Duel.IsExistingTarget(s.filter6b,tp,LOCATION_MZONE,0,1,nil,c:GetLevel(),c:GetCode())
 end
 function s.filter6b(c,lv,code)
@@ -63,7 +64,7 @@ function s.target6(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
     if chk==0 then return Duel.IsExistingMatchingCard(s.filter6a,tp,LOCATION_DECK+LOCATION_EXTRA,0,1,nil,tp) end
     Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_CONFIRM)
     local rc=Duel.SelectMatchingCard(tp,s.filter6a,tp,LOCATION_DECK+LOCATION_EXTRA,0,1,1,nil,tp):GetFirst()
-	Duel.ConfirmCards(1-tp,rc)
+    Duel.ConfirmCards(1-tp,rc)
     e:SetLabel(rc:GetLevel(),rc:GetCode())
     if rc:IsLocation(LOCATION_DECK) then
         Duel.ShuffleDeck(tp)
@@ -77,7 +78,7 @@ function s.operation6(e,tp,eg,ep,ev,re,r,rp)
     local c=e:GetHandler()
     local tc=Duel.GetFirstTarget()
     local lv,code=e:GetLabel()
-    if tc:IsRelateToEffect(e) then
+    if tc:IsRelateToEffect(e) and tc:IsFaceup() and not tc:IsImmuneToEffect(e) then
         local e1=Effect.CreateEffect(c)
         e1:SetType(EFFECT_TYPE_SINGLE)
         e1:SetCode(EFFECT_CHANGE_LEVEL)
@@ -89,7 +90,7 @@ function s.operation6(e,tp,eg,ep,ev,re,r,rp)
         e2:SetCode(EFFECT_CHANGE_CODE)
         e2:SetValue(code)
         tc:RegisterEffect(e2)
-		Duel.BreakEffect()
-		Duel.Destroy(c,REASON_EFFECT)
+        Duel.BreakEffect()
+        Duel.Destroy(c,REASON_EFFECT)
     end
 end

@@ -22,6 +22,7 @@ function s.initial_effect(c)
     e2:SetCountLimit(1,{id,1})
     c:RegisterEffect(e2)
 end
+s.listed_series={0xb02,0x3b02,0xb0c}
 function s.filter1(c)
     return c:IsSetCard(0xb0c) and c:IsType(TYPE_CONTINUOUS) and (c:IsFaceup() or c:IsLocation(LOCATION_GRAVE))
 end
@@ -31,7 +32,7 @@ function s.condition1(e,tp,eg,ep,ev,re,r,rp)
         and Duel.IsExistingMatchingCard(s.filter1,tp,LOCATION_ONFIELD+LOCATION_GRAVE,0,1,nil)
 end
 function s.target1(e,tp,eg,ep,ev,re,r,rp,chk)
-    return re:GetHandler():IsAbleToRemove()
+    if chk==0 then return re:GetHandler():IsAbleToRemove() end
 end
 function s.operation1(e,tp,eg,ep,ev,re,r,rp)
     Duel.ChangeTargetCard(ev,Group.CreateGroup())
