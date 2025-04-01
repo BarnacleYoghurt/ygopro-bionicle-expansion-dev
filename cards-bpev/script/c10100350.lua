@@ -26,13 +26,16 @@ function s.initial_effect(c)
     e2:SetCountLimit(1,id)
     c:RegisterEffect(e2)
 end
+s.listed_series={0xb06}
 function s.target1(e,tp,eg,ep,ev,re,r,rp,chk)
     if chk==0 then return Duel.IsExistingMatchingCard(Card.IsFaceup,tp,LOCATION_MZONE,LOCATION_MZONE,1,e:GetHandler()) end
 end
 function s.operation1(e,tp,eg,ep,ev,re,r,rp)
     local g=Duel.GetMatchingGroup(Card.IsFaceup,tp,LOCATION_MZONE,LOCATION_MZONE,e:GetHandler())
     for tc in g:Iter() do
-        tc:UpdateLevel(-1,RESET_EVENT+RESETS_STANDARD,e:GetHandler())
+        if tc:IsLevelAbove(2) then
+            tc:UpdateLevel(-1,RESET_EVENT+RESETS_STANDARD,e:GetHandler())
+        end
         tc:UpdateAttack(-math.min(tc:GetAttack(),500),RESET_EVENT+RESETS_STANDARD,e:GetHandler())
     end
 end

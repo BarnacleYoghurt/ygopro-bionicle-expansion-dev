@@ -3,7 +3,7 @@ local s,id=GetID()
 function s.initial_effect(c)
     --Fusion Material
     Fusion.AddProcMixRep(c,true,true,s.filter0a,3,99)
-    Fusion.AddContactProc(c,s.contactfil,s.contactop,aux.fuslimit)
+    Fusion.AddContactProc(c,s.contactfil,s.contactop,aux.fuslimit,nil,nil,nil,false)
     c:EnableReviveLimit()
     --Copy Types
     local e1=Effect.CreateEffect(c)
@@ -28,11 +28,13 @@ function s.initial_effect(c)
     e2b:SetCondition(s.condition2b)
     c:RegisterEffect(e2b)
 end
+s.listed_series={0xb06}
 function s.filter0a(c,fc,sumtype,tp,sub,mg,sg,contact)
     if sg and #sg==0 then
         --Okay, so there's some weirdness going on here
         --sg holds the selection after picking the first material, but then becomes empty
         --at the same time, mg seemingly goes from holding possible material to holding the selection!
+        --Seems to be unqiue to AddProcMixRep; AddProcMixN with the same filter works.
         --Also this has some real performance issues on big selections ...
         sg=mg
     end
@@ -51,14 +53,10 @@ end
 function s.operation1(e,tp,eg,ep,ev,re,r,rp)
     local c=e:GetHandler()
     local g=c:GetMaterial()
-    local race=0
-    for tc in g:Iter() do
-        race=race|tc:GetOriginalRace()
-    end
     local e1=Effect.CreateEffect(c)
     e1:SetType(EFFECT_TYPE_SINGLE)
     e1:SetCode(EFFECT_ADD_RACE)
-    e1:SetValue(race)
+    e1:SetValue(g:GetBitwiseOr(Card.GetOriginalRace))
     e1:SetReset(RESET_EVENT+RESETS_STANDARD_DISABLE)
     c:RegisterEffect(e1)
 end

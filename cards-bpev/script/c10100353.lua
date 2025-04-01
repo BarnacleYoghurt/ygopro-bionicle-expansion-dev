@@ -26,6 +26,7 @@ function s.initial_effect(c)
     e2:SetCountLimit(1,id)
     c:RegisterEffect(e2)
 end
+s.listed_series={0xb06}
 function s.filter2(c,e,tp)
     return c:IsSetCard(0xb06) and c:IsType(TYPE_TUNER) and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
 end

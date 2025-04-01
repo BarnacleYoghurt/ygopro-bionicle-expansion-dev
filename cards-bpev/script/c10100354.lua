@@ -31,10 +31,11 @@ function s.initial_effect(c)
     e2:SetCountLimit(1,id)
     c:RegisterEffect(e2)
 end
+s.listed_series={0xb06}
 function s.spcheck1(sg,tp,_,e)
     --check that tributing frees a zone iff adding to hand is not possible
     local rc=sg:GetFirst()
-    return Duel.IsExistingMatchingCard(aux.NecroValleyFilter(s.filter1),tp,LOCATION_DECK+LOCATION_GRAVE,0,1,nil,e,tp,rc),true
+    return Duel.IsExistingMatchingCard(s.filter1,tp,LOCATION_DECK+LOCATION_GRAVE,0,1,nil,e,tp,rc),true
 end
 function s.filter1(c,e,tp,rc)
     return c:IsSetCard(0xb06) and c:IsType(TYPE_NORMAL)
@@ -52,8 +53,8 @@ function s.target1(e,tp,eg,ep,ev,re,r,rp,chk)
 end
 function s.operation1(e,tp,eg,ep,ev,re,r,rp)
     Duel.Hint(HINT_SELECTMSG,tp,aux.Stringid(id,2))
-	local g=Duel.SelectMatchingCard(tp,aux.NecroValleyFilter(s.filter1),tp,LOCATION_DECK+LOCATION_GRAVE,0,1,1,nil,e,tp,nil)
-	if #g>0 then
+    local g=Duel.SelectMatchingCard(tp,aux.NecroValleyFilter(s.filter1),tp,LOCATION_DECK+LOCATION_GRAVE,0,1,1,nil,e,tp,nil)
+    if #g>0 then
         aux.ToHandOrElse(g,tp,
             function()
                 return Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and g:GetFirst():IsCanBeSpecialSummoned(e,0,tp,false,false)

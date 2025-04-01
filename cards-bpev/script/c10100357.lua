@@ -23,12 +23,13 @@ function s.initial_effect(c)
     e2:SetCountLimit(1,{id,1})
     c:RegisterEffect(e2)
 end
+s.listed_series={0xb08,0xb09}
 function s.filter1a(c,tp)
-    return c:IsSetCard(0xb09) and c:IsMonster() and (c:IsLocation(LOCATION_GRAVE) or c:IsFaceup())
-        and (c:IsAbleToHand() or Duel.IsExistingMatchingCard(s.filter1b,tp,LOCATION_MZONE,0,1,nil,c))
+    return c:IsSetCard(0xb09) and c:IsMonster() and c:IsFaceup()
+        and (c:IsAbleToHand() or Duel.IsExistingMatchingCard(s.filter1b,tp,LOCATION_MZONE,0,1,nil,c,tp))
 end
-function s.filter1b(c,tc)
-    return c:IsFaceup() and c:IsSetCard(0xb08) and c:IsType(TYPE_XYZ)
+function s.filter1b(c,tc,tp)
+    return c:IsFaceup() and c:IsSetCard(0xb08) and c:IsType(TYPE_XYZ) and tc:IsCanBeXyzMaterial(c,tp,REASON_EFFECT)
         and c~=tc -- you know, for the totally real Bohrok/Krana hybrid
 end
 function s.target1(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
@@ -45,14 +46,14 @@ function s.operation1(e,tp,eg,ep,ev,re,r,rp)
     local tc=Duel.GetFirstTarget()
     if tc:IsRelateToEffect(e) then
         aux.ToHandOrElse(tc,tp,
-            function(c) return Duel.IsExistingMatchingCard(s.filter1b,tp,LOCATION_MZONE,0,1,nil,c) end,
+            function(c) return Duel.IsExistingMatchingCard(s.filter1b,tp,LOCATION_MZONE,0,1,nil,c,tp) end,
             function (tc)
-                local g=Duel.SelectMatchingCard(tp,s.filter1b,tp,LOCATION_MZONE,0,1,1,nil,tc)
+                local g=Duel.SelectMatchingCard(tp,s.filter1b,tp,LOCATION_MZONE,0,1,1,nil,tc,tp)
                 if #g>0 then
                     Duel.Overlay(g:GetFirst(),tc,true)
                 end
             end,
-            aux.Stringid(id,2)
+            aux.Stringid(id,1)
         )
     end
 end

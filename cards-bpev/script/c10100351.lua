@@ -1,5 +1,5 @@
 if not bcor then
-	Duel.LoadScript("util-bcor.lua")
+    Duel.LoadScript("util-bcor.lua")
 end
 --MKT Fish, Biting Rahi
 local s,id=GetID()
@@ -7,21 +7,21 @@ function s.initial_effect(c)
     --Non-Tuner
     local e1=Effect.CreateEffect(c)
     e1:SetType(EFFECT_TYPE_SINGLE)
-	e1:SetProperty(EFFECT_FLAG_SINGLE_RANGE)
-	e1:SetRange(LOCATION_MZONE)
-	e1:SetCode(EFFECT_NONTUNER)
+    e1:SetProperty(EFFECT_FLAG_SINGLE_RANGE)
+    e1:SetRange(LOCATION_MZONE)
+    e1:SetCode(EFFECT_NONTUNER)
     c:RegisterEffect(e1)
     --Synchro Summon
     local e2=Effect.CreateEffect(c)
-    e2:SetDescription(aux.Stringid(id,1))
+    e2:SetDescription(aux.Stringid(id,0))
     e2:SetCategory(CATEGORY_SPECIAL_SUMMON)
     e2:SetType(EFFECT_TYPE_QUICK_O)
     e2:SetRange(LOCATION_MZONE)
     e2:SetCode(EVENT_FREE_CHAIN)
+    e2:SetHintTiming(TIMING_MAIN_END)
     e2:SetCondition(s.condition2)
     e2:SetTarget(s.target2)
     e2:SetOperation(s.operation2)
-    e2:SetHintTiming(TIMING_MAIN_END)
     e2:SetCountLimit(1,id)
     c:RegisterEffect(e2)
 end
