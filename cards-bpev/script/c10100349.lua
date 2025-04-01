@@ -48,10 +48,11 @@ function s.filter1a(c,e,tp)
 	local range=LOCATION_GRAVE+LOCATION_MZONE
 	local ex=Group.FromCards(c,e:GetHandler())
 	return c:IsSetCard(0xb08) and c:IsAbleToRemoveAsCost()
-		and Duel.IsExistingTarget(s.filter1b,tp,range,range,1,ex)
+		and Duel.IsExistingTarget(s.filter1b,tp,range,range,1,ex,tp)
 end
-function s.filter1b(c)
-	return (c:IsLocation(LOCATION_MZONE) or c:IsMonster()) and c:IsFaceup() and not c:IsForbidden()
+function s.filter1b(c,tp)
+	return c:IsMonster() and c:IsFaceup() and (c:IsAbleToChangeControler() or c:IsControler(tp))
+		and not c:IsForbidden() and c:CheckUniqueOnField(tp)
 end
 function s.cost1(e,tp,eg,ep,ev,re,r,rp,chk)
 	if chk==0 then return Duel.IsExistingMatchingCard(s.filter1a,tp,LOCATION_GRAVE,0,1,nil,e,tp) end
@@ -62,10 +63,10 @@ end
 function s.target1(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 	local c=e:GetHandler()
 	local range=LOCATION_GRAVE+LOCATION_MZONE
-	if chkc then return s.filter1b(chkc) and chkc:IsLocation(range) and chkc~=c end
+	if chkc then return s.filter1b(chkc,tp) and chkc:IsLocation(range) and chkc~=c end
 	if chk==0 then return Duel.GetLocationCount(tp,LOCATION_SZONE)>0 end -- Target availability is already checked in cost processing
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_EQUIP)
-	local g=Duel.SelectTarget(tp,s.filter1b,tp,range,range,1,1,c)
+	local g=Duel.SelectTarget(tp,s.filter1b,tp,range,range,1,1,c,tp)
 	Duel.SetOperationInfo(0,CATEGORY_EQUIP,g,1,0,0)
 	Duel.SetChainLimit(function(e,ep,tp) return ep==tp end)
 end
