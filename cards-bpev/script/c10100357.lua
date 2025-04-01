@@ -59,7 +59,7 @@ function s.operation1(e,tp,eg,ep,ev,re,r,rp)
 end
 function s.target2(e,tp,eg,ep,ev,re,r,rp,chk)
     if chk==0 then return true end
-	Duel.SetChainLimit(aux.FALSE)
+    Duel.SetChainLimit(aux.FALSE)
 end
 function s.operation2(e,tp,eg,ep,ev,re,r,rp)
     local e1=Effect.CreateEffect(e:GetHandler())

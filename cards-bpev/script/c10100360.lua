@@ -37,9 +37,9 @@ end
 function s.target1(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
     if chkc then return s.filter1a(chkc,e,tp) and chkc:IsControler(tp) and chkc:IsLocation(LOCATION_MZONE) end
     if chk==0 then return Duel.IsExistingTarget(s.filter1a,tp,LOCATION_MZONE,0,1,nil,e,tp) end
-	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_RELEASE)
-	local g=Duel.SelectTarget(tp,s.filter1a,tp,LOCATION_MZONE,0,1,1,nil,e,tp)
-	Duel.SetOperationInfo(0,CATEGORY_RELEASE,g,1,0,0)
+    Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_RELEASE)
+    local g=Duel.SelectTarget(tp,s.filter1a,tp,LOCATION_MZONE,0,1,1,nil,e,tp)
+    Duel.SetOperationInfo(0,CATEGORY_RELEASE,g,1,0,0)
     Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,1,tp,LOCATION_HAND+LOCATION_DECK)
 end
 function s.operation1(e,tp,eg,ep,ev,re,r,rp)
