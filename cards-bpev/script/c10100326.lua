@@ -32,7 +32,7 @@ function s.filter1(c)
     return c:IsSetCard(0xb02) and c:IsMonster()
 end
 function s.condition1(e,tp,eg,ep,ev,re,r,rp)
-    return e:GetHandler():GetOverlayGroup():IsExists(s.filter1,1,nil)
+    return e:GetHandler():GetOverlayGroup():IsExists(s.filter1,1,nil) and ep~=tp and Duel.IsChainNegatable(ev)
 end
 function s.target1(e,tp,eg,ep,ev,re,r,rp,chk)
     local rc=re:GetHandler()
