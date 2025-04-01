@@ -4,7 +4,7 @@ function s.initial_effect(c)
 	c:EnableReviveLimit()
 	--Fusion Material
 	Fusion.AddProcCode3(c,10100331,10100333,10100334,true,true)
-	Fusion.AddContactProc(c,s.contactgroup,s.contactop,s.contactsumcon)
+	Fusion.AddContactProc(c,s.contactgroup,s.contactop,s.contactsumcon,nil,nil,nil,false)
 	--Boost
 	local e1=Effect.CreateEffect(c)
 	e1:SetDescription(aux.Stringid(id,0))
@@ -27,7 +27,8 @@ function s.initial_effect(c)
 	e2:SetCountLimit(1,{id,1})
 	c:RegisterEffect(e2)
 end
-
+s.listed_names={10100331,10100333,10100334}
+s.listed_series={0xb08}
 function s.contactgroup(tp)
 	return Duel.GetReleaseGroup(tp)
 end
@@ -35,7 +36,7 @@ function s.contactop(g)
 	Duel.Release(g,REASON_COST+REASON_MATERIAL)
 end
 function s.contactsumcon(e,se,sp,st)
-	return (st&SUMMON_TYPE_FUSION)==SUMMON_TYPE_FUSION
+	return (st&SUMMON_TYPE_FUSION)==SUMMON_TYPE_FUSION or not e:GetHandler():IsLocation(LOCATION_EXTRA)
 end
 function s.filter1(c)
 	return c:IsSetCard(0xb08) and c:IsAbleToRemoveAsCost()
@@ -78,6 +79,7 @@ function s.target2(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 	Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
 	local g=Duel.SelectTarget(tp,s.filter2,tp,LOCATION_GRAVE,0,1,1,nil,e,tp)
 	Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,g,1,0,0)
+	Duel.SetOperationInfo(0,CATEGORY_LEAVE_GRAVE,e:GetHandler(),1,0,0)
 end
 function s.operation2(e,tp,eg,ep,ev,re,r,rp)
 	local tc=Duel.GetFirstTarget()
