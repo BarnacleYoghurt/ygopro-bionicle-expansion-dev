@@ -22,14 +22,13 @@ function s.initial_effect(c)
     c:RegisterEffect(e2)
 end
 s.listed_series={0xb0d}
-function s.filter1a(c,tp,chk)
-    return c:IsFaceup() and Duel.IsExistingMatchingCard(s.filter1c,tp,LOCATION_DECK+LOCATION_GRAVE+LOCATION_ONFIELD,0,1,nil,tp,c,chk)
+function s.filter1a(c,tp,z)
+    return c:IsFaceup() and Duel.IsExistingMatchingCard(s.filter1c,tp,LOCATION_DECK+LOCATION_GRAVE+LOCATION_ONFIELD,0,1,nil,tp,c,z)
 end
 function s.filter1b(c)
     return c:GetEquipGroup():IsExists(s.filter1d,1,nil)
 end
-function s.filter1c(c,tp,tc,chk)
-    local z=chk==0 and 1 or 0 --need >1 zone (this card + equip) in chk, and >0 afterwards
+function s.filter1c(c,tp,tc,z)
     return c:IsSetCard(0xb0d) and c:IsEquipSpell() and c:CheckEquipTarget(tc)
         and c:GetEquipTarget()~=tc and c:CheckUniqueOnField(tp) and not c:IsForbidden()
         and (Duel.GetLocationCount(tp,LOCATION_SZONE)>z or c:IsLocation(LOCATION_SZONE))
@@ -39,12 +38,14 @@ function s.filter1d(c)
     return c:IsSetCard(0xb0d) and c:IsEquipSpell() and c:IsFaceup()
 end
 function s.target1(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
+    --The equip effect needs to account for 1 more zone if this card is not yet on the field
+    local z=e:GetHandler():IsOnField() and 0 or 1
     if chkc then
-        if e:GetLabel()==1 then return s.filter1a(chkc,tp,1) and chkc:IsLocation(LOCATION_MZONE) end
+        if e:GetLabel()==1 then return s.filter1a(chkc,tp,z) and chkc:IsLocation(LOCATION_MZONE) end
         if e:GetLabel()==2 then return chkc:IsFaceup() and chkc:IsOnField() and chkc~=e:GetHandler() end
         return false
     end
-    local b1=Duel.IsExistingTarget(s.filter1a,tp,LOCATION_MZONE,LOCATION_MZONE,1,nil,tp,chk)
+    local b1=Duel.IsExistingTarget(s.filter1a,tp,LOCATION_MZONE,LOCATION_MZONE,1,nil,tp,z)
     local b2=Duel.IsExistingMatchingCard(s.filter1b,tp,LOCATION_MZONE,0,1,nil)
         and Duel.IsExistingTarget(Card.IsFaceup,tp,LOCATION_ONFIELD,LOCATION_ONFIELD,1,nil)
     if chk==0 then return b1 or b2 end
@@ -55,7 +56,7 @@ function s.target1(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
     if op==1 then
         e:SetCategory(CATEGORY_EQUIP)
         Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TARGET)
-        Duel.SelectTarget(tp,s.filter1a,tp,LOCATION_MZONE,LOCATION_MZONE,1,1,nil,tp)
+        Duel.SelectTarget(tp,s.filter1a,tp,LOCATION_MZONE,LOCATION_MZONE,1,1,nil,tp,z)
         Duel.SetOperationInfo(0,CATEGORY_EQUIP,nil,1,tp,LOCATION_DECK+LOCATION_GRAVE+LOCATION_ONFIELD)
     elseif op==2 then
         e:SetCategory(CATEGORY_DISABLE)
@@ -71,7 +72,7 @@ function s.operation1(e,tp,eg,ep,ev,re,r,rp)
         if op==1 then
             Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_EQUIP)
             local g=Duel.SelectMatchingCard(tp,aux.NecroValleyFilter(s.filter1c),tp,
-                LOCATION_DECK+LOCATION_GRAVE+LOCATION_ONFIELD,0,1,1,nil,tp,tc,1)
+                LOCATION_DECK+LOCATION_GRAVE+LOCATION_ONFIELD,0,1,1,nil,tp,tc,0)
             if #g>0 then
                 Duel.Equip(tp,g:GetFirst(),tc)
             end
