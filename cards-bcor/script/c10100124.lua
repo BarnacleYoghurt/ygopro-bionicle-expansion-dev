@@ -55,7 +55,7 @@ function s.operation1(e,tp,eg,ep,ev,re,r,rp)
 	end
 end
 function s.filter2(c)
-	return c:IsRace(RACE_INSECT) and c:IsSetCard(0xb06) and not c:IsCode(id)
+	return c:IsRace(RACE_INSECT) and c:IsSetCard(0xb06) and not c:IsCode(id) and c:IsAbleToHand()
 end
 function s.condition2(e,tp,eg,ep,ev,re,r,rp)
 	return Duel.IsExistingMatchingCard(aux.FaceupFilter(Card.IsSpellTrap),tp,LOCATION_ONFIELD,LOCATION_ONFIELD,1,nil)
