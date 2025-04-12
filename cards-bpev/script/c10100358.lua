@@ -45,7 +45,7 @@ function s.filter3(c)
 end
 function s.condition3(e,tp,eg,ep,ev,re,r,rp)
     local ec=e:GetHandler():GetEquipTarget()
-    return bcot.greatkanohi_con(e) and ec:IsControler(e:GetOwnerPlayer())
+    return ec and ec:IsControler(e:GetOwnerPlayer())
 end
 function s.target3(e,tp,eg,ep,ev,re,r,rp,chk)
     if chk==0 then return Duel.IsExistingMatchingCard(s.filter3,tp,LOCATION_DECK+LOCATION_GRAVE,0,1,nil) end

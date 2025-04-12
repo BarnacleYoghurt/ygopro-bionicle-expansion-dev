@@ -26,7 +26,7 @@ function s.filter1a(c,tp,z)
     return c:IsFaceup() and Duel.IsExistingMatchingCard(s.filter1c,tp,LOCATION_DECK+LOCATION_GRAVE+LOCATION_ONFIELD,0,1,nil,tp,c,z)
 end
 function s.filter1b(c)
-    return c:GetEquipGroup():IsExists(s.filter1d,1,nil)
+    return (c:IsSetCard(0xb02) or c:IsSetCard(0xb07)) and c:GetEquipGroup():IsExists(s.filter1d,1,nil)
 end
 function s.filter1c(c,tp,tc,z)
     return c:IsSetCard(0xb0d) and c:IsEquipSpell() and c:CheckEquipTarget(tc)
