@@ -28,10 +28,10 @@ function s.filter1a(c,e,tp)
         and Duel.IsExistingMatchingCard(s.filter1b,tp,LOCATION_HAND+LOCATION_DECK,0,1,nil,c,e,tp)
 end
 function s.filter1b(c,rc,e,tp)
-    return c:IsLevelBelow(4) and c:IsRace(RACE_WARRIOR)
+    return c:IsRace(RACE_WARRIOR)
         and c:GetOriginalLevel()>rc:GetOriginalLevel()
+        and c:GetOriginalLevel()-rc:GetOriginalLevel()<=2
         and c:IsOriginalAttribute(rc:GetOriginalAttribute())
-        and not c:IsOriginalCode(rc:GetOriginalCode())
         and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
 end
 function s.target1(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
