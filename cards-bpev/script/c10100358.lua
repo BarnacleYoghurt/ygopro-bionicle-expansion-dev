@@ -5,8 +5,6 @@ end
 local s,id=GetID()
 function s.initial_effect(c)
     aux.AddEquipProcedure(c)
-    --Only 1 "Vahi" Equip Spell
-    c:SetUniqueOnField(1,0,s.filter0,LOCATION_SZONE)
     --Destroy if replaced
     local e1=bcot.kanohi_selfdestruct(c)
     c:RegisterEffect(e1)
@@ -33,7 +31,7 @@ function s.initial_effect(c)
     e3:SetCondition(s.condition3)
     e3:SetTarget(s.target3)
     e3:SetOperation(s.operation3)
-    e3:SetCountLimit(1)
+    e3:SetCountLimit(1,id)
     c:RegisterEffect(e3)
 end
 s.listed_series={0xb02,0xb04,0xb07,0xb0d}
