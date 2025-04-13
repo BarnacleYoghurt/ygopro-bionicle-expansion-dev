@@ -21,7 +21,7 @@ function s.initial_effect(c)
     e2:SetCountLimit(1,id)
     c:RegisterEffect(e2)
 end
-s.listed_series={0xb0d}
+s.listed_series={0xb02,0xb07,0xb0d}
 function s.filter1a(c,tp,z)
     return c:IsFaceup() and Duel.IsExistingMatchingCard(s.filter1c,tp,LOCATION_DECK+LOCATION_GRAVE+LOCATION_ONFIELD,0,1,nil,tp,c,z)
 end

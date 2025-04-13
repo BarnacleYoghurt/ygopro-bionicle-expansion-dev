@@ -34,7 +34,7 @@ function s.initial_effect(c)
     e3:SetCountLimit(1,id)
     c:RegisterEffect(e3)
 end
-s.listed_series={0xb02,0xb04,0xb07,0xb0d}
+s.listed_series={0xb04,0xb0d}
 function s.filter0(c)
     return c:IsSetCard(0xb0d) and c:IsEquipSpell()
 end
