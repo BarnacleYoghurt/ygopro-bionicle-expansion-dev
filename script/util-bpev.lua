@@ -58,7 +58,7 @@ function BPEV.toa_nuva_kaita_search(baseC)
   e:SetCategory(CATEGORY_SEARCH+CATEGORY_TOHAND)
   e:SetType(EFFECT_TYPE_IGNITION)
   e:SetRange(LOCATION_MZONE)
-  e:SetCost(aux.dxmcostgen(1,1))
+  e:SetCost(Cost.Detach(1))
   e:SetTarget(target)
   e:SetOperation(operation)
   return e
