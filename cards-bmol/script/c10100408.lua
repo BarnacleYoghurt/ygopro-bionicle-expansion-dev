@@ -26,7 +26,7 @@ function s.initial_effect(c)
     --Add
     local e3=Effect.CreateEffect(c)
     e3:SetDescription(aux.Stringid(id,1))
-    e3:SetCategory(CATEGORY_SEARCH+CATEGORY_TOHAND)
+    e3:SetCategory(CATEGORY_SEARCH|CATEGORY_TOHAND)
     e3:SetType(EFFECT_TYPE_SINGLE|EFFECT_TYPE_TRIGGER_O)
     e3:SetCode(EVENT_SUMMON_SUCCESS)
     e3:SetTarget(s.target3)
