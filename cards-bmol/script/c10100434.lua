@@ -1,6 +1,4 @@
-if not bmol then
-    Duel.LoadScript("util-bmol.lua")
-end
+Duel.LoadScript("util-bmol.lua")
 --Shattering Kraata Xi
 local s,id=GetID()
 function s.initial_effect(c)

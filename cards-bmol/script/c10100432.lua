@@ -1,6 +1,4 @@
-if not bmol then
-    Duel.LoadScript("util-bmol.lua")
-end
+Duel.LoadScript("util-bmol.lua")
 --Erosive Kraata Ul
 local s,id=GetID()
 function c10100432.initial_effect(c)
