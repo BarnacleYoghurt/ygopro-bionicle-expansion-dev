@@ -63,7 +63,7 @@ end
 function s.target3(e,tp,eg,ep,ev,re,r,rp,chk)
     local c=e:GetHandler()
     local tc=c:GetBattleTarget()
-    if chk==0 then return tc and tc:IsRelateToBattle() and tc:IsAttackBelow(800*c:GetLevel()) end
+    if chk==0 then return tc and tc:IsRelateToBattle() and tc:IsAttackBelow(600*c:GetLevel()) end
     local g=tc:GetColumnGroup(1,1):Filter(s.filter3,nil,tc,tc:GetSequence(),tp)
     g:Merge(tc)
     Duel.SetOperationInfo(0,CATEGORY_DESTROY,g,#g,0,0)
