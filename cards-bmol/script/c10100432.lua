@@ -1,7 +1,7 @@
 Duel.LoadScript("util-bmol.lua")
 --Erosive Kraata Ul
 local s,id=GetID()
-function c10100432.initial_effect(c)
+function s.initial_effect(c)
     --Special Summon
     local e1=Effect.CreateEffect(c)
     e1:SetDescription(aux.Stringid(id,0))
@@ -32,7 +32,7 @@ function c10100432.initial_effect(c)
     c:RegisterEffect(e3b)
 end
 function s.filter1a(c)
-    return c:IsFaceup() and not c:IsSetCard(SET_KRAATA)
+    return c:IsFaceup() and not (c:IsAttribute(ATTRIBUTE_DARK) and c:IsRace(RACE_FIEND))
 end
 function s.filter1b(c)
     return c:IsSetCard(SET_KRAATA) and c:IsType(TYPE_SPELL|TYPE_TRAP) and c:IsAbleToHand()
@@ -49,7 +49,7 @@ end
 function s.operation1(e,tp,eg,ep,ev,re,r,rp)
     local c=e:GetHandler()
     if c:IsRelateToEffect(e) and Duel.GetLocationCount(tp,LOCATION_MZONE)>0 then
-        if Duel.SpecialSummon(c,0,tp,tp,false,false,POS_FACEUP_ATTACK)>0
+        if Duel.SpecialSummon(c,0,tp,tp,false,false,POS_FACEUP)>0
             and Duel.IsExistingMatchingCard(s.filter1b,tp,LOCATION_DECK,0,1,nil)
             and Duel.SelectYesNo(tp,aux.Stringid(id,1)) then
             Duel.BreakEffect()
@@ -73,8 +73,8 @@ function s.operation1(e,tp,eg,ep,ev,re,r,rp)
 	Duel.RegisterEffect(e1,tp)
 end
 function s.target1_1(e,c)
-    return not (c:IsAttribute(ATTRIBUTE_DARK) and c:IsRace(RACE_FIEND))
+    return c:IsType(TYPE_EFFECT) and not (c:IsAttribute(ATTRIBUTE_DARK) and c:IsRace(RACE_FIEND))
 end
 function s.value3(e,c)
-    return e:GetHandler():GetLevel()*-800
+    return e:GetHandler():GetLevel()*-600
 end
