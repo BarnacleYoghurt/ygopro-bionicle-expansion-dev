@@ -53,8 +53,7 @@ function s.operation1(e,tp,eg,ep,ev,re,r,rp)
 end
 function s.condition2(e,tp,eg,ep,ev,re,r,rp)
     local bc=Duel.GetBattleMonster(tp)
-    return bc and bc:IsFaceup() and bc==Duel.GetAttacker() and bc:CanChainAttack()
-        and (bc:IsAttribute(ATTRIBUTE_WATER) or bc:IsRace(RACE_WARRIOR))
+    return bc and bc:IsFaceup() and bc==Duel.GetAttacker() and bc:CanChainAttack() and bc:IsRace(RACE_WARRIOR)
 end
 function s.operation2(e,tp,eg,ep,ev,re,r,rp)
     local bc=Duel.GetBattleMonster(tp)
