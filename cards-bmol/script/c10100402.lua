@@ -43,7 +43,7 @@ function s.operation1(e,tp,eg,ep,ev,re,r,rp)
     local c=e:GetHandler()
     local rc=e:GetLabelObject()
     if c:IsRelateToEffect(e) and Duel.GetLocationCount(tp,LOCATION_MZONE)>0 then
-        if Duel.SpecialSummon(c,0,tp,tp,false,false,POS_FACEUP_DEFENSE)>0 and rc:IsRelateToEffect(e)
+        if Duel.SpecialSummon(c,0,tp,tp,false,false,POS_FACEUP)>0 and rc:IsRelateToEffect(e)
             and Duel.GetMatchingGroupCount(aux.FaceupFilter(Card.ListsCode,CARD_AVOHKII),tp,LOCATION_ONFIELD,0,nil)<2 then
             Duel.BreakEffect()
             Duel.SendtoGrave(rc,REASON_EFFECT)
