@@ -46,6 +46,7 @@ function s.operation1(e,tp,eg,ep,ev,re,r,rp)
         if Duel.GetMatchingGroup(Card.IsMonster,tp,LOCATION_GRAVE,0,nil):GetClassCount(Card.GetAttribute)==1 then
             local tc=e:GetLabelObject()
             if tc:IsRelateToEffect(e) and Duel.SelectYesNo(tp,aux.Stringid(id,1)) then
+                Duel.BreakEffect()
                 Duel.Destroy(tc,REASON_EFFECT)
             end
         end
