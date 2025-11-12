@@ -55,7 +55,7 @@ function s.cost1b(e,tp,eg,ep,ev,re,r,rp,chk)
     Duel.Release(g,REASON_COST)
 end
 function s.target1(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
-    if chkc then return s.filter1c(chkc,tp) end
+    if chkc then return s.filter1c(chkc,tp) and chkc:IsLocation(LOCATION_ONFIELD) end
     local c=e:GetHandler()
     if chk==0 then
         return Duel.IsExistingTarget(s.filter1c,tp,LOCATION_ONFIELD,LOCATION_ONFIELD,1,nil,tp)

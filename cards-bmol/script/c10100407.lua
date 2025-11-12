@@ -40,7 +40,7 @@ function s.filter1(c,e,tp)
     return c:IsSetCard(SET_AVOHKII) and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
 end
 function s.target1(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
-    if chkc then return s.filter1(chkc,e,tp) end
+    if chkc then return s.filter1(chkc,e,tp) and chkc:IsLocation(LOCATION_GRAVE) and chkc:IsControler(tp) end
     if chk==0 then return true end
     if Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and Duel.IsExistingTarget(s.filter1,tp,LOCATION_GRAVE,0,1,nil,e,tp)
         and Duel.SelectYesNo(tp,aux.Stringid(id,1)) then
