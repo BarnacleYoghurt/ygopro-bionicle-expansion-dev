@@ -37,18 +37,17 @@ function s.initial_effect(c)
 end
 s.listed_names={CARD_AVOHKII}
 function s.filter1(c,e,tp)
-    return c:IsSetCard(SET_AVOHKII) and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
+    return c:IsSetCard(SET_AVOHKII) and c:IsFaceup() and c:IsAbleToHand()
 end
 function s.target1(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
-    if chkc then return s.filter1(chkc,e,tp) and chkc:IsLocation(LOCATION_GRAVE) and chkc:IsControler(tp) end
+    if chkc then return s.filter1(chkc,e,tp) and chkc:IsLocation(LOCATION_GRAVE|LOCATION_REMOVED) and chkc:IsControler(tp) end
     if chk==0 then return true end
-    if Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and Duel.IsExistingTarget(s.filter1,tp,LOCATION_GRAVE,0,1,nil,e,tp)
-        and Duel.SelectYesNo(tp,aux.Stringid(id,1)) then
-        e:SetCategory(CATEGORY_SPECIAL_SUMMON)
+    if Duel.IsExistingTarget(s.filter1,tp,LOCATION_GRAVE|LOCATION_REMOVED,0,1,nil,e,tp) and Duel.SelectYesNo(tp,aux.Stringid(id,1)) then
+        e:SetCategory(CATEGORY_TOHAND)
         e:SetProperty(EFFECT_FLAG_CARD_TARGET)
-        Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
-        local g=Duel.SelectTarget(tp,s.filter1,tp,LOCATION_GRAVE,0,1,1,nil,e,tp)
-        Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,g,1,0,0)
+        Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_ATOHAND)
+        local g=Duel.SelectTarget(tp,s.filter1,tp,LOCATION_GRAVE|LOCATION_REMOVED,0,1,1,nil,e,tp)
+        Duel.SetOperationInfo(0,CATEGORY_TOHAND,g,1,0,0)
     else
         e:SetCategory(0)
         e:SetProperty(0)
@@ -56,10 +55,9 @@ function s.target1(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
 end
 function s.operation1(e,tp,eg,ep,ev,re,r,rp)
     local tc=Duel.GetFirstTarget()
-    if tc and tc:IsRelateToEffect(e) and Duel.SpecialSummonStep(tc,0,tp,tp,false,false,POS_FACEUP) then
-        tc:NegateEffects(e:GetHandler())
+    if tc and tc:IsRelateToEffect(e) then
+        Duel.SendtoHand(tc,nil,REASON_EFFECT)
     end
-    Duel.SpecialSummonComplete()
 end
 function s.filter2a(c,tp)
     return c:IsFaceup() and c:IsControler(tp) and c:ListsCode(CARD_AVOHKII)
