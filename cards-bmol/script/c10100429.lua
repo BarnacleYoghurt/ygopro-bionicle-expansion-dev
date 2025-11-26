@@ -28,6 +28,7 @@ function s.initial_effect(c)
     e2:SetCategory(CATEGORY_TOHAND)
     e2:SetType(EFFECT_TYPE_SINGLE|EFFECT_TYPE_TRIGGER_F)
     e2:SetCode(EVENT_DAMAGE_STEP_END)
+    e2:SetCondition(s.condition2)
     e2:SetTarget(s.target2)
     e2:SetOperation(s.operation2)
     c:RegisterEffect(e2)
@@ -85,6 +86,9 @@ function s.operation1(e,tp,eg,ep,ev,re,r,rp)
             Duel.SpecialSummonComplete()
         end
     end
+end
+function s.condition2(e,tp,eg,ep,ev,re,r,rp,chk)
+    return e:GetHandler():IsRelateToBattle()
 end
 function s.target2(e,tp,eg,ep,ev,re,r,rp,chk)
     if chk==0 then return true end
