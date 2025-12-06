@@ -4,18 +4,18 @@ local s,id=GetID()
 function s.initial_effect(c)
     --Special Summon
     local e1=Effect.CreateEffect(c)
-    e1:SetDescription(aux.Stringid(id,0))
-    e1:SetCategory(CATEGORY_SPECIAL_SUMMON)
-    e1:SetType(EFFECT_TYPE_IGNITION)
+    e1:SetType(EFFECT_TYPE_FIELD)
+    e1:SetProperty(EFFECT_FLAG_UNCOPYABLE)
     e1:SetRange(LOCATION_HAND)
-    e1:SetCost(s.cost1)
+    e1:SetCode(EFFECT_SPSUMMON_PROC)
+    e1:SetCondition(s.condition1)
     e1:SetTarget(s.target1)
     e1:SetOperation(s.operation1)
-    e1:SetCountLimit(1,id)
+    e1:SetCountLimit(1,id,EFFECT_COUNT_CODE_OATH)
     c:RegisterEffect(e1)
     --Search
     local e2=Effect.CreateEffect(c)
-    e2:SetDescription(aux.Stringid(id,1))
+    e2:SetDescription(aux.Stringid(id,0))
     e2:SetCategory(CATEGORY_SEARCH|CATEGORY_TOHAND)
     e2:SetType(EFFECT_TYPE_SINGLE|EFFECT_TYPE_TRIGGER_O)
     e2:SetProperty(EFFECT_FLAG_DELAY)
@@ -32,22 +32,27 @@ s.listed_names={CARD_AVOHKII}
 function s.filter1(c)
     return c:IsCode(CARD_AVOHKII) and not c:IsPublic()
 end
-function s.cost1(e,tp,eg,ep,ev,re,r,rp,chk)
-    if chk==0 then return Duel.IsExistingMatchingCard(s.filter1,tp,LOCATION_HAND,0,1,nil) end
+function s.condition1(e,c)
+    if c==nil then return true end
+    local tp=c:GetControler()
+    return Duel.GetLocationCount(tp,LOCATION_MZONE)>0
+        and Duel.IsExistingMatchingCard(s.filter1,tp,LOCATION_HAND,0,1,nil)
+end
+function s.target1(e,tp,eg,ep,ev,re,r,rp,chk,c)
     Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_CONFIRM)
-    local g=Duel.SelectMatchingCard(tp,s.filter1,tp,LOCATION_HAND,0,1,1,nil)
-    Duel.ConfirmCards(1-tp,g)
-end
-function s.target1(e,tp,eg,ep,ev,re,r,rp,chk)
-    local c=e:GetHandler()
-    if chk==0 then return Duel.GetLocationCount(tp,LOCATION_MZONE)>0 and c:IsCanBeSpecialSummoned(e,0,tp,false,false) end
-    Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,c,1,0,0)
-end
-function s.operation1(e,tp,eg,ep,ev,re,r,rp)
-    local c=e:GetHandler()
-    if c:IsRelateToEffect(e) and Duel.GetLocationCount(tp,LOCATION_MZONE)>0 then
-        Duel.SpecialSummon(c,0,tp,tp,false,false,POS_FACEUP)
+    local g=Duel.SelectMatchingCard(tp,s.filter1,tp,LOCATION_HAND,0,0,1,nil)
+    if #g>0 then
+        g:KeepAlive()
+        e:SetLabelObject(g)
+        return true
     end
+    return false
+end
+function s.operation1(e,tp,eg,ep,ev,re,r,rp,c)
+    local g=e:GetLabelObject()
+    Duel.ConfirmCards(1-tp,g)
+    Duel.ShuffleHand(tp)
+    g:DeleteGroup()
 end
 function s.filter2(c)
     return c:ListsCode(CARD_AVOHKII) and c:IsAbleToHand()
