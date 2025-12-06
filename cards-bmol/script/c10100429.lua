@@ -73,7 +73,7 @@ function s.operation1(e,tp,eg,ep,ev,re,r,rp)
     if tc:IsRelateToEffect(e) then
         local p=tc:GetControler()
         if Duel.Destroy(tc,REASON_EFFECT)>0 and c:IsRelateToEffect(e) and Duel.GetLocationCount(p,LOCATION_MZONE)>0 then
-            if Duel.SpecialSummonStep(c,0,tp,p,false,false,POS_FACEUP_ATTACK) and c:IsPreviousLocation(LOCATION_GRAVE) then
+            if Duel.SpecialSummonStep(c,0,tp,p,false,false,POS_FACEUP) and c:IsPreviousLocation(LOCATION_GRAVE) then
                 local e1=Effect.CreateEffect(c)
                 e1:SetDescription(3301)
                 e1:SetType(EFFECT_TYPE_SINGLE)
