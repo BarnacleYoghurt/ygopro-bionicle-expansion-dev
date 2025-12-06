@@ -59,19 +59,15 @@ function s.operation1(e,tp,eg,ep,ev,re,r,rp)
         Duel.SendtoHand(tc,nil,REASON_EFFECT)
     end
 end
-function s.filter2a(c,tp)
-    return c:IsFaceup() and c:IsControler(tp) and c:ListsCode(CARD_AVOHKII)
-end
-function s.filter2b(c)
-    --Garbage Collector uses IsAbleToHandAsCost to check "began the Duel", but that can have false positives here ...
-    return c:IsType(TYPE_FUSION) or c:IsType(TYPE_SYNCHRO) or c:IsType(TYPE_XYZ) or c:IsType(TYPE_LINK)
+function s.filter2(c,tp)
+    return c:IsFaceup() and c:ListsCode(CARD_AVOHKII)
 end
 function s.operation2(e,tp,eg,ep,ev,re,r,rp)
-    local g=eg:Filter(s.filter2a,nil,tp)
+    local g=eg:Filter(s.filter2,nil,tp)
     local ct=(g:IsExists(Card.IsRace,1,nil,RACE_WARRIOR) and 1 or 0)
             +(g:IsExists(Card.IsAttribute,1,nil,ATTRIBUTE_LIGHT) and 1 or 0)
             +(g:IsExists(Card.IsLevelAbove,1,nil,7) and 1 or 0)
-            +(g:IsExists(s.filter2b,1,nil) and 1 or 0)
+            +(g:IsExists(aux.NOT(Card.IsSummonableCard),1,nil) and 1 or 0)
     if ct>0 then
         e:GetHandler():AddCounter(COUNTER_SEVEN,ct)
     end
