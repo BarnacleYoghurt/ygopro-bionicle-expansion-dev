@@ -74,8 +74,8 @@ function s.operation2(e,tp,eg,ep,ev,re,r,rp)
     for tc in g:Iter() do
         local atk=tc:GetAttack()
         local def=tc:GetDefense()
-        tc:UpdateAttack(-1000,0,e:GetHandler())
-        tc:UpdateDefense(-1000,0,e:GetHandler())
+        tc:UpdateAttack(-1000,RESET_EVENT|RESETS_STANDARD,e:GetHandler())
+        tc:UpdateDefense(-1000,RESET_EVENT|RESETS_STANDARD,e:GetHandler())
         if (atk>0 and tc:GetAttack()==0) or (def>0 and tc:GetDefense()==0) then
             Duel.Destroy(tc,REASON_EFFECT)
         end
