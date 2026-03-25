@@ -22,11 +22,21 @@ function s.initial_effect(c)
     c:RegisterEffect(e2)
     --Negate
     local e3=Effect.CreateEffect(c)
-    e3:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_CONTINUOUS)
-    e3:SetCode(EVENT_BATTLE_START)
-    e3:SetCondition(s.condition3)
-    e3:SetOperation(s.operation3)
+    e3:SetType(EFFECT_TYPE_FIELD)
+    e3:SetCode(EFFECT_DISABLE)
+    e3:SetRange(LOCATION_MZONE)
+    e3:SetTargetRange(0,LOCATION_MZONE)
+    e3:SetTarget(s.target3)
     c:RegisterEffect(e3)
+    --Force adjust so negation applies at attack declaration (see: Scareclaw Kashtira)
+    --Note: also lasts after the damage step until the next attack is declared, but that's a GetBattleTarget issue
+    local e3b=Effect.CreateEffect(c)
+    e3b:SetType(EFFECT_TYPE_FIELD+EFFECT_TYPE_CONTINUOUS)
+    e3b:SetProperty(EFFECT_FLAG_CANNOT_DISABLE)
+    e3b:SetCode(EVENT_BE_BATTLE_TARGET)
+    e3b:SetRange(LOCATION_MZONE)
+    e3b:SetOperation(function(e) Duel.AdjustInstantly(e:GetHandler()) end)
+    c:RegisterEffect(e3b)
 end
 function s.filter1(c)
     return c:IsFaceup() and c:HasLevel() and c:IsSetCard(SET_KRAATA)
@@ -59,14 +69,9 @@ function s.operation1(e,tp,eg,ep,ev,re,r,rp)
         end
     end
 end
-function s.condition3(e)
-    local c=e:GetHandler()
-    local tc=c:GetBattleTarget()
-    return tc and tc:IsRelateToBattle() and tc:IsAttackBelow(600*c:GetLevel())
-end
-function s.operation3(e,tp,eg,ep,ev,re,r,rp)
-    local tc=e:GetHandler():GetBattleTarget()
-    if tc:IsRelateToBattle() then
-        tc:NegateEffects(e:GetHandler(),RESET_PHASE|PHASE_END)
-    end
+function s.target3(e,c)
+    local bc=c:GetBattleTarget()
+    return c:IsRelateToBattle() and c:IsAttackBelow(e:GetHandler():GetLevel()*600)
+       and bc and bc:IsControler(e:GetHandlerPlayer()) and bc:IsFaceup()
+       and bc:IsAttribute(ATTRIBUTE_DARK) and bc:IsRace(RACE_FIEND)
 end
