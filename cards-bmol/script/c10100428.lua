@@ -57,15 +57,12 @@ function s.operation1(e,tp,eg,ep,ev,re,r,rp)
         Duel.Destroy(dg,REASON_EFFECT)
     end
 end
-function s.filter2(c)
-    return (c:IsFaceup() or not c:IsOnField()) and c:IsAbleToGrave()
-end
 function s.target2(e,tp,eg,ep,ev,re,r,rp,chk)
     local ac=Duel.GetAttacker()
     local dc=Duel.GetAttackTarget()
     if chk==0 then
         return dc and ac:IsAbleToHand() and dc:IsAbleToHand()
-           and Duel.IsExistingMatchingCard(s.filter2,tp,LOCATION_HAND|LOCATION_ONFIELD,0,1,nil)
+           and Duel.IsExistingMatchingCard(Card.IsAbleToGrave,tp,LOCATION_HAND|LOCATION_ONFIELD,0,1,nil)
     end
     Duel.SetOperationInfo(0,CATEGORY_TOHAND,Group.FromCards(ac,dc),2,0,0)
     Duel.SetOperationInfo(0,CATEGORY_TOGRAVE,nil,1,tp,LOCATION_HAND|LOCATION_ONFIELD)
@@ -75,7 +72,7 @@ function s.operation2(e,tp,eg,ep,ev,re,r,rp)
     local dc=Duel.GetAttackTarget()
     if Duel.SendtoHand(Group.FromCards(ac,dc),nil,REASON_EFFECT)==2 and ac:IsLocation(LOCATION_HAND) and dc:IsLocation(LOCATION_HAND) then
         Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TOGRAVE)
-        local g=Duel.SelectMatchingCard(tp,s.filter2,tp,LOCATION_HAND|LOCATION_ONFIELD,0,1,1,nil)
+        local g=Duel.SelectMatchingCard(tp,Card.IsAbleToGrave,tp,LOCATION_HAND|LOCATION_ONFIELD,0,1,1,nil)
         if #g>0 then Duel.SendtoGrave(g,REASON_EFFECT) end
     end
 end
