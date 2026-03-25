@@ -23,16 +23,16 @@ function s.initial_effect(c)
     e1b:SetOperation(s.operation1)
     c:RegisterEffect(e1b)
     --Fusion Summon
-    local params={handler=c,matfilter=Fusion.OnFieldMat,extrafil=s.filter3}
+    local params={handler=c,fusfilter=aux.FilterBoolFunction(Card.IsRace,RACE_FIEND),matfilter=Fusion.OnFieldMat,
+                  extrafil=s.extrafil,extratg=s.extratg,extraop=s.extraop,stage2=s.stage2}
     local e2=Effect.CreateEffect(c)
     e2:SetDescription(aux.Stringid(id,0))
     e2:SetCategory(CATEGORY_SPECIAL_SUMMON+CATEGORY_FUSION_SUMMON)
-    e2:SetType(EFFECT_TYPE_QUICK_O)
+    e2:SetType(EFFECT_TYPE_IGNITION)
     e2:SetRange(LOCATION_MZONE)
     e2:SetCode(EVENT_FREE_CHAIN)
     e2:SetTarget(Fusion.SummonEffTG(params))
     e2:SetOperation(Fusion.SummonEffOP(params))
-    e2:SetHintTiming(0,TIMING_STANDBY_PHASE|TIMING_MAIN_END|TIMINGS_CHECK_MONSTER_E)
     e2:SetCountLimit(1)
     c:RegisterEffect(e2)
 end
@@ -62,9 +62,37 @@ function s.operation1(e,tp,eg,ep,ev,re,r,rp,c)
     c:SetMaterial(g)
     g:DeleteGroup()
 end
-function s.filter3(e,tp,mg)
+function s.checkmat(tp,sg,fc)
+    return sg:FilterCount(Card.IsLocation,nil,LOCATION_GRAVE|LOCATION_REMOVED)<=1
+end
+function s.extrafil(e,tp,mg)
     if e:GetHandler():IsFusionSummoned() then
-        return Duel.GetMatchingGroup(Fusion.IsMonsterFilter(Card.IsAbleToGrave),tp,LOCATION_HAND,0,nil)
+        local eg=Duel.GetMatchingGroup(aux.NecroValleyFilter(Fusion.IsMonsterFilter(Card.IsAbleToDeck)),tp,LOCATION_GRAVE,0,nil)
+              +  Duel.GetMatchingGroup(Fusion.IsMonsterFilter(Card.IsFaceup,Card.IsAbleToDeck),tp,LOCATION_REMOVED,0,nil)
+        return eg,s.checkmat
     end
     return nil
+end
+function s.extratg(e,tp,eg,ep,ev,re,r,rp,chk)
+    if chk==0 then return true end
+    Duel.SetPossibleOperationInfo(0,CATEGORY_TODECK,nil,0,tp,LOCATION_GRAVE|LOCATION_REMOVED)
+end
+function s.extraop(e,tc,tp,sg)
+    local rg=sg:Filter(Card.IsLocation,nil,LOCATION_GRAVE|LOCATION_REMOVED)
+    if #rg>0 then
+        sg:Sub(rg)
+        Fusion.ShuffleMaterial(e,tc,tp,rg)
+    end
+end
+function s.stage2(e,tc,tp,sg,chk)
+    if chk==0 then
+        local fg=sg:Filter(Card.IsPreviousLocation,nil,LOCATION_MZONE)
+        local e1=Effect.CreateEffect(e:GetHandler())
+        e1:SetType(EFFECT_TYPE_SINGLE)
+        e1:SetProperty(EFFECT_FLAG_CANNOT_DISABLE)
+        e1:SetCode(EFFECT_UPDATE_ATTACK)
+        e1:SetValue(fg:GetSum(Card.GetPreviousLevelOnField)*100)
+        e1:SetReset(RESET_EVENT|RESETS_STANDARD)
+        tc:RegisterEffect(e1)
+    end
 end
