@@ -46,15 +46,21 @@ function s.filter2(c,e,tp)
     return c:IsSetCard(SET_KRAATA) and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
 end
 function s.target2(e,tp,eg,ep,ev,re,r,rp,chk)
-    if chk==0 then return Duel.IsExistingMatchingCard(s.filter2,tp,LOCATION_GRAVE,0,1,nil,e,tp) and Duel.GetLocationCount(tp,LOCATION_MZONE)>0 end
-    Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,1,tp,LOCATION_GRAVE)
+    if chk==0 then
+        return Duel.IsExistingMatchingCard(aux.NecroValleyFilter(s.filter2),tp,LOCATION_HAND|LOCATION_GRAVE,0,1,nil,e,tp)
+            and Duel.GetLocationCount(tp,LOCATION_MZONE)>0
+    end
+    Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,1,tp,LOCATION_HAND|LOCATION_GRAVE)
 end
 function s.operation2(e,tp,eg,ep,ev,re,r,rp)
-    if Duel.GetLocationCount(tp,LOCATION_MZONE)>0 then
-        Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_SPSUMMON)
-        local g=Duel.SelectMatchingCard(tp,s.filter2,tp,LOCATION_GRAVE,0,1,1,nil,e,tp)
-        if #g>0 then
-            Duel.SpecialSummon(g,0,tp,tp,false,false,POS_FACEUP)
+    local ft=math.min(Duel.GetLocationCount(tp,LOCATION_MZONE),2)
+    if ft==0 then return end
+    if Duel.IsPlayerAffectedByEffect(tp,CARD_BLUEEYES_SPIRIT) then ft=1 end
+    if ft>0 then
+        local g=Duel.GetMatchingGroup(aux.NecroValleyFilter(s.filter2),tp,LOCATION_HAND|LOCATION_GRAVE,0,nil,e,tp)
+        local sg=aux.SelectUnselectGroup(g,e,tp,1,ft,aux.dpcheck(Card.GetLocation),1,tp,HINTMSG_SPSUMMON)
+        if #sg>0 then
+            Duel.SpecialSummon(sg,0,tp,tp,false,false,POS_FACEUP)
         end
     end
 end
