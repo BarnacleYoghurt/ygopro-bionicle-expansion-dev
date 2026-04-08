@@ -16,6 +16,7 @@ function s.initial_effect(c)
     e2:SetDescription(aux.Stringid(id,0))
     e2:SetCategory(CATEGORY_TODECK)
     e2:SetType(EFFECT_TYPE_QUICK_O)
+    e2:SetProperty(EFFECT_FLAG_CARD_TARGET)
     e2:SetRange(LOCATION_GRAVE)
     e2:SetCode(EVENT_FREE_CHAIN)
     e2:SetTarget(s.target2)
@@ -24,7 +25,7 @@ function s.initial_effect(c)
     c:RegisterEffect(e2)
 end
 function s.filter1a(c,e,tp)
-    return c:IsFaceup() and (not (c:IsSetCard(SET_MAKUTA) and c:IsLevelAbove(2))
+    return c:IsFaceup() and (not (c:IsAttribute(ATTRIBUTE_DARK) and c:IsRace(RACE_FIEND) and c:IsLevelAbove(2))
             or Duel.IsExistingMatchingCard(s.filter1b,tp,LOCATION_DECK|LOCATION_GRAVE,0,1,nil,e,tp)
         )
 end
@@ -40,7 +41,7 @@ function s.target1(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
     Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TARGET)
     local g=Duel.SelectTarget(tp,s.filter1a,tp,LOCATION_MZONE,LOCATION_MZONE,1,1,nil,e,tp)
     local tc=g:GetFirst()
-    if tc:IsSetCard(SET_MAKUTA) and tc:IsLevelAbove(2) then
+    if tc:IsAttribute(ATTRIBUTE_DARK) and tc:IsRace(RACE_FIEND) and tc:IsLevelAbove(2) then
         e:SetLabel(1)
         e:SetCategory(CATEGORY_SPECIAL_SUMMON)
         Duel.SetOperationInfo(0,CATEGORY_SPECIAL_SUMMON,nil,1,tp,tp)
@@ -79,20 +80,21 @@ end
 function s.filter2(c,tp)
     return c:IsAttribute(ATTRIBUTE_DARK) and c:IsRace(RACE_FIEND) and c:IsAbleToDeck()
 end
-function s.target2(e,tp,eg,ep,ev,re,r,rp,chk)
+function s.target2(e,tp,eg,ep,ev,re,r,rp,chk,chkc)
+    if chkc then return false end
     local c=e:GetHandler()
     if chk==0 then
-        return Duel.IsExistingMatchingCard(s.filter2,tp,LOCATION_GRAVE,0,3,nil) and c:IsSSetable()
+        return Duel.IsExistingTarget(s.filter2,tp,LOCATION_GRAVE,0,3,nil) and c:IsSSetable()
     end
-    Duel.SetOperationInfo(0,CATEGORY_TODECK,nil,3,tp,LOCATION_GRAVE)
+    Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TODECK)
+    local g=Duel.SelectTarget(tp,s.filter2,tp,LOCATION_GRAVE,0,3,3,nil)
+    Duel.SetOperationInfo(0,CATEGORY_TODECK,g,#g,tp,LOCATION_GRAVE)
     Duel.SetOperationInfo(0,CATEGORY_LEAVE_GRAVE,c,1,0,0)
 end
 function s.operation2(e,tp,eg,ep,ev,re,r,rp)
-    if not Duel.IsExistingMatchingCard(s.filter2,tp,LOCATION_GRAVE,0,3,nil) then return end
     local c=e:GetHandler()
-    Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TODECK)
-    local g=Duel.SelectMatchingCard(tp,s.filter2,tp,LOCATION_GRAVE,0,3,3,nil)
-    if Duel.SendtoDeck(g,tp,SEQ_DECKSHUFFLE,REASON_EFFECT)==3
+    local g=Duel.GetTargetCards(e)
+    if Duel.SendtoDeck(g,tp,SEQ_DECKSHUFFLE,REASON_EFFECT)>0
     and c:IsRelateToEffect(e) and c:IsSSetable() then
         Duel.SSet(tp,c)
         local e1=Effect.CreateEffect(c)
