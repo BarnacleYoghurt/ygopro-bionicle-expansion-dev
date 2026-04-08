@@ -35,20 +35,27 @@ function s.filter0(c,fc,sumtype,tp)
     return c:IsRace(RACE_FIEND,fc,sumtype,tp) and c:IsAttribute(ATTRIBUTE_DARK,fc,sumtype,tp)
         and c:GetLevel()>=4
 end
+function s.filter1(c)
+    return c:IsFaceup() and math.max(c:GetAttack(),0)+math.max(c:GetDefense(),0)==0
+end
 function s.target1(e,tp,eg,ep,ev,re,r,rp,chk)
     if chk==0 then return Duel.IsExistingMatchingCard(Card.IsFaceup,tp,0,LOCATION_MZONE,1,nil) end
     Duel.SetPossibleOperationInfo(0,CATEGORY_DESTROY,nil,1,1-tp,LOCATION_MZONE)
 end
 function s.operation1(e,tp,eg,ep,ev,re,r,rp)
-    local g=Duel.GetMatchingGroup(Card.IsFaceup,tp,0,LOCATION_MZONE,1,nil)
-    for tc in g:Iter() do
-        local atk=tc:GetAttack()
-        local def=tc:GetDefense()
-        tc:UpdateAttack(-1000,RESET_EVENT|RESETS_STANDARD,e:GetHandler())
-        tc:UpdateDefense(-1000,RESET_EVENT|RESETS_STANDARD,e:GetHandler())
-        if (atk>0 and tc:GetAttack()==0) or (def>0 and tc:GetDefense()==0) then
-            Duel.Destroy(tc,REASON_EFFECT)
+    local g=Duel.GetMatchingGroup(Card.IsFaceup,tp,0,LOCATION_MZONE,1,nil):Filter(aux.NOT(Card.IsImmuneToEffect),nil,e)
+    if #g>0 then
+        for tc in g:Iter() do
+            local atk=tc:GetAttack()
+            local def=tc:GetDefense()
+            tc:UpdateAttack(-1200,RESET_EVENT|RESETS_STANDARD,e:GetHandler())
+            tc:UpdateDefense(-1200,RESET_EVENT|RESETS_STANDARD,e:GetHandler())
         end
+    end
+    local gg=Duel.GetMatchingGroup(s.filter1,tp,0,LOCATION_MZONE,nil)
+    if #gg>0 then
+        Duel.BreakEffect()
+        Duel.SendtoGrave(gg,REASON_EFFECT)
     end
 end
 function s.target2(e,tp,eg,ep,ev,re,r,rp,chk)
