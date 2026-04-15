@@ -36,7 +36,7 @@ function s.filter0(c,fc,sumtype,tp)
         and c:GetLevel()>=4
 end
 function s.filter1(c)
-    return c:IsFaceup() and math.max(c:GetAttack(),0)+math.max(c:GetDefense(),0)==0
+    return c:IsFaceup() and not (c:GetAttack()>0 or c:GetDefense()>0)
 end
 function s.target1(e,tp,eg,ep,ev,re,r,rp,chk)
     if chk==0 then return Duel.IsExistingMatchingCard(Card.IsFaceup,tp,0,LOCATION_MZONE,1,nil) end
