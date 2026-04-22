@@ -48,7 +48,7 @@ function s.operation1(e,tp,eg,ep,ev,re,r,rp)
         Duel.ConfirmCards(1-tp,g)
     end
 end
-function s.filter3a(c,tc,seq,tp)
+function s.filter3(c,tc,seq,tp)
     -- only counts cards opponent controls
     if not c:IsControler(1-tp) then return false end
     -- still have to check controller of tc after this because it may change before resolution!
@@ -60,35 +60,21 @@ function s.filter3a(c,tc,seq,tp)
         return c:IsSequence(seq+1,seq-1) and tc:IsControler(1-tp)
     end
 end
-function s.filter3b(c)
-    return c:IsFaceup() and c:HasLevel() and c:IsSetCard(SET_KRAATA)
-end
 function s.target3(e,tp,eg,ep,ev,re,r,rp,chk)
     local c=e:GetHandler()
     local tc=c:GetBattleTarget()
     if chk==0 then return tc and tc:IsRelateToBattle() and tc:IsAttackBelow(600*c:GetLevel()) end
-    local g=tc:GetColumnGroup(1,1):Filter(s.filter3a,nil,tc,tc:GetSequence(),tp)
+    local g=tc:GetColumnGroup(1,1):Filter(s.filter3,nil,tc,tc:GetSequence(),tp)
     g:Merge(tc)
     Duel.SetOperationInfo(0,CATEGORY_DESTROY,g,#g,0,0)
 end
 function s.operation3(e,tp,eg,ep,ev,re,r,rp)
     local tc=e:GetHandler():GetBattleTarget()
     if tc:IsRelateToBattle() then
-        local g=tc:GetColumnGroup(1,1):Filter(s.filter3a,nil,tc,tc:GetSequence(),tp)
+        local g=tc:GetColumnGroup(1,1):Filter(s.filter3,nil,tc,tc:GetSequence(),tp)
         if Duel.Destroy(tc,REASON_EFFECT)>0 and #g>0 then
             Duel.BreakEffect()
             Duel.Destroy(g,REASON_EFFECT)
         end
-    end
-    Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_FACEUP)
-    local g=Duel.SelectMatchingCard(tp,s.filter3b,tp,LOCATION_MZONE,0,1,1,nil)
-    if #g>0 then
-        local e1=Effect.CreateEffect(e:GetHandler())
-        e1:SetType(EFFECT_TYPE_SINGLE)
-        e1:SetProperty(EFFECT_FLAG_CANNOT_DISABLE)
-        e1:SetCode(EFFECT_UPDATE_LEVEL)
-        e1:SetValue(1)
-        e1:SetReset(RESET_EVENT|RESETS_STANDARD)
-        g:GetFirst():RegisterEffect(e1)
     end
 end
