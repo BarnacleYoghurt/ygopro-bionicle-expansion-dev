@@ -44,16 +44,17 @@ function s.target1(e,tp,eg,ep,ev,re,r,rp,chk)
 end
 function s.operation1(e,tp,eg,ep,ev,re,r,rp)
     local g=Duel.GetMatchingGroup(Card.IsFaceup,tp,0,LOCATION_MZONE,1,nil):Filter(aux.NOT(Card.IsImmuneToEffect),nil,e)
+    local lost=false
     if #g>0 then
         for tc in g:Iter() do
             local atk=tc:GetAttack()
             local def=tc:GetDefense()
-            tc:UpdateAttack(-1200,RESET_EVENT|RESETS_STANDARD,e:GetHandler())
-            tc:UpdateDefense(-1200,RESET_EVENT|RESETS_STANDARD,e:GetHandler())
+            lost=(tc:UpdateAttack(-1200,RESET_EVENT|RESETS_STANDARD,e:GetHandler())~=0) or lost
+            lost=(tc:UpdateDefense(-1200,RESET_EVENT|RESETS_STANDARD,e:GetHandler())~=0) or lost
         end
     end
     local gg=Duel.GetMatchingGroup(s.filter1,tp,0,LOCATION_MZONE,nil)
-    if #gg>0 then
+    if lost and #gg>0 then
         Duel.BreakEffect()
         Duel.SendtoGrave(gg,REASON_EFFECT)
     end
