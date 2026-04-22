@@ -21,7 +21,8 @@ function s.initial_effect(c)
     e2:SetCategory(CATEGORY_SPECIAL_SUMMON)
     e2:SetType(EFFECT_TYPE_SINGLE+EFFECT_TYPE_TRIGGER_O)
     e2:SetProperty(EFFECT_FLAG_DELAY)
-    e2:SetCode(EVENT_DESTROYED)
+    e2:SetCode(EVENT_LEAVE_FIELD)
+    e2:SetCondition(s.condition2)
     e2:SetTarget(s.target2)
     e2:SetOperation(s.operation2)
     e2:SetCountLimit(1,{id,1})
@@ -44,6 +45,11 @@ function s.operation1(e,tp,eg,ep,ev,re,r,rp)
 end
 function s.filter2(c,e,tp)
     return c:IsSetCard(SET_KRAATA) and c:IsCanBeSpecialSummoned(e,0,tp,false,false)
+end
+function s.condition2(e,tp,eg,ep,ev,re,r,rp)
+    local c=e:GetHandler()
+    return rp==1-tp and c:IsPreviousControler(tp) and c:IsPreviousPosition(POS_FACEUP)
+        and c:IsPreviousLocation(LOCATION_MZONE) and c:IsFusionSummoned()
 end
 function s.target2(e,tp,eg,ep,ev,re,r,rp,chk)
     if chk==0 then
