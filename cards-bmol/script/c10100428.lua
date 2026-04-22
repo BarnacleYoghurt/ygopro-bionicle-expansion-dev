@@ -47,13 +47,13 @@ function s.target1(e,tp,eg,ep,ev,re,r,rp,chk)
     local att=ATTRIBUTE_FIRE|ATTRIBUTE_WATER|ATTRIBUTE_EARTH|ATTRIBUTE_WIND|ATTRIBUTE_LIGHT
     local g=Duel.GetMatchingGroup(aux.FaceupFilter(Card.IsAttribute,att),tp,LOCATION_MZONE,0,1,nil)
     Duel.SetOperationInfo(0,CATEGORY_TOHAND,g,#g,tp,0)
-    Duel.SetOperationInfo(0,CATEGORY_DESTROY,nil,1,tp,LOCATION_MZONE)
+    Duel.SetOperationInfo(0,CATEGORY_DESTROY,nil,1,PLAYER_ALL,LOCATION_MZONE)
 end
 function s.operation1(e,tp,eg,ep,ev,re,r,rp)
     local att=ATTRIBUTE_FIRE|ATTRIBUTE_WATER|ATTRIBUTE_EARTH|ATTRIBUTE_WIND|ATTRIBUTE_LIGHT
     local hg=Duel.GetMatchingGroup(aux.FaceupFilter(Card.IsAttribute,att),tp,LOCATION_MZONE,0,1,nil)
     if #hg>0 and Duel.SendtoHand(hg,nil,REASON_EFFECT)>0 and hg:IsExists(Card.IsLocation,1,nil,LOCATION_HAND) then
-        local dg=Duel.GetMatchingGroup(aux.TRUE,tp,LOCATION_MZONE,0,nil)
+        local dg=Duel.GetMatchingGroup(aux.TRUE,tp,LOCATION_MZONE,LOCATION_MZONE,nil)
         Duel.Destroy(dg,REASON_EFFECT)
     end
 end
@@ -70,11 +70,11 @@ end
 function s.operation2(e,tp,eg,ep,ev,re,r,rp)
     local ac=Duel.GetAttacker()
     local dc=Duel.GetAttackTarget()
-    if Duel.SendtoHand(Group.FromCards(ac,dc),nil,REASON_EFFECT)==2 and ac:IsLocation(LOCATION_HAND) and dc:IsLocation(LOCATION_HAND) then
-        Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TOGRAVE)
-        local g=Duel.SelectMatchingCard(tp,Card.IsAbleToGrave,tp,LOCATION_HAND|LOCATION_ONFIELD,0,1,1,nil)
-        if #g>0 then Duel.SendtoGrave(g,REASON_EFFECT) end
-    end
+    Duel.SendtoHand(Group.FromCards(ac,dc),nil,REASON_EFFECT)
+    Duel.BreakEffect()
+    Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TOGRAVE)
+    local g=Duel.SelectMatchingCard(tp,Card.IsAbleToGrave,tp,LOCATION_HAND|LOCATION_ONFIELD,0,1,1,nil)
+    if #g>0 then Duel.SendtoGrave(g,REASON_EFFECT) end
 end
 function s.filter3(c)
     return c:IsType(TYPE_FIELD) and not c:IsSetCard(0xb05) and c:IsAbleToHand()
