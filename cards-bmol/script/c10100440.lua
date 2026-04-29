@@ -68,7 +68,7 @@ function s.operation1(e,tp,eg,ep,ev,re,r,rp)
             e1:SetRange(LOCATION_MZONE)
             e1:SetCode(EFFECT_SET_ATTACK_FINAL)
             e1:SetValue(0)
-            e1:SetReset(RESETS_STANDARD_PHASE_END)
+            e1:SetReset(RESETS_STANDARD)
             tc:RegisterEffect(e1)
         end
         local lg=Duel.GetMatchingGroup(s.filter1c,tp,LOCATION_MZONE,LOCATION_MZONE,nil)
