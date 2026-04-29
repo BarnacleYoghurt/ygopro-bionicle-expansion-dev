@@ -8,7 +8,7 @@ function s.initial_effect(c)
     --Must be either Fusion Summoned ...
     local e1a=Effect.CreateEffect(c)
     e1a:SetType(EFFECT_TYPE_SINGLE)
-    e1a:SetProperty(EFFECT_FLAG_CANNOT_DISABLE+EFFECT_FLAG_UNCOPYABLE)
+    e1a:SetProperty(EFFECT_FLAG_CANNOT_DISABLE|EFFECT_FLAG_UNCOPYABLE)
     e1a:SetCode(EFFECT_SPSUMMON_CONDITION)
     e1a:SetValue(aux.fuslimit)
     c:RegisterEffect(e1a)
@@ -23,11 +23,11 @@ function s.initial_effect(c)
     e1b:SetOperation(s.operation1)
     c:RegisterEffect(e1b)
     --Fusion Summon
-    local params={handler=c,fusfilter=aux.FilterBoolFunction(Card.IsRace,RACE_FIEND),matfilter=Fusion.OnFieldMat,
+    local params={fusfilter=aux.FilterBoolFunction(Card.IsRace,RACE_FIEND),matfilter=Fusion.OnFieldMat,
                   extrafil=s.extrafil,extratg=s.extratg,extraop=s.extraop,stage2=s.stage2}
     local e2=Effect.CreateEffect(c)
     e2:SetDescription(aux.Stringid(id,0))
-    e2:SetCategory(CATEGORY_SPECIAL_SUMMON+CATEGORY_FUSION_SUMMON)
+    e2:SetCategory(CATEGORY_SPECIAL_SUMMON|CATEGORY_FUSION_SUMMON)
     e2:SetType(EFFECT_TYPE_QUICK_O)
     e2:SetRange(LOCATION_MZONE)
     e2:SetCode(EVENT_FREE_CHAIN)
@@ -35,6 +35,14 @@ function s.initial_effect(c)
     e2:SetOperation(Fusion.SummonEffOP(params))
     e2:SetCountLimit(1)
     c:RegisterEffect(e2)
+    --Register own Fusion Summon
+	local e3=Effect.CreateEffect(c)
+	e3:SetType(EFFECT_TYPE_SINGLE|EFFECT_TYPE_CONTINUOUS)
+	e3:SetProperty(EFFECT_FLAG_CANNOT_DISABLE)
+	e3:SetCode(EVENT_SPSUMMON_SUCCESS)
+	e3:SetCondition(function(e) return e:GetHandler():IsFusionSummoned() end)
+	e3:SetOperation(function(e) e:GetHandler():RegisterFlagEffect(id,RESETS_STANDARD_PHASE_END,0,1) end)
+	c:RegisterEffect(e3)
 end
 s.material_setcode={SET_EP,SET_KRAATA}
 function s.filter1(c,tp,sc)
@@ -62,14 +70,11 @@ function s.operation1(e,tp,eg,ep,ev,re,r,rp,c)
     c:SetMaterial(g)
     g:DeleteGroup()
 end
-function s.checkmat(tp,sg,fc)
-    return sg:FilterCount(Card.IsLocation,nil,LOCATION_GRAVE|LOCATION_REMOVED)<=1
-end
 function s.extrafil(e,tp,mg)
-    if e:GetHandler():IsFusionSummoned() then
+    if e:GetHandler():HasFlagEffect(id) then
         local eg=Duel.GetMatchingGroup(aux.NecroValleyFilter(Fusion.IsMonsterFilter(Card.IsAbleToDeck)),tp,LOCATION_GRAVE,0,nil)
               +  Duel.GetMatchingGroup(Fusion.IsMonsterFilter(Card.IsFaceup,Card.IsAbleToDeck),tp,LOCATION_REMOVED,0,nil)
-        return eg,s.checkmat
+        return eg
     end
     return nil
 end
