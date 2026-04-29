@@ -37,7 +37,7 @@ function s.filter0(c,fc,sumtype,tp)
         and c:GetLevel()>=4
 end
 function s.filter1(c)
-    return c:IsSetCard(SET_KRAATA) and c:IsMonster() and c:IsAbleToGraveAsCost()
+    return c:IsSetCard(SET_KRAATA) and c:IsAbleToGraveAsCost()
 end
 function s.cost1(e,tp,eg,ep,ev,re,r,rp,chk)
     if chk==0 then return Duel.IsExistingMatchingCard(s.filter1,tp,LOCATION_HAND|LOCATION_DECK,0,1,nil) end
