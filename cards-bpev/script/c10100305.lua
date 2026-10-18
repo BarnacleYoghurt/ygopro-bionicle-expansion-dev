@@ -32,7 +32,7 @@ function s.initial_effect(c)
     e3:SetCost(s.cost3)
     e3:SetTarget(s.target3)
     e3:SetOperation(s.operation3)
-    e2:SetCountLimit(1,{id,2})
+    e3:SetCountLimit(1,{id,2})
     c:RegisterEffect(e3)
 end
 s.listed_series={0xb02,0x3b02,0xb0b,0xb0c}
