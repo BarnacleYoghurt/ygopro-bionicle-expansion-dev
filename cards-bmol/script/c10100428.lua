@@ -52,9 +52,12 @@ end
 function s.operation1(e,tp,eg,ep,ev,re,r,rp)
     local att=ATTRIBUTE_FIRE|ATTRIBUTE_WATER|ATTRIBUTE_EARTH|ATTRIBUTE_WIND|ATTRIBUTE_LIGHT
     local hg=Duel.GetMatchingGroup(aux.FaceupFilter(Card.IsAttribute,att),tp,LOCATION_MZONE,0,1,nil)
-    if #hg>0 and Duel.SendtoHand(hg,nil,REASON_EFFECT)>0 and hg:IsExists(Card.IsLocation,1,nil,LOCATION_HAND) then
+    if #hg>0 and Duel.SendtoHand(hg,nil,REASON_EFFECT)>0 and hg:IsExists(Card.IsLocation,1,nil,LOCATION_HAND|LOCATION_EXTRA) then
         local dg=Duel.GetMatchingGroup(aux.TRUE,tp,LOCATION_MZONE,LOCATION_MZONE,nil)
-        Duel.Destroy(dg,REASON_EFFECT)
+        if #dg>0 then
+            Duel.BreakEffect()
+            Duel.Destroy(dg,REASON_EFFECT)
+        end
     end
 end
 function s.target2(e,tp,eg,ep,ev,re,r,rp,chk)
