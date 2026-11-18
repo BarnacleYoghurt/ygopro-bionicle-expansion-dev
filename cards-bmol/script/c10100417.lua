@@ -92,9 +92,10 @@ function s.operation3(e,tp,eg,ep,ev,re,r,rp)
     if ct>0 and Duel.GetFieldGroupCount(tp,LOCATION_DECK,0)>=ct then
         Duel.ConfirmDecktop(tp,ct)
         Duel.DisableShuffleCheck()
-        local g=Duel.GetDecktopGroup(tp,ct):Filter(Card.IsSSetable,nil)
-        if #g>0 and Duel.SelectYesNo(tp,aux.Stringid(id,3)) then
-            local sc=g:Select(tp,1,1,nil)
+        local g=Duel.GetDecktopGroup(tp,ct)
+        local fg=g:Filter(Card.IsSSetable,nil)
+        if #fg>0 and Duel.SelectYesNo(tp,aux.Stringid(id,3)) then
+            local sc=fg:Select(tp,1,1,nil)
             if sc then
                 Duel.SSet(tp,sc)
                 g=g-sc
