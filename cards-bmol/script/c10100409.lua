@@ -6,7 +6,6 @@ function s.initial_effect(c)
     local e1=Effect.CreateEffect(c)
     e1:SetType(EFFECT_TYPE_ACTIVATE)
     e1:SetCode(EVENT_FREE_CHAIN)
-    e1:SetTarget(s.target1)
     e1:SetOperation(s.operation1)
     c:RegisterEffect(e1)
     --Add to hand
@@ -32,15 +31,14 @@ function s.filter1b(c,attr)
     end
     return false
 end
-function s.target1(e,tp,eg,ep,ev,re,r,rp,chk)
-    if chk==0 then return Duel.IsExistingMatchingCard(s.filter1a,tp,LOCATION_DECK|LOCATION_GRAVE,0,1,nil,tp) end
-    Duel.SetPossibleOperationInfo(0,CATEGORY_LEAVE_GRAVE,nil,1,tp,0)
-end
 function s.operation1(e,tp,eg,ep,ev,re,r,rp)
-    Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TOFIELD)
-    local g=Duel.SelectMatchingCard(tp,aux.NecroValleyFilter(s.filter1a),tp,LOCATION_DECK|LOCATION_GRAVE,0,1,1,nil,tp)
-    if #g>0 then
-        Duel.PlaceFieldSpell(g:GetFirst(),tp)
+    if Duel.IsExistingMatchingCard(aux.NecroValleyFilter(s.filter1a),tp,LOCATION_DECK|LOCATION_GRAVE,0,1,nil,tp) and
+       Duel.SelectYesNo(tp,aux.Stringid(id,1)) then
+        Duel.Hint(HINT_SELECTMSG,tp,HINTMSG_TOFIELD)
+        local g=Duel.SelectMatchingCard(tp,aux.NecroValleyFilter(s.filter1a),tp,LOCATION_DECK|LOCATION_GRAVE,0,1,1,nil,tp)
+        if #g>0 then
+            Duel.PlaceFieldSpell(g:GetFirst(),tp)
+        end
     end
 end
 function s.filter2(c,fc)
@@ -66,7 +64,7 @@ function s.operation2(e,tp,eg,ep,ev,re,r,rp)
 
             -- Cannot Special Summon, except Warriors and/or added Attribute
             local e1=Effect.CreateEffect(e:GetHandler())
-            e1:SetDescription(aux.Stringid(id,1))
+            e1:SetDescription(aux.Stringid(id,2))
             e1:SetType(EFFECT_TYPE_FIELD)
             e1:SetProperty(EFFECT_FLAG_PLAYER_TARGET|EFFECT_FLAG_CLIENT_HINT)
             e1:SetTargetRange(1,0)
