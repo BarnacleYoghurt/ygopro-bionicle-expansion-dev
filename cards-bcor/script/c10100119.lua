@@ -1,3 +1,4 @@
+Duel.LoadScript("util-bcor.lua")
 --Takea, Shark Rahi
 local s,id=GetID()
 function s.initial_effect(c)
